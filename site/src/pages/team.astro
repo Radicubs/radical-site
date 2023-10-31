@@ -1,0 +1,58 @@
+---
+import Layout from "../layouts/Layout.astro";
+import TeamMember from "../components/TeamMember.astro";
+
+import fetchApi, { type Media, type Result, type EmbeddedResult } from "../lib/strapi";
+
+interface TeamMember {
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+  photo: EmbeddedResult<Media>;
+}
+
+const teamMembers = await fetchApi<Result<TeamMember>[]>({
+  endpoint: "team-members", // the content type to fetch
+  wrappedByKey: "data", // the key to unwrap the response
+  query: { populate: "*" }
+});
+---
+
+<Layout title="Meet the Team">
+  <header>
+    <h1>NASA HUNCH</h1>
+    <div class="team-members">
+      {
+        teamMembers.map(member => (
+          <TeamMember
+            name={member.attributes.name}
+            role={member.attributes.role}
+            email={member.attributes.email}
+            phone={member.attributes.phone}
+            photo_url={import.meta.env.STRAPI_URL + member.attributes.photo.data.attributes.url}
+          />
+        ))
+      }
+    </div>
+  </header>
+</Layout>
+
+<style>
+  h1 {
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    margin-bottom: 1em;
+  }
+
+  .team-members {
+    display: flex;
+    max-width: 1000px;
+    margin: auto;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+  }
+</style>
