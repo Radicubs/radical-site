@@ -18,54 +18,77 @@ const { title } = Astro.props;
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <script src="https://kit.fontawesome.com/03998fe36f.js" crossorigin="anonymous"></script>
   </head>
   <body>
-    <slot />
+    <nav class="navbar">
+      <a href="/">Home</a>
+      <a href="/team">Team</a>
+      <a href="/sponsors">Sponsors</a>
+      <a href="/spotlight">Spotlight</a>
+      <a href="/contact">Contact</a>
+      <a href="/blog">Radiblog</a>
+      <a href="/donate">Donate</a>
+    </nav>
+    <div class="container">
+      <slot />
+    </div>
+    <style is:global>
+      :root {
+        --accent: #8efc5e;
+        --accent-gradient: linear-gradient(90deg, #8efc5e 0%, #03a9f4 100%);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      html {
+        font-family: Inter, sans-serif;
+        color: white;
+        background: black;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      code {
+        font-family:
+          Menlo,
+          Monaco,
+          Lucida Console,
+          Liberation Mono,
+          DejaVu Sans Mono,
+          Bitstream Vera Sans Mono,
+          Courier New,
+          monospace;
+      }
+      .navbar {
+        position: fixed;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+        gap: 20px;
+        background-color: #181818;
+        /* border-bottom: 2px solid #828282; */
+      }
+      .container {
+      }
+      .navbar > a {
+        color: white;
+        text-decoration: none;
+      }
+      .navbar > a:hover {
+        text-decoration: underline;
+      }
+    </style>
   </body>
 </html>
-<style is:global>
-  :root {
-    /* --accent: rgb(136, 58, 234); */
-    /* --accent-light: rgb(224, 204, 250); */
-    /* --accent-dark: rgb(49, 10, 101); */
-    --accent-gradient: linear-gradient(45deg, rgb(136, 58, 234), rgb(224, 204, 250) 30%, white 60%);
-
-    --accent: #e43c44;
-    --accent-dark: #1f3959;
-    --accent-light: #94c4cc;
-    /* --dark: #447c9c; */
-    /* --lighter: #cceae3; */
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  html,
-  body {
-    height: 100%;
-  }
-
-  html {
-    font-family: Inter, sans-serif;
-    /* color: white;
-    background: black; */
-  }
-
-  body {
-    margin: 0;
-    padding: 0;
-  }
-
-  code {
-    font-family:
-      Menlo,
-      Monaco,
-      Lucida Console,
-      Liberation Mono,
-      DejaVu Sans Mono,
-      Bitstream Vera Sans Mono,
-      Courier New,
-      monospace;
-  }
-</style>

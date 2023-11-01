@@ -2,12 +2,10 @@
 interface Props {
   name: string;
   role: string;
-  email: string;
-  phone: string;
   photo_url: string;
 }
 
-const { name, role, email, phone, photo_url } = Astro.props;
+const { name, role, photo_url } = Astro.props;
 ---
 
 <div class="link-card">
@@ -15,7 +13,6 @@ const { name, role, email, phone, photo_url } = Astro.props;
     <img class="photo" src={photo_url} alt={name} width="128" height="128" />
     <h2>{name}</h2>
     <p>{role}</p>
-    <p class="contact">{email} &bull; {phone}</p>
   </a>
 </div>
 <style>

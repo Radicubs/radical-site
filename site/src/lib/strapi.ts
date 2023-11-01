@@ -50,18 +50,17 @@ export default async function fetchApi<T>({ endpoint, query, wrappedByKey, wrapp
     endpoint = endpoint.slice(1);
   }
 
-  console.log(`${import.meta.env.STRAPI_URL}/api/${endpoint}`);
   const url = new URL(`${import.meta.env.STRAPI_URL}/api/${endpoint}`);
-
   if (query) {
     Object.entries(query).forEach(([key, value]) => {
       url.searchParams.append(key, value);
     });
   }
+
   const res = await fetch(url.toString(), {
     headers: {
       authorization:
-        "Bearer d5249ede0477c2fbb0efef55e6745df4a5018d57aeb17d73da8f91837b6320c5b7da26e82280ec9eb8f48801813bb874e189e378980dfbe7ae3f9f1fcb75f8fe67e58ae7ec8d71beeee72106c52eb4655d8fe7261bb66506df55623cfbc5e4892344884bfa91beb0ceca0052fec8f504d54fc7f141f4e97b260d6a8fec4c9638"
+        "Bearer 71e474902e105b0abe6504f6de61775b1a5cd8b6982e9073c3618cf189d9169c0f1d20cfad0edfbb2e1948c7bc6db2bffb90557b90948604582eaa2940578862eb59b72766b5068109dba28fef82750f04b0f114049b20a97c634df85d8af3f7c10aa2739860faf3aee39643170652a42ce5a3bb49d4ca8729abbe887c0e617f"
     }
   });
   let data = await res.json();

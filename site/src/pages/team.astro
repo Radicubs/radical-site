@@ -7,9 +7,7 @@ import fetchApi, { type Media, type Result, type EmbeddedResult } from "../lib/s
 interface TeamMember {
   name: string;
   role: string;
-  email: string;
-  phone: string;
-  photo: EmbeddedResult<Media>;
+  avatar: EmbeddedResult<Media>;
 }
 
 const teamMembers = await fetchApi<Result<TeamMember>[]>({
@@ -28,9 +26,7 @@ const teamMembers = await fetchApi<Result<TeamMember>[]>({
           <TeamMember
             name={member.attributes.name}
             role={member.attributes.role}
-            email={member.attributes.email}
-            phone={member.attributes.phone}
-            photo_url={import.meta.env.STRAPI_URL + member.attributes.photo.data.attributes.url}
+            photo_url={import.meta.env.STRAPI_URL + member.attributes.avatar.data.attributes.url}
           />
         ))
       }
