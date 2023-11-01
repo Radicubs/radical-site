@@ -368,7 +368,6 @@ export interface ApiTeamMemberTeamMember extends Schema.CollectionType {
     singularName: 'team-member';
     pluralName: 'team-members';
     displayName: 'Team Member';
-    description: '';
   };
   options: {
     draftAndPublish: true;

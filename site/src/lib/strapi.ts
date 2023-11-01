@@ -51,16 +51,18 @@ export default async function fetchApi<T>({ endpoint, query, wrappedByKey, wrapp
   }
 
   const url = new URL(`${import.meta.env.STRAPI_URL}/api/${endpoint}`);
+  console.log(url.toString());
   if (query) {
     Object.entries(query).forEach(([key, value]) => {
       url.searchParams.append(key, value);
     });
   }
 
+  //const res = await fetch(url.toString(), {
   const res = await fetch(url.toString(), {
     headers: {
       authorization:
-        "Bearer 71e474902e105b0abe6504f6de61775b1a5cd8b6982e9073c3618cf189d9169c0f1d20cfad0edfbb2e1948c7bc6db2bffb90557b90948604582eaa2940578862eb59b72766b5068109dba28fef82750f04b0f114049b20a97c634df85d8af3f7c10aa2739860faf3aee39643170652a42ce5a3bb49d4ca8729abbe887c0e617f"
+        `Bearer ${import.meta.env.STRAPI_API_TOKEN}`
     }
   });
   let data = await res.json();
