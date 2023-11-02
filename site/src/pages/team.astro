@@ -7,6 +7,7 @@ import fetchApi, { type Media, type Result, type EmbeddedResult } from "../lib/s
 interface TeamMember {
   name: string;
   role: string;
+  year: number;
   avatar: EmbeddedResult<Media>;
 }
 
@@ -15,23 +16,38 @@ const teamMembers = await fetchApi<Result<TeamMember>[]>({
   wrappedByKey: "data", // the key to unwrap the response
   query: { populate: "*" }
 });
+
+const teamMembersByYear = teamMembers.reduce((acc, member) => {
+  const year = member.attributes.year - 2018;
+  if (!acc[year]) acc[year] = [];
+  acc[year].push(member);
+  return acc;
+}, []);
+
+console.log(teamMembersByYear);
 ---
 
 <Layout title="Meet the Team">
-  <header>
-    <h1>NASA HUNCH</h1>
-    <div class="team-members">
-      {
-        teamMembers.map(member => (
-          <TeamMember
-            name={member.attributes.name}
-            role={member.attributes.role}
-            photo_url={import.meta.env.STRAPI_URL + member.attributes.avatar.data.attributes.url}
-          />
-        ))
-      }
-    </div>
-  </header>
+  <div class="container">
+    {
+      teamMembersByYear.map((members, year) => (
+        <details>
+          <summary>
+            {year + 2018} - {year + 2019}
+          </summary>
+          <div class="team-members">
+            {members.map(member => (
+              <TeamMember
+                name={member.attributes.name}
+                role={member.attributes.role}
+                photo_url={import.meta.env.STRAPI_URL + member.attributes.avatar.data.attributes.url}
+              />
+            ))}
+          </div>
+        </details>
+      ))
+    }
+  </div>
 </Layout>
 
 <style>
@@ -43,12 +59,29 @@ const teamMembers = await fetchApi<Result<TeamMember>[]>({
     margin-bottom: 1em;
   }
 
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  details {
+    background-color: #181818;
+    border-radius: 5px;
+  }
+
+  summary {
+    color: var(--accent);
+    font-size: 20px;
+    padding: 10px;
+    font-weight: bold;
+    border-radius: 5px;
+    border: 1px solid var(--accent);
+  }
+
   .team-members {
     display: flex;
-    max-width: 1000px;
-    margin: auto;
+    padding: 20px;
     flex-wrap: wrap;
     gap: 20px;
-    justify-content: center;
   }
 </style>

@@ -4,7 +4,8 @@
   "info": {
     "singularName": "team-member",
     "pluralName": "team-members",
-    "displayName": "Team Member"
+    "displayName": "Team Member",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -18,14 +19,19 @@
       "type": "string"
     },
     "avatar": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
       "allowedTypes": [
         "images",
         "files",
         "videos",
         "audios"
-      ],
-      "type": "media",
-      "multiple": false
+      ]
+    },
+    "year": {
+      "min": 2018,
+      "type": "integer"
     }
   }
 }

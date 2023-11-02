@@ -368,6 +368,7 @@ export interface ApiTeamMemberTeamMember extends Schema.CollectionType {
     singularName: 'team-member';
     pluralName: 'team-members';
     displayName: 'Team Member';
+    description: '';
   };
   options: {
     draftAndPublish: true;
@@ -376,6 +377,10 @@ export interface ApiTeamMemberTeamMember extends Schema.CollectionType {
     name: Attribute.String;
     role: Attribute.String;
     avatar: Attribute.Media;
+    year: Attribute.Integer &
+      Attribute.SetMinMax<{
+        min: 2018;
+      }>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
