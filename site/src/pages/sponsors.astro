@@ -6,10 +6,10 @@ import Layout from "../layouts/Layout.astro";
   <header>
     <div class="content">
       <h1>Sponsors</h1>
-      <div class="socials">
-        <button onclick="window.location.href = 'https://w3docs.com'; "> Corporate Sponsers</button>
-        <button onclick="window.location.href = 'https://w3docs.com'; "> Become a Sponsors</button>
-        <button onclick="window.location.href = 'https://w3docs.com';"> Indiviudal Sponsors</button>
+      <div>
+        <button onclick="window.location.href = 'https://w3docs.com'; "> Corporate Sponsors</button>
+        <button onclick="window.location.href = 'https://w3docs.com'; " style="--c:#3C6927" > Become a Sponsors</button>
+        <button onclick="window.location.href = 'https://w3docs.com';" style="--c:#3C6927"> Indiviudal Sponsors</button>
       </div>
     </div>
   </header>
@@ -26,7 +26,7 @@ import Layout from "../layouts/Layout.astro";
     }
 
     .content {
-      width: 40%;
+      width: 50%;
     }
 
     h1 {
@@ -37,28 +37,38 @@ import Layout from "../layouts/Layout.astro";
       color: var(--accent);
     }
 
-    .subheading {
-      color: lightgray;
+    button {
+      font-family: "Space Mono", monospace;
+      font-size: 3.5rem;
+      cursor: pointer;
+      padding: .1em .6em;
+      border: none;
+      color:white;
+      border-radius: 25px;
       font-size: 20px;
     }
-
-    .socials {
-      margin-top: 32px;
-      font-size: 32px;
-      display: flex;
-      gap: 8px;
+    button {
+      --c:  #3C6927; /* the color*/
+      
+      box-shadow: 0 0 0 .1em inset var(--c); 
+      --_g: linear-gradient(var(--c) 0 0) no-repeat;
+      background: 
+        var(--_g) calc(var(--_p,0%) - 100%) 0%,
+        var(--_g) calc(200% - var(--_p,0%)) 0%,
+        var(--_g) calc(var(--_p,0%) - 100%) 100%,
+        var(--_g) calc(200% - var(--_p,0%)) 100%;
+      background-size: 50.5% calc(var(--_p,0%)/2 + .5%);
+      outline-offset: .1em;
+      transition: background-size .2s, background-position 0s .2s;
     }
-
-    .socials > a {
-      color: var(--accent);
+    button:hover {
+      --_p: 100%;
+      transition: background-position .2s, background-size 0s;
     }
-
-    footer {
-      width: 100%;
-      text-align: center;
-      color: white;
-      position: fixed;
-      bottom: 16px;
+    button:active {
+      box-shadow: 0 0 9e9q inset #0009; 
+      background-color: var(--c);
+      color: #fff;
     }
   </style>
 </Layout>

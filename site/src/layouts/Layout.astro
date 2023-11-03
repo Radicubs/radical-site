@@ -31,11 +31,10 @@ const { title } = Astro.props;
       <a href="/donate">Donate</a>
     </nav>
     <div class="container">
-      <slot />
-      <!-- we don't want the footer on the index page since it adds scrolling just for the footer, we will add it back after we do the other pages -->
-      <!-- <footer>
+      <slot/>
+      <footer>
         <div>The Radicubs Robotics Team is recognized as a non-profit organization under a 501(c)(3).</div>
-      </footer> -->
+      </footer>
     </div>
     <style is:global>
       :root {
