@@ -20,7 +20,7 @@ import Layout from "../layouts/Layout.astro";
                 <label for="fname">Leave a message:</label><br>
                 <input type="text" id="messsage" name="messsage"><br>
                 
-                <input type="submit" value="Submit">
+                <input class="btn" type="submit" value="Submit">
             </form>
         </div>
       
@@ -37,10 +37,47 @@ import Layout from "../layouts/Layout.astro";
         border: 2px solid var(--accent);
         border-radius: 4px;
         background: transparent;
-        height: 100px;
-        width: 1000px;
+        height: 50px;
         font-size:20px;
-        color: aqua;
+        color:var(--accent);
     }
+
+    .btn {
+    font-family: "Space Mono", monospace;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px 20px;
+    border: none;
+    color: white;
+    border-radius: 20px;
+    font-size: 20px;
+    text-decoration: none;
+
+    --color: #3c6927; /* the color*/
+
+    box-shadow: 0 0 0 0.1em inset var(--color);
+    --gradient: linear-gradient(var(--color) 0 0) no-repeat;
+    background:
+      var(--gradient) calc(var(--pos, 0%) - 100%) 0%,
+      var(--gradient) calc(200% - var(--pos, 0%)) 0%,
+      var(--gradient) calc(var(--pos, 0%) - 100%) 100%,
+      var(--gradient) calc(200% - var(--pos, 0%)) 100%;
+    background-size: 50.5% calc(var(--pos, 0%) / 2 + 0.5%);
+    outline-offset: 0.1em;
+    transition:
+      background-size 0.2s,
+      background-position 0s 0.2s;
+  }
+  .btn:hover {
+    --pos: 100%;
+    transition:
+      background-position 0.2s,
+      background-size 0s;
+  }
+  .btn:active {
+    box-shadow: 0 0 9e9Q inset #0009;
+    background-color: var(--color);
+    color: #fff;
+  }
 
 </style>
