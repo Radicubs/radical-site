@@ -2,16 +2,10 @@
 import Layout from "../layouts/Layout.astro";
 import TeamMember from "../components/TeamMember.astro";
 
-import fetchApi, { type Media, type Result, type EmbeddedResult } from "../lib/strapi";
+import type { ApiTeamMemberTeamMember } from "../lib/contentTypes";
+import fetchApi from "../lib/strapi";
 
-interface TeamMember {
-  name: string;
-  role: string;
-  year: number;
-  avatar: EmbeddedResult<Media>;
-}
-
-const teamMembers = await fetchApi<Result<TeamMember>[]>({
+const teamMembers = await fetchApi<ApiTeamMemberTeamMember[]>({
   endpoint: "team-members", // the content type to fetch
   wrappedByKey: "data", // the key to unwrap the response
   query: { populate: "*" }
@@ -23,8 +17,6 @@ const teamMembersByYear = teamMembers.reduce((acc, member) => {
   acc[year].push(member);
   return acc;
 }, []);
-
-console.log(teamMembersByYear);
 ---
 
 <Layout title="Meet the Team">
@@ -85,3 +77,4 @@ console.log(teamMembersByYear);
     gap: 20px;
   }
 </style>
+ ../lib/contentTypes

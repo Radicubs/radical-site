@@ -1,7 +1,68 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import type { ApiBlogPostBlogPost } from "../lib/contentTypes";
+import fetchApi from "../lib/strapi";
+
+const posts = await fetchApi<ApiBlogPostBlogPost[]>({
+  endpoint: "blog-posts", // the content type to fetch
+  wrappedByKey: "data", // the key to unwrap the response
+  query: { populate: "*" }
+});
+
+const titleToSlug = (title: string) => title.toLowerCase().replace(/ /g, "-");
 ---
 
-<Layout title="Radiblog">
-    
+<Layout title="Blog">
+  <h1>Blog</h1>
+  <div>
+    {
+      posts.map(post => (
+        <a class="post" href={`/blog/${titleToSlug(post.attributes.title)}`}>
+          <img
+            src={import.meta.env.STRAPI_URL + post.attributes.cover.data.attributes.url}
+            alt={post.attributes.title + " cover"}
+          />
+          <div class="title">{post.attributes.title}</div>
+          <div class="description">{post.attributes.description}</div>
+        </a>
+      ))
+    }
+  </div>
 </Layout>
+
+<style>
+  h1 {
+    font-size: 60px;
+    font-weight: 700;
+    margin: 0;
+    font-family: "Space Mono", monospace;
+    color: var(--accent);
+    text-align: center;
+  }
+
+  .post {
+    color: white;
+    margin: auto;
+    background-color: #181818;
+    padding: 16px;
+    width: 400px;
+    display: block;
+    text-decoration: none;
+  }
+
+  .post img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    margin-bottom: 16px;
+  }
+
+  .title {
+    font-weight: bold;
+    font-size: 24px;
+  }
+
+  .description {
+    color: lightgray;
+  }
+</style>
