@@ -3,34 +3,42 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="Contact">
-        <div class="content">
-            <form>
-                <label for="fname">First name:</label><br>
-                <input type="text" id="fname" name="fname"><br>
+  <div>
+    <h1>Contact Us</h1>
+    <div class="email">
+      <h2>Email:</h2>
+      <p>radicubs@gmail.com</p>
+    </div>
+      <form class="form">
+          <label for="fname">First name:</label><br>
+          <input type="text" id="fname" name="fname"><br>
 
-                <label for="lname">Last name:</label><br>
-                <input type="text" id="lname" name="lname"><br>
+          <label for="lname">Last name:</label><br>
+          <input type="text" id="lname" name="lname"><br>
 
-                <label for="lname">Email:</label><br>
-                <input type="email" id="email" name="email"><br>
+          <label for="lname">Email:</label><br>
+          <input type="email" id="email" name="email"><br>
 
-                <label for="fname">Subject:</label><br>
-                <input type="text" id="subject" name="subject"><br>
-                
-                <label for="fname">Leave a message:</label><br>
-                <input type="text" id="messsage" name="messsage"><br>
-                
-                <input class="btn" type="submit" value="Submit">
-            </form>
-        </div>
+          <label for="fname">Subject:</label><br>
+          <input type="text" id="subject" name="subject"><br>
+          
+          <label for="fname">Leave a message:</label><br>
+          <input type="text" id="messsage" name="messsage"><br>
+          
+          <input class="btn" type="submit" value="Submit">
+      </form>
+  </div>
+  
       
 
 </Layout>     
 <style>
-    .content{
+    .form{
         color:var(--accent);
         display: flex;
-        justify-content: center;
+        align-items: center;
+        width:50%;
+        flex-direction: column;
     }
 
     input {
@@ -43,31 +51,31 @@ import Layout from "../layouts/Layout.astro";
     }
 
     .btn {
-    font-family: "Space Mono", monospace;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 5px 20px;
-    border: none;
-    color: white;
-    border-radius: 20px;
-    font-size: 20px;
-    text-decoration: none;
+      font-family: "Space Mono", monospace;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 5px 20px;
+      border: none;
+      color: white;
+      border-radius: 20px;
+      font-size: 20px;
+      text-decoration: none;
 
-    --color: #3c6927; /* the color*/
+      --color: #3c6927; /* the color*/
 
-    box-shadow: 0 0 0 0.1em inset var(--color);
-    --gradient: linear-gradient(var(--color) 0 0) no-repeat;
-    background:
-      var(--gradient) calc(var(--pos, 0%) - 100%) 0%,
-      var(--gradient) calc(200% - var(--pos, 0%)) 0%,
-      var(--gradient) calc(var(--pos, 0%) - 100%) 100%,
-      var(--gradient) calc(200% - var(--pos, 0%)) 100%;
-    background-size: 50.5% calc(var(--pos, 0%) / 2 + 0.5%);
-    outline-offset: 0.1em;
-    transition:
-      background-size 0.2s,
-      background-position 0s 0.2s;
-  }
+      box-shadow: 0 0 0 0.1em inset var(--color);
+      --gradient: linear-gradient(var(--color) 0 0) no-repeat;
+      background:
+        var(--gradient) calc(var(--pos, 0%) - 100%) 0%,
+        var(--gradient) calc(200% - var(--pos, 0%)) 0%,
+        var(--gradient) calc(var(--pos, 0%) - 100%) 100%,
+        var(--gradient) calc(200% - var(--pos, 0%)) 100%;
+      background-size: 50.5% calc(var(--pos, 0%) / 2 + 0.5%);
+      outline-offset: 0.1em;
+      transition:
+        background-size 0.2s,
+        background-position 0s 0.2s;
+    }
   .btn:hover {
     --pos: 100%;
     transition:
@@ -80,4 +88,19 @@ import Layout from "../layouts/Layout.astro";
     color: #fff;
   }
 
+  h1{
+    font-size: 60px;
+    font-weight: 700;
+    margin-bottom: 0px;
+    font-family: "Space Mono", monospace;
+    color: var(--accent);
+  }
+
+  .email{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color:var(--accent);
+    font-size: 32px;
+  }
 </style>
