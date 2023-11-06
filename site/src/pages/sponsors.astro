@@ -7,6 +7,12 @@ const corporateSponsors = (await fetchApi({
   wrappedByKey: "data", // the key to unwrap the response
   query: { populate: "*" }
 })) as any[];
+
+const individualSponsors = (await fetchApi({
+  endpoint: "individual-sponsors", // the content type to fetch
+  wrappedByKey: "data", // the key to unwrap the response
+  query: { populate: "*" }
+})) as any[];
 ---
 
 <Layout title="Sponsors">
@@ -29,9 +35,13 @@ const corporateSponsors = (await fetchApi({
     <h2>Individual Sponsors</h2>
     <hr />
     <ul class="individual-sponsors">
-      <li>Sule Family</li>
-      <li>Ganapathineedi Family</li>
-      <li>Baumel Family</li>
+      {
+        individualSponsors.map(sponsor => (
+          <li>
+            {sponsor.attributes.name}
+          </li>
+        ))
+      }
     </ul>
     <div class="become-sponsor">
       <a class="link" href="/contact">Become a Sponsor</a>
