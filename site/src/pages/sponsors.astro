@@ -22,13 +22,15 @@ const individualSponsors = (await fetchApi({
     <div class="corporate-sponsors">
       {
         corporateSponsors.map(sponsor => (
-          <a href={sponsor.attributes.link} target="_blank" rel="noopener noreferrer" title="{sponsor.name}">
-            <img
-              src={import.meta.env.STRAPI_URL + sponsor.attributes.logo.data.attributes.url}
-              alt={sponsor.name + " Logo"}
-              width="300"
-            />
-          </a>
+          <div class = "card">
+            <a href={sponsor.attributes.link} target="_blank" rel="noopener noreferrer" title={sponsor.attributes.name}>
+              <img
+                src={import.meta.env.STRAPI_URL + sponsor.attributes.logo.data.attributes.url}
+                alt={sponsor.attributes.name + " Logo"}
+                width="250"
+              />
+            </a>
+          </div>
         ))
       }
     </div>
