@@ -15,17 +15,28 @@ import Layout from "../layouts/Layout.astro";
           To : 'ninjawashyper152@gmail.com',
           From : "karthik.duvvuri08@gmail.com",
           Subject : "Contact Information",
-          Body : "yo"
+          Body : getName()
       }).then(
         message => alert(message)
+        
       );
     }
+
+    function getName() {
+      let getTextArea = document.getElementById("txtArea");
+      let textMessage = " Message: " + getTextArea.value;
+      let email = " Email: " + document.getElementById("email").value
+      let firstName = " Name: " + document.getElementById("fname").value
+
+      return firstName + email + textMessage
+    }
+
   </script>
   <h1>Contact Us</h1>
   <form method="post" class="form">
     <input type="text" id="fname" name="fname" placeholder="Name" />
     <input type="email" id="email" name="email" placeholder="Email" />
-    <textarea id="messsage" name="messsage" placeholder="Message"></textarea>
+    <textarea id="txtArea" name="messsage" placeholder="Message"></textarea>
 
     <input class="btn" type="button" value="Send Mail"onclick="sendEmail()" />
   </form>
