@@ -746,6 +746,28 @@ export interface ApiCorporateSponsorCorporateSponsor
   };
 }
 
+export interface ApiHomeHome extends Schema.SingleType {
+  collectionName: 'homes';
+  info: {
+    singularName: 'home';
+    pluralName: 'homes';
+    displayName: 'Home';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    heroImage: Attribute.Media;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<'api::home.home', 'oneToOne', 'admin::user'> &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<'api::home.home', 'oneToOne', 'admin::user'> &
+      Attribute.Private;
+  };
+}
+
 export interface ApiIndividualSponsorIndividualSponsor
   extends Schema.CollectionType {
   collectionName: 'individual_sponsors';
@@ -832,6 +854,7 @@ declare module '@strapi/types' {
       'plugin::i18n.locale': PluginI18NLocale;
       'api::blog-post.blog-post': ApiBlogPostBlogPost;
       'api::corporate-sponsor.corporate-sponsor': ApiCorporateSponsorCorporateSponsor;
+      'api::home.home': ApiHomeHome;
       'api::individual-sponsor.individual-sponsor': ApiIndividualSponsorIndividualSponsor;
       'api::team-member.team-member': ApiTeamMemberTeamMember;
     }
