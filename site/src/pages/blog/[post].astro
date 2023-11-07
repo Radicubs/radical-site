@@ -1,0 +1,111 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import type { ApiBlogPostBlogPost } from "../../lib/contentTypes";
+import fetchApi from "../../lib/strapi";
+import { marked } from "marked";
+
+// const titleToSlug = (title: string) => title.toLowerCase().replace(/ /g, "-");
+
+// export async function getStaticPaths() {
+//   console.log("getStaticPaths");
+//   const posts = await fetchApi<ApiBlogPostBlogPost[]>({
+//     endpoint: "blog-posts", // the content type to fetch
+//     wrappedByKey: "data", // the key to unwrap the response
+//     query: { populate: "*" }
+//   });
+
+//   return posts.map(post => ({
+//     params: { id: titleToSlug(post.attributes.title) },
+//     props: { post }
+//   }));
+// }
+
+// const { id } = Astro.params;
+// const { post } = Astro.props;
+
+// console.log("post", post);
+
+const slug = Astro.params.post;
+if (!slug) {
+  throw new Response("Not found", { status: 404 });
+}
+
+const [post] = await fetchApi<ApiBlogPostBlogPost[]>({
+  endpoint: "blog-posts", // the content type to fetch
+  wrappedByKey: "data", // the key to unwrap the response
+  query: { populate: "*", "filter[slug][$eq]": slug }
+});
+
+if (!post) {
+  throw new Response("Not found", { status: 404 });
+}
+
+const html = marked.parse(post.attributes.content);
+---
+
+<Layout title={post.attributes.title}>
+  <div class="container">
+    <div class="date">
+      {new Date(post.attributes.createdAt).toLocaleString("en-CA", { month: "long", day: "numeric", year: "numeric" })}
+    </div>
+    <h1 class="title">{post.attributes.title}</h1>
+    <p class="description">{post.attributes.description}</p>
+    <hr />
+    <img
+      src={import.meta.env.STRAPI_URL + post.attributes.cover.data.attributes.url}
+      alt={post.attributes.title + " cover"}
+      class="cover"
+    />
+    <article set:html={html} />
+  </div>
+</Layout>
+
+<style>
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  hr {
+    border: 1px solid #181818;
+    margin: 16px 0;
+  }
+
+  .date {
+    color: darkgray;
+    font-family: "Space Mono", monospace;
+    font-size: 14px;
+  }
+
+  .title {
+    color: var(--accent);
+    font-family: "Space Mono", monospace;
+    margin-top: 4px;
+    margin-bottom: 0;
+  }
+
+  .description {
+    color: lightgray;
+    font-family: "Space Mono", monospace;
+    font-size: 18px;
+    margin-top: 4px;
+    margin-bottom: 0;
+  }
+
+  img {
+    width: 100%;
+    min-height: 200px;
+    max-height: 400px;
+    margin: 25px auto;
+    border-radius: 25px;
+    object-fit: cover;
+    aspect-ratio: 2/1;
+  }
+</style>
+
+<style is:global>
+  article a {
+    font-family: "Space Mono", monospace;
+    color: var(--accent);
+  }
+</style>

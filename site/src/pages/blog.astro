@@ -8,8 +8,6 @@ const posts = await fetchApi<ApiBlogPostBlogPost[]>({
   wrappedByKey: "data", // the key to unwrap the response
   query: { populate: "*" }
 });
-
-const titleToSlug = (title: string) => title.toLowerCase().replace(/ /g, "-");
 ---
 
 <Layout title="Blog">
@@ -17,7 +15,7 @@ const titleToSlug = (title: string) => title.toLowerCase().replace(/ /g, "-");
   <div>
     {
       posts.map(post => (
-        <a class="post" href={`/blog/${titleToSlug(post.attributes.title)}`}>
+        <a class="post" href={`/blog/${post.attributes.slug}`}>
           <img
             src={import.meta.env.STRAPI_URL + post.attributes.cover.data.attributes.url}
             alt={post.attributes.title + " cover"}
