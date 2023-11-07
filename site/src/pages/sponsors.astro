@@ -1,18 +1,19 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import type { ApiCorporateSponsorCorporateSponsor, ApiIndividualSponsorIndividualSponsor } from "../lib/contentTypes";
 import fetchApi from "../lib/strapi";
 
-const corporateSponsors = (await fetchApi({
+const corporateSponsors = await fetchApi<ApiCorporateSponsorCorporateSponsor[]>({
   endpoint: "corporate-sponsors", // the content type to fetch
   wrappedByKey: "data", // the key to unwrap the response
   query: { populate: "*" }
-})) as any[];
+});
 
-const individualSponsors = (await fetchApi({
+const individualSponsors = await fetchApi<ApiIndividualSponsorIndividualSponsor[]>({
   endpoint: "individual-sponsors", // the content type to fetch
   wrappedByKey: "data", // the key to unwrap the response
   query: { populate: "*" }
-})) as any[];
+});
 ---
 
 <Layout title="Sponsors">
@@ -22,7 +23,7 @@ const individualSponsors = (await fetchApi({
     <div class="corporate-sponsors">
       {
         corporateSponsors.map(sponsor => (
-          <div class = "card">
+          <div class="card">
             <a href={sponsor.attributes.link} target="_blank" rel="noopener noreferrer" title={sponsor.attributes.name}>
               <img
                 src={import.meta.env.STRAPI_URL + sponsor.attributes.logo.data.attributes.url}
@@ -37,13 +38,7 @@ const individualSponsors = (await fetchApi({
     <h2>Individual Sponsors</h2>
     <hr />
     <ul class="individual-sponsors">
-      {
-        individualSponsors.map(sponsor => (
-          <li>
-            {sponsor.attributes.name}
-          </li>
-        ))
-      }
+      {individualSponsors.map(sponsor => <li>{sponsor.attributes.name}</li>)}
     </ul>
     <div class="become-sponsor">
       <a class="link" href="/contact">Become a Sponsor</a>
