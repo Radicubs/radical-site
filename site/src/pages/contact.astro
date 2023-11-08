@@ -37,7 +37,7 @@ import Layout from "../layouts/Layout.astro";
 
   </script>
   <h1>Contact Us</h1>
-  <form method="post" class="form">
+  <form method="post" class="form" onsubmit="sendEmail()">
     <div hidden id="error">
       <p id="errorMessage"></p>
     </div>
@@ -45,7 +45,7 @@ import Layout from "../layouts/Layout.astro";
     <input type="email" id="email" name="email" placeholder="Email" />
     <textarea id="txtArea" name="messsage" placeholder="Message"></textarea>
 
-    <input class="btn" type="button" value="Send Mail"onclick="sendEmail()" />
+    <input class="btn" type="submit" value="Send Mail"/>
   </form>
 </Layout>
 
