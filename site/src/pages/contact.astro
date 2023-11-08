@@ -14,9 +14,15 @@ import Layout from "../layouts/Layout.astro";
           From : "karthik.duvvuri08@gmail.com",
           Subject : "Contact Information",
           Body : getName()
-      }).then(
-        message => alert(message)
-        
+      }).then(message =>{
+          if(message !== "OK"){
+            document.getElementById("errorMessage").innerHTML = message;
+            document.getElementById("error").toggleAttribute("hidden");
+          }
+          else{
+            location.reload();
+          }
+        }
       );
     }
 
@@ -32,6 +38,9 @@ import Layout from "../layouts/Layout.astro";
   </script>
   <h1>Contact Us</h1>
   <form method="post" class="form">
+    <div hidden id="error">
+      <p id="errorMessage"></p>
+    </div>
     <input type="text" id="fname" name="fname" placeholder="Name" />
     <input type="email" id="email" name="email" placeholder="Email" />
     <textarea id="txtArea" name="messsage" placeholder="Message"></textarea>
@@ -41,6 +50,22 @@ import Layout from "../layouts/Layout.astro";
 </Layout>
 
 <style>
+  #error{
+    background-color:rgb(255, 100, 100);
+    max-width: 400px;
+    width: 100%;
+    border-radius: 4px;
+  }
+
+  #errorMessage{
+    text-align: center;
+    padding: 5px;
+    font-size: 16px;
+    color: white;
+    font-weight: #cccccc;
+    font-family: "Space Mono", monospace;
+  }
+
   .form {
     color: var(--accent);
     display: flex;
