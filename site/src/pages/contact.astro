@@ -17,7 +17,7 @@ import Layout from "../layouts/Layout.astro";
       }).then(message =>{
           if(message !== "OK"){
             document.getElementById("errorMessage").innerHTML = message;
-            document.getElementById("error").toggleAttribute("hidden");
+            document.getElementById("error").toggleAttribute("hidden", false);
           }
           else{
             location.reload();
