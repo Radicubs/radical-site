@@ -1,0 +1,37 @@
+---
+import type { ApiTeamMemberTeamMember } from "../../../lib/contentTypes";
+import fetchApi from "../../../lib/strapi";
+import TeamMember from "../../../components/TeamMember.astro";
+
+const year = Astro.params.year;
+if (!year) {
+  throw new Response("Not found", { status: 404 });
+}
+
+const teamMembers = await fetchApi<ApiTeamMemberTeamMember[]>({
+  endpoint: "team-members", // the content type to fetch
+  wrappedByKey: "data", // the key to unwrap the response
+  query: { populate: "*", "filters[year][$eq]": year }
+});
+
+const teamMembersByYear = Array.from(
+  teamMembers.reduce((acc, member) => {
+    const year = member.attributes.year;
+    if (!acc.has(year)) acc.set(year, []);
+    acc.get(year).push(member);
+    return acc;
+  }, new Map())
+).sort(([yearA], [yearB]) => yearB - yearA);
+---
+
+{
+  teamMembersByYear[0][1].map(member => (
+    <TeamMember
+      name={member.attributes.name}
+      role={member.attributes.role}
+      photo_url={
+        member.attributes.avatar.data ? import.meta.env.STRAPI_URL + member.attributes.avatar.data.attributes.url : null
+      }
+    />
+  ))
+}

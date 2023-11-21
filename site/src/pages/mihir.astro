@@ -1,5 +1,14 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Spotlight from "../components/Spotlight.astro";
+import fetchApi from "../lib/strapi";
+import type { ApiHomeHome } from "../lib/contentTypes";
+
+const home = await fetchApi<ApiHomeHome>({
+  endpoint: "home", // the content type to fetch
+  wrappedByKey: "data", // the key to unwrap the response
+  query: { populate: "*" }
+});
 ---
 
 <Layout title="Radicubs">
@@ -18,9 +27,15 @@ import Layout from "../layouts/Layout.astro";
       </div>
     </div>
     <div class="media">
-      <img src="radilogo.jpg" alt="Radicubs Logo" width="400" height="400" />
+      <img
+        src={import.meta.env.STRAPI_URL + home.attributes.heroImage.data.attributes.url}
+        alt="Radicubs Logo"
+        width="400"
+        height="400"
+      />
     </div>
   </header>
+  <Spotlight />
 </Layout>
 
 <style is:global>
@@ -32,25 +47,16 @@ import Layout from "../layouts/Layout.astro";
 <style>
   header {
     color: white;
-    height: 100%;
     gap: 32px;
-    padding: 32px;
-    background-color: black;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding-top: 40px;
+    padding-bottom: 40px;
   }
 
   .content {
     width: 40%;
-  }
-
-  h1 {
-    font-size: 64px;
-    font-weight: 700;
-    margin: 0;
-    font-family: "Space Mono", monospace;
-    color: var(--accent);
   }
 
   .subheading {

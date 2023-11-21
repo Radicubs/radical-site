@@ -11,8 +11,8 @@ const posts = await fetchApi<ApiBlogPostBlogPost[]>({
 ---
 
 <Layout title="Blog">
-  <h1>Blog</h1>
-  <div>
+  <div class="container">
+    <h1>Blog</h1>
     {
       posts.map(post => (
         <a class="post" href={`/blog/${post.attributes.slug}`}>
@@ -29,6 +29,10 @@ const posts = await fetchApi<ApiBlogPostBlogPost[]>({
 </Layout>
 
 <style>
+  .container {
+    padding: 32px;
+  }
+
   h1 {
     font-size: 60px;
     font-weight: 700;
@@ -43,7 +47,8 @@ const posts = await fetchApi<ApiBlogPostBlogPost[]>({
     margin: auto;
     background-color: #181818;
     padding: 16px;
-    width: 400px;
+    width: 100%;
+    max-width: 400px;
     display: block;
     text-decoration: none;
   }

@@ -1,9 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import TeamMember from "../components/TeamMember.astro";
 
 import type { ApiTeamMemberTeamMember } from "../lib/contentTypes";
 import fetchApi from "../lib/strapi";
+import TeamMember from "../components/TeamMember.astro";
 
 const teamMembers = await fetchApi<ApiTeamMemberTeamMember[]>({
   endpoint: "team-members", // the content type to fetch
@@ -11,69 +11,102 @@ const teamMembers = await fetchApi<ApiTeamMemberTeamMember[]>({
   query: { populate: "*" }
 });
 
-const teamMembersByYear = teamMembers.reduce((acc, member) => {
-  const year = member.attributes.year - 2018;
-  if (!acc[year]) acc[year] = [];
-  acc[year].push(member);
-  return acc;
-}, []);
+const teamMembersByYear = Array.from(
+  teamMembers.reduce((acc, member) => {
+    const year = member.attributes.year;
+    if (!acc.has(year)) acc.set(year, []);
+    acc.get(year).push(member);
+    return acc;
+  }, new Map())
+).sort(([yearA], [yearB]) => yearB - yearA);
 ---
 
 <Layout title="Meet the Team">
   <div class="container">
-    {
-      teamMembersByYear.map((members, year) => (
-        <details>
-          <summary>
-            {year + 2018} - {year + 2019}
-          </summary>
-          <div class="team-members">
-            {members.map(member => (
-              <TeamMember
-                name={member.attributes.name}
-                role={member.attributes.role}
-                photo_url={import.meta.env.STRAPI_URL + member.attributes.avatar.data.attributes.url}
-              />
-            ))}
-          </div>
-        </details>
-      ))
-    }
+    <div class="heading">
+      <h1>Meet the Team</h1>
+      <select name="Year" id="year">
+        {
+          teamMembersByYear.map(([year]) => (
+            <option value={year}>
+              {year} - {year + 1}
+            </option>
+          ))
+        }
+      </select>
+    </div>
+    <div id="team-members" class="team-members">
+      {
+        teamMembersByYear[0][1].map(member => (
+          <TeamMember
+            name={member.attributes.name}
+            role={member.attributes.role}
+            photo_url={
+              member.attributes.avatar.data
+                ? import.meta.env.STRAPI_URL + member.attributes.avatar.data.attributes.url
+                : null
+            }
+          />
+        ))
+      }
+    </div>
   </div>
 </Layout>
 
 <style>
+  .heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
   h1 {
-    font-size: 4rem;
+    font-size: 48px;
     font-weight: 700;
     line-height: 1;
     text-align: center;
-    margin-bottom: 1em;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+
+  select {
+    margin-left: 10px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    background-color: #181818;
+    color: var(--accent);
+    font-family: "Space Mono", monospace;
   }
 
   .container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
-  }
-
-  details {
-    background-color: #181818;
-    border-radius: 5px;
-  }
-
-  summary {
-    color: var(--accent);
-    font-size: 20px;
-    padding: 10px;
-    font-weight: bold;
-    border-radius: 5px;
-    border: 1px solid var(--accent);
+    padding: 32px;
+    gap: 16px;
+    display: flex;
+    flex-direction: column;
   }
 
   .team-members {
     display: flex;
-    padding: 20px;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 20px;
   }
 </style>
+
+<script>
+  const teamMembersElement = document.getElementById("team-members") as HTMLDivElement;
+  const yearSelect = document.getElementById("year") as HTMLSelectElement;
+
+  yearSelect.addEventListener("change", () => {
+    const year = yearSelect.value;
+    fetch(`/api/team-members/${encodeURIComponent(year)}`)
+      .then(res => res.text())
+      .then(res => (teamMembersElement.innerHTML = res));
+  });
+</script>

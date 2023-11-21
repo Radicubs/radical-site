@@ -1,0 +1,14 @@
+---
+import { toSvg } from "jdenticon";
+
+interface Props {
+  seed: string;
+  size?: number;
+}
+
+const { seed, size } = Astro.props;
+
+const svg = toSvg(seed, size ?? 100);
+---
+
+<Fragment set:html={svg} />
