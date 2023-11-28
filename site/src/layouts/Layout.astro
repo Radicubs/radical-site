@@ -1,5 +1,5 @@
 ---
-import { ViewTransitions, slide } from "astro:transitions";
+import { ViewTransitions } from "astro:transitions";
 
 interface Props {
   title: string;
@@ -32,11 +32,11 @@ const { title } = Astro.props;
       <a href="/team">Team</a>
       <a href="/sponsors">Sponsors</a>
       <a href="/spotlight">Spotlight</a>
-      <a href="/contact">Contact</a>
       <a href="/blog">Blog</a>
+      <a href="/contact">Contact</a>
       <a href="https://www.paypal.com/paypalme/radicubs">Donate</a>
     </nav>
-    <div id="root" transition:animate={slide({ duration: "0.5s" })}>
+    <div id="root">
       <slot />
     </div>
     <!-- ❗ DONT YOU DARE FUCKING UNCOMMENT THIS I WILL FIND YOU ❗ -->
