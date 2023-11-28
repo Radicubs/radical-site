@@ -27,7 +27,7 @@ const html = marked.parse(post.attributes.content);
     <div class="date">
       {new Date(post.attributes.createdAt).toLocaleString("en-CA", { month: "long", day: "numeric", year: "numeric" })}
     </div>
-    <h1 class="title">{post.attributes.title}</h1>
+    <h2 class="title">{post.attributes.title}</h2>
     <p class="description">{post.attributes.description}</p>
     <hr />
     <img
@@ -47,21 +47,22 @@ const html = marked.parse(post.attributes.content);
   }
 
   hr {
-    border: 1px solid #181818;
+    border: 1px solid var(--tertiary);
     margin: 16px 0;
   }
 
   .date {
     color: darkgray;
     font-family: "Space Mono", monospace;
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .title {
     color: var(--accent);
-    font-family: "Space Mono", monospace;
+    font-size: 48px;
     margin-top: 4px;
     margin-bottom: 0;
+    font-family: "Space Mono", monospace;
   }
 
   .description {
@@ -85,6 +86,7 @@ const html = marked.parse(post.attributes.content);
 
 <style is:global>
   article a {
+    font-weight: bold;
     font-family: "Space Mono", monospace;
     color: var(--accent);
   }
