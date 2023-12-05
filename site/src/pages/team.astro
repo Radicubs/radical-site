@@ -21,7 +21,7 @@ const teamMembersByYear = Array.from(
 ).sort(([yearA], [yearB]) => yearB - yearA);
 ---
 
-<Layout title="Meet the Team">
+<Layout title="Team">
   <div class="container">
     <div class="heading">
       <h1>Meet the Team</h1>
@@ -82,7 +82,17 @@ const teamMembersByYear = Array.from(
   }
 
   select option {
+    position: relative;
     background-color: var(--secondary);
+  }
+
+  select option:checked,
+  select option:hover {
+    box-shadow: 0 0 10px 100px #000 inset;
+  }
+
+  select:focus > option:checked {
+    background: #000 !important;
   }
 
   .container {

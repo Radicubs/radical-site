@@ -13,19 +13,10 @@ const teamMembers = await fetchApi<ApiTeamMemberTeamMember[]>({
   wrappedByKey: "data", // the key to unwrap the response
   query: { populate: "*", "filters[year][$eq]": year }
 });
-
-const teamMembersByYear = Array.from(
-  teamMembers.reduce((acc, member) => {
-    const year = member.attributes.year;
-    if (!acc.has(year)) acc.set(year, []);
-    acc.get(year).push(member);
-    return acc;
-  }, new Map())
-).sort(([yearA], [yearB]) => yearB - yearA);
 ---
 
 {
-  teamMembersByYear[0][1].map(member => (
+  teamMembers.map(member => (
     <TeamMember
       name={member.attributes.name}
       role={member.attributes.role}

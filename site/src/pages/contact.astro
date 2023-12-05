@@ -12,7 +12,7 @@ import Layout from "../layouts/Layout.astro";
       <input type="text" id="name" name="name" placeholder="Name" required />
       <input type="email" id="email" name="email" placeholder="Email" required />
       <textarea id="txtArea" name="messsage" placeholder="Message"></textarea>
-      <input class="btn" type="submit" value="Send Mail" onclick="sendEmail" />
+      <input id="submit" class="btn" type="submit" value="Send Mail" />
     </div>
   </div>
 </Layout>
@@ -122,71 +122,27 @@ import Layout from "../layouts/Layout.astro";
 </style>
 
 <script>
-  var Email = {
-    send: function (a) {
-      return new Promise(function (n, e) {
-        (a.nocache = Math.floor(1e6 * Math.random() + 1)), (a.Action = "Send");
-        var t = JSON.stringify(a);
-        Email.ajaxPost("https://smtpjs.com/v3/smtpjs.aspx?", t, function (e) {
-          n(e);
-        });
-      });
-    },
-    ajaxPost: function (e, n, t) {
-      var a = Email.createCORSRequest("POST", e);
-      a.setRequestHeader("Content-type", "application/x-www-form-urlencoded"),
-        (a.onload = function () {
-          var e = a.responseText;
-          null != t && t(e);
-        }),
-        a.send(n);
-    },
-    ajax: function (e, n) {
-      var t = Email.createCORSRequest("GET", e);
-      (t.onload = function () {
-        var e = t.responseText;
-        null != n && n(e);
-      }),
-        t.send();
-    },
-    createCORSRequest: function (e, n) {
-      var t = new XMLHttpRequest();
-      return (
-        "withCredentials" in t
-          ? t.open(e, n, !0)
-          : "undefined" != typeof XDomainRequest
-          ? (t = new XDomainRequest()).open(e, n)
-          : (t = null),
-        t
-      );
-    }
-  };
-
-  function getSubject() {
-    const name = (document.getElementById("name") as HTMLInputElement).value;
-    return `[Contact Form] ${name}`;
-  }
-
-  function getBody() {
-    const email = (document.getElementById("email") as HTMLInputElement).value;
-    const message = (document.getElementById("txtArea") as HTMLInputElement).value;
-    return `Email: ${email}\n\n---\n${message}`;
-  }
-
   function sendEmail() {
-    Email.send({
-      SecureToken: "fb6b6d14-72e4-427f-b78f-9e058bc64b4d",
-      To: "ninjawashyper152@gmail.com",
-      From: "karthik.duvvuri08@gmail.com",
-      Subject: getSubject(),
-      Body: getBody()
-    }).then((message: string) => {
-      if (message !== "OK") {
-        document.getElementById("errorMessage").innerHTML = message;
+    fetch("/api/contact", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        name: (document.getElementById("name") as HTMLInputElement).value,
+        email: (document.getElementById("email") as HTMLInputElement).value,
+        message: (document.getElementById("txtArea") as HTMLInputElement).value
+      })
+    }).then(async res => {
+      if (!res.ok) {
+        document.getElementById("errorMessage").innerText = await res.text();
         document.getElementById("error").toggleAttribute("hidden", false);
       } else {
-        location.reload();
+        // location.reload();
       }
     });
   }
+
+  document.getElementById("submit").addEventListener("click", () => {
+    console.log("submit");
+    sendEmail();
+  });
 </script>

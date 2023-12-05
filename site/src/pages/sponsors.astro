@@ -49,6 +49,7 @@ const individualSponsors = await fetchApi<ApiIndividualSponsorIndividualSponsor[
   .container {
     max-width: 1000px;
     margin: auto;
+    padding: 32px;
   }
 
   h2 {
@@ -67,8 +68,12 @@ const individualSponsors = await fetchApi<ApiIndividualSponsorIndividualSponsor[
   }
 
   .corporate-sponsors {
+    columns: 298px;
     gap: 20px;
-    columns: 320px;
+  }
+
+  .corporate-sponsors > * {
+    margin: 20px 0;
   }
 
   .corporate-sponsors img {

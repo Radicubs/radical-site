@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Radicubs">
+<Layout title="Home">
   <header>
     <div class="content">
       <h1>Radicubs</h1>
@@ -18,7 +18,7 @@ import Layout from "../layouts/Layout.astro";
       </div>
     </div>
     <div class="media">
-      <img src="radilogo.jpg" alt="Radicubs Logo" width="400" height="400" />
+      <img src="radilogo.jpg" alt="Radicubs Logo" class="logo" width="400" height="400" />
     </div>
   </header>
 </Layout>
@@ -67,6 +67,10 @@ import Layout from "../layouts/Layout.astro";
 
   .socials > a {
     color: var(--accent);
+  }
+
+  .logo {
+    border-radius: 9999px;
   }
 
   /* mobile no .media */
