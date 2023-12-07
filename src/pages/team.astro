@@ -36,7 +36,7 @@ const teamMembersByYear = Array.from(
         }
       </select>
     </div>
-    <Link text="Mentors" href="/mentors" />
+    <Link text="View mentors" href="/mentors" />
     <div id="team-members" class="team-members">
       {
         teamMembersByYear[0][1].map(member => (
@@ -67,7 +67,7 @@ const teamMembersByYear = Array.from(
   h1 {
     font-size: 48px;
     font-weight: 700;
-    line-height: 1;
+    margin-bottom: 0;
     text-align: center;
     display: inline-block;
   }
@@ -92,7 +92,6 @@ const teamMembersByYear = Array.from(
     max-width: 1200px;
     margin: 0 auto;
     padding: 32px;
-    gap: 16px;
     display: flex;
     flex-direction: column;
   }
@@ -102,6 +101,7 @@ const teamMembersByYear = Array.from(
     flex-wrap: wrap;
     justify-content: center;
     gap: 20px;
+    margin-top: 24px;
   }
 </style>
 

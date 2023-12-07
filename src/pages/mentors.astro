@@ -16,7 +16,7 @@ const mentors = await fetchApi<ApiMentorMentor[]>({
 <Layout title="Mentors">
   <div class="container">
     <h1>Mentors</h1>
-    <Link text="Team" href="/team" />
+    <Link text="View team members" href="/team" />
     <div id="team-members" class="team-members">
       {
         mentors.map(member => (
@@ -39,7 +39,7 @@ const mentors = await fetchApi<ApiMentorMentor[]>({
   h1 {
     font-size: 48px;
     font-weight: 700;
-    line-height: 1;
+    margin-bottom: 0;
     text-align: center;
     display: inline-block;
   }
@@ -48,7 +48,6 @@ const mentors = await fetchApi<ApiMentorMentor[]>({
     max-width: 1200px;
     margin: 0 auto;
     padding: 32px;
-    gap: 16px;
     display: flex;
     flex-direction: column;
   }
@@ -58,6 +57,7 @@ const mentors = await fetchApi<ApiMentorMentor[]>({
     flex-wrap: wrap;
     justify-content: center;
     gap: 20px;
+    margin-top: 24px;
   }
 </style>
 
