@@ -1,19 +1,26 @@
 ---
 import Layout from "../layouts/Layout.astro";
+
+const success = Astro.url.searchParams.get("success") === "true";
+const message = Astro.url.searchParams.get("message");
 ---
 
 <Layout title="Contact">
   <div class="container">
     <h1>Contact Us</h1>
-    <div class="form">
-      <div hidden id="error">
-        <p id="errorMessage"></p>
-      </div>
+    <form class="form" method="post" action="/api/contact">
+      {
+        message && (
+          <div class:list={["status", success ? "success" : "error"]}>
+            <p class="status-message">{message}</p>
+          </div>
+        )
+      }
       <input type="text" id="name" name="name" placeholder="Name" required />
       <input type="email" id="email" name="email" placeholder="Email" required />
-      <textarea id="txtArea" name="messsage" placeholder="Message"></textarea>
+      <textarea id="message" name="message" placeholder="Message" maxlength="1500"></textarea>
       <input id="submit" class="btn" type="submit" value="Send Mail" />
-    </div>
+    </form>
   </div>
 </Layout>
 
@@ -22,16 +29,24 @@ import Layout from "../layouts/Layout.astro";
     padding: 32px;
   }
 
-  #error {
-    background-color: rgb(255, 100, 100);
+  .status {
     max-width: 400px;
     width: 100%;
     border-radius: 4px;
+    padding: 10px;
   }
 
-  #errorMessage {
+  .status.success {
+    background: #3c6927;
+  }
+
+  .status.error {
+    background: #692727;
+  }
+
+  .status-message {
     text-align: center;
-    padding: 5px;
+    margin: 0;
     font-size: 16px;
     color: white;
     font-weight: #cccccc;
@@ -43,7 +58,6 @@ import Layout from "../layouts/Layout.astro";
     display: flex;
     align-items: center;
     flex-direction: column;
-    margin: 32px;
     gap: 16px;
   }
 
@@ -120,29 +134,3 @@ import Layout from "../layouts/Layout.astro";
     font-size: 32px;
   }
 </style>
-
-<script>
-  function sendEmail() {
-    fetch("/api/contact", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        name: (document.getElementById("name") as HTMLInputElement).value,
-        email: (document.getElementById("email") as HTMLInputElement).value,
-        message: (document.getElementById("txtArea") as HTMLInputElement).value
-      })
-    }).then(async res => {
-      if (!res.ok) {
-        document.getElementById("errorMessage").innerText = await res.text();
-        document.getElementById("error").toggleAttribute("hidden", false);
-      } else {
-        // location.reload();
-      }
-    });
-  }
-
-  document.getElementById("submit").addEventListener("click", () => {
-    console.log("submit");
-    sendEmail();
-  });
-</script>

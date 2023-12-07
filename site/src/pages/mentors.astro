@@ -1,45 +1,25 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Link from "../components/Link.astro";
 
-import type { ApiTeamMemberTeamMember } from "../lib/contentTypes";
+import type { ApiMentorMentor } from "../lib/contentTypes";
 import fetchApi from "../lib/strapi";
 import TeamMember from "../components/TeamMember.astro";
+import Link from "../components/Link.astro";
 
-const teamMembers = await fetchApi<ApiTeamMemberTeamMember[]>({
-  endpoint: "team-members", // the content type to fetch
+const mentors = await fetchApi<ApiMentorMentor[]>({
+  endpoint: "mentors", // the content type to fetch
   wrappedByKey: "data", // the key to unwrap the response
   query: { populate: "*" }
 });
-
-const teamMembersByYear = Array.from(
-  teamMembers.reduce((acc, member) => {
-    const year = member.attributes.year;
-    if (!acc.has(year)) acc.set(year, []);
-    acc.get(year).push(member);
-    return acc;
-  }, new Map())
-).sort(([yearA], [yearB]) => yearB - yearA);
 ---
 
-<Layout title="Team">
+<Layout title="Mentors">
   <div class="container">
-    <div class="heading">
-      <h1>Meet the Team</h1>
-      <select name="Year" id="year">
-        {
-          teamMembersByYear.map(([year]) => (
-            <option value={year}>
-              {year} - {year + 1}
-            </option>
-          ))
-        }
-      </select>
-    </div>
-    <Link text="Mentors" href="/mentors" />
+    <h1>Mentors</h1>
+    <Link text="Team" href="/team" />
     <div id="team-members" class="team-members">
       {
-        teamMembersByYear[0][1].map(member => (
+        mentors.map(member => (
           <TeamMember
             name={member.attributes.name}
             role={member.attributes.role}
@@ -56,36 +36,12 @@ const teamMembersByYear = Array.from(
 </Layout>
 
 <style>
-  .heading {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-  }
-
   h1 {
     font-size: 48px;
     font-weight: 700;
     line-height: 1;
     text-align: center;
     display: inline-block;
-  }
-
-  select {
-    margin-left: 10px;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid var(--accent);
-    border-radius: 4px;
-    background-color: var(--primary);
-    color: var(--accent);
-    font-family: "Space Mono", monospace;
-  }
-
-  select option {
-    position: relative;
-    background-color: var(--secondary);
   }
 
   .container {

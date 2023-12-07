@@ -1,0 +1,39 @@
+---
+import External from "./External.astro";
+
+interface Props {
+  text: string;
+  href: string;
+}
+
+const { text, href } = Astro.props;
+---
+
+<a href={href}>{text} <External /></a>
+
+<style>
+  a {
+    color: white;
+    position: relative;
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none;
+    margin: auto;
+  }
+
+  a::before {
+    content: "";
+    position: absolute;
+    display: block;
+    width: 0%;
+    height: 1px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--accent);
+    transition: width 0.3s ease;
+  }
+
+  a:hover::before {
+    width: 100%;
+  }
+</style>

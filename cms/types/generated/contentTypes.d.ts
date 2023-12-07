@@ -800,6 +800,38 @@ export interface ApiIndividualSponsorIndividualSponsor
   };
 }
 
+export interface ApiMentorMentor extends Schema.CollectionType {
+  collectionName: 'mentors';
+  info: {
+    singularName: 'mentor';
+    pluralName: 'mentors';
+    displayName: 'Mentor';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    name: Attribute.String;
+    role: Attribute.String;
+    avatar: Attribute.Media;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::mentor.mentor',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::mentor.mentor',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiTeamMemberTeamMember extends Schema.CollectionType {
   collectionName: 'team_members';
   info: {
@@ -857,6 +889,7 @@ declare module '@strapi/types' {
       'api::corporate-sponsor.corporate-sponsor': ApiCorporateSponsorCorporateSponsor;
       'api::home.home': ApiHomeHome;
       'api::individual-sponsor.individual-sponsor': ApiIndividualSponsorIndividualSponsor;
+      'api::mentor.mentor': ApiMentorMentor;
       'api::team-member.team-member': ApiTeamMemberTeamMember;
     }
   }
