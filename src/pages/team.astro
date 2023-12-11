@@ -6,20 +6,55 @@ import type { ApiTeamMemberTeamMember } from "../lib/contentTypes";
 import fetchApi from "../lib/strapi";
 import TeamMember from "../components/TeamMember.astro";
 
-const teamMembers = await fetchApi<ApiTeamMemberTeamMember[]>({
+const roleOrder = ["captain", "lead", "senior", "junior", "sophomore", "freshman"];
+const getMemberWeight = member => {
+  let weight = 0;
+
+  for (let i = roleOrder.length; i >= 0; i--) {
+    if (member.role?.toLowerCase().includes(roleOrder[i])) weight += i;
+  }
+
+  return weight;
+};
+
+let page = 0;
+let pageSize = 100;
+let years = [];
+
+while (true) {
+  const nextYears = await fetchApi<ApiTeamMemberTeamMember[]>({
+    endpoint: "team-members", // the content type to fetch
+    wrappedByKey: "data", // the key to unwrap the response
+    query: {
+      fields: "year",
+      sort: "year:desc",
+      "pagination[page]": page.toString(),
+      "pagination[pageSize]": pageSize.toString()
+    }
+  });
+
+  for (const nextYear of nextYears) {
+    if (!years.includes(nextYear.attributes.year)) years.push(nextYear.attributes.year);
+  }
+
+  if (nextYears.length < 100) {
+    break;
+  }
+
+  page++;
+}
+
+const currentMembers = await fetchApi<ApiTeamMemberTeamMember[]>({
   endpoint: "team-members", // the content type to fetch
   wrappedByKey: "data", // the key to unwrap the response
-  query: { populate: "*" }
+  query: {
+    populate: "*",
+    "filters[year]": years[0],
+    "pagination[limit]": "9999"
+  }
 });
 
-const teamMembersByYear = Array.from(
-  teamMembers.reduce((acc, member) => {
-    const year = member.attributes.year;
-    if (!acc.has(year)) acc.set(year, []);
-    acc.get(year).push(member);
-    return acc;
-  }, new Map())
-).sort(([yearA], [yearB]) => yearB - yearA);
+currentMembers.sort((memberA, memberB) => getMemberWeight(memberA) - getMemberWeight(memberB));
 ---
 
 <Layout title="Team">
@@ -28,7 +63,7 @@ const teamMembersByYear = Array.from(
       <h1>Meet the Team</h1>
       <select name="Year" id="year">
         {
-          teamMembersByYear.map(([year]) => (
+          years.map(year => (
             <option value={year}>
               {year} - {year + 1}
             </option>
@@ -39,7 +74,7 @@ const teamMembersByYear = Array.from(
     <Link text="View mentors" href="/mentors" />
     <div id="team-members" class="team-members">
       {
-        teamMembersByYear[0][1].map(member => (
+        currentMembers.map(member => (
           <TeamMember
             name={member.attributes.name}
             role={member.attributes.role}
