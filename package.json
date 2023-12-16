@@ -12,6 +12,7 @@
   "dependencies": {
     "@astrojs/node": "^6.0.3",
     "astro": "^3.3.2",
+    "execa": "^8.0.1",
     "jdenticon": "^3.2.0",
     "marked": "^9.1.5",
     "resend": "^2.0.0",
