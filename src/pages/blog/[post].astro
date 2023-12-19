@@ -20,8 +20,14 @@ if (!post) {
   throw new Response("Not found", { status: 404 });
 }
 
-export const getStaticPaths = (() => {
-  return [];
+export const getStaticPaths = (async () => {
+  const posts = await fetchApi<ApiBlogPostBlogPost[]>({
+    endpoint: "blog-posts", // the content type to fetch
+    wrappedByKey: "data", // the key to unwrap the response
+    query: { populate: "*" }
+  });
+
+  return posts.map(post => ({ params: { post: post.attributes.slug } }));
 }) satisfies GetStaticPaths;
 
 const html = marked.parse(post.attributes.content);

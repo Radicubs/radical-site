@@ -146,7 +146,7 @@ currentMembers.sort((memberA, memberB) => getMemberWeight(memberA) - getMemberWe
 
   yearSelect.addEventListener("change", () => {
     const year = yearSelect.value;
-    fetch(`/api/team-members/${encodeURIComponent(year)}`)
+    fetch(`/api/team-members/${encodeURIComponent(year)}/`)
       .then(res => res.text())
       .then(res => (teamMembersElement.innerHTML = res));
   });
