@@ -18,7 +18,7 @@ const getMemberWeight = member => {
 };
 
 let page = 0;
-let pageSize = 100;
+let pageSize = 1000;
 let years = [];
 
 while (true) {
@@ -37,7 +37,7 @@ while (true) {
     if (!years.includes(nextYear.attributes.year)) years.push(nextYear.attributes.year);
   }
 
-  if (nextYears.length < 100) {
+  if (nextYears.length < pageSize) {
     break;
   }
 
@@ -50,7 +50,7 @@ const currentMembers = await fetchApi<ApiTeamMemberTeamMember[]>({
   query: {
     populate: "*",
     "filters[year]": years[0],
-    "pagination[limit]": "9999"
+    "pagination[limit]": pageSize.toString()
   }
 });
 

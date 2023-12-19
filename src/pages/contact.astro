@@ -1,21 +1,14 @@
 ---
 import Layout from "../layouts/Layout.astro";
-
-const success = Astro.url.searchParams.get("success") === "true";
-const message = Astro.url.searchParams.get("message");
 ---
 
 <Layout title="Contact">
   <div class="container">
     <h1>Contact Us</h1>
-    <form class="form" method="post" action="/api/contact">
-      {
-        message && (
-          <div class:list={["status", success ? "success" : "error"]}>
-            <p class="status-message">{message}</p>
-          </div>
-        )
-      }
+    <form class="form" method="post" action={import.meta.env.CONTACT_API_URL}>
+      <div id="status" class="status hidden">
+        <p id="status-message" class="status-message"></p>
+      </div>
       <input type="text" id="name" name="name" placeholder="Name" required />
       <input type="email" id="email" name="email" placeholder="Email" required />
       <textarea id="message" name="message" placeholder="Message" maxlength="1500"></textarea>
@@ -23,6 +16,26 @@ const message = Astro.url.searchParams.get("message");
     </form>
   </div>
 </Layout>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const success = params.get("success");
+  const message = params.get("message");
+
+  if (success && message) {
+    const $status = document.getElementById("status");
+    const $message = document.getElementById("status-message");
+
+    if (success === "true") {
+      $status.classList.add("success");
+    } else {
+      $status.classList.add("error");
+    }
+
+    $status.classList.remove("hidden");
+    $message.innerText = message;
+  }
+</script>
 
 <style>
   .container {
@@ -34,6 +47,10 @@ const message = Astro.url.searchParams.get("message");
     width: 100%;
     border-radius: 4px;
     padding: 10px;
+  }
+
+  .status.hidden {
+    display: none;
   }
 
   .status.success {
