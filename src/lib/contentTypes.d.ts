@@ -578,6 +578,7 @@ export interface ApiHomeHome extends Schema.SingleType {
     image: Attribute.Media;
     name: Attribute.String;
     description: Attribute.String;
+    keywords: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;

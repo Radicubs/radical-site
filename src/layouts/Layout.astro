@@ -1,19 +1,33 @@
 ---
+import type { ApiHomeHome } from "../lib/contentTypes";
+import fetchApi from "../lib/strapi";
+
 interface Props {
   title: string;
 }
 
 const { title } = Astro.props;
+
+const home = await fetchApi<ApiHomeHome>({
+  endpoint: "home", // the content type to fetch
+  wrappedByKey: "data", // the key to unwrap the response
+  query: { populate: "*" }
+});
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Astro description" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>Radicubs | {title}</title>
+    <meta name="site_name" content="radicubs.com" />
+    <meta name="title" content={`Radicubs | ${title}`} />
+    <meta name="description" content={home.attributes.description} />
+    <meta name="theme-color" content="#8efc5e" />
+    <meta name="image" content={import.meta.env.STRAPI_URL + home.attributes.image.data.attributes.url} />
+    <meta name="keywords" content={home.attributes.keywords} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
