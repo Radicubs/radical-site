@@ -3,58 +3,22 @@ import Layout from "../layouts/Layout.astro";
 import Link from "../components/Link.astro";
 
 import type { ApiTeamMemberTeamMember } from "../lib/contentTypes";
+import { getYears, sortMembers } from "../lib/team";
 import fetchApi from "../lib/strapi";
 import TeamMember from "../components/TeamMember.astro";
 
-const roleOrder = ["captain", "lead", "senior", "junior", "sophomore", "freshman"];
-const getMemberWeight = member => {
-  let weight = 0;
-
-  for (let i = roleOrder.length; i >= 0; i--) {
-    if (member.role?.toLowerCase().includes(roleOrder[i])) weight += i;
-  }
-
-  return weight;
-};
-
-let page = 0;
-let pageSize = 1000;
-let years = [];
-
-while (true) {
-  const nextYears = await fetchApi<ApiTeamMemberTeamMember[]>({
-    endpoint: "team-members", // the content type to fetch
-    wrappedByKey: "data", // the key to unwrap the response
-    query: {
-      fields: "year",
-      sort: "year:desc",
-      "pagination[page]": page.toString(),
-      "pagination[pageSize]": pageSize.toString()
-    }
-  });
-
-  for (const nextYear of nextYears) {
-    if (!years.includes(nextYear.attributes.year)) years.push(nextYear.attributes.year);
-  }
-
-  if (nextYears.length < pageSize) {
-    break;
-  }
-
-  page++;
-}
-
+const years = await getYears();
 const currentMembers = await fetchApi<ApiTeamMemberTeamMember[]>({
   endpoint: "team-members", // the content type to fetch
   wrappedByKey: "data", // the key to unwrap the response
   query: {
     populate: "*",
-    "filters[year]": years[0],
-    "pagination[limit]": pageSize.toString()
+    "filters[year]": years[0].toString(),
+    "pagination[limit]": "1000"
   }
 });
 
-currentMembers.sort((memberA, memberB) => getMemberWeight(memberA) - getMemberWeight(memberB));
+sortMembers(currentMembers);
 ---
 
 <Layout title="Team">
