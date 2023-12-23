@@ -10,12 +10,15 @@ if (!slug) {
   throw new Response("Not found", { status: 404 });
 }
 
-const [post] = await fetchApi<ApiBlogPostBlogPost[]>({
+console.log(slug);
+
+const posts = await fetchApi<ApiBlogPostBlogPost[]>({
   endpoint: "blog-posts", // the content type to fetch
   wrappedByKey: "data", // the key to unwrap the response
-  query: { populate: "*", "filter[slug][$eq]": slug }
+  query: { populate: "*", "filters[slug][$eq]": slug }
 });
 
+const post = posts[0];
 if (!post) {
   throw new Response("Not found", { status: 404 });
 }
@@ -96,9 +99,53 @@ const html = marked.parse(post.attributes.content);
 </style>
 
 <style is:global>
+  article {
+    color: lightgray;
+    font-size: 18px;
+  }
+
   article a {
     font-weight: bold;
     font-family: "Space Mono", monospace;
     color: var(--accent);
+  }
+
+  article img {
+    width: 100%;
+    border-radius: 25px;
+  }
+
+  article h1,
+  article h2,
+  article h3,
+  article h4,
+  article h5,
+  article h6 {
+    font-family: "Space Mono", monospace;
+    color: var(--accent);
+  }
+
+  article h1 {
+    font-size: 32px;
+  }
+
+  article h2 {
+    font-size: 28px;
+  }
+
+  article h3 {
+    font-size: 24px;
+  }
+
+  article h4 {
+    font-size: 20px;
+  }
+
+  article h5 {
+    font-size: 16px;
+  }
+
+  article h6 {
+    font-size: 12px;
   }
 </style>

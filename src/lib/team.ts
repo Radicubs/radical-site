@@ -6,7 +6,7 @@ const getMemberWeight = (member: ApiTeamMemberTeamMember) => {
   let weight = 0;
 
   for (let i = 0; i < roleOrder.length; i++) {
-    if (member.attributes.role?.toLowerCase().includes(roleOrder[i])) weight += i;
+    if (member.attributes.role?.toLowerCase().includes(roleOrder[i])) weight += i + 1;
   }
 
   return weight;
