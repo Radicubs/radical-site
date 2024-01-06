@@ -1,7 +1,7 @@
 ---
 import type { GetStaticPaths } from "astro";
 import type { ApiTeamMemberTeamMember } from "../../../lib/contentTypes";
-import { getYears, sortMembers } from "../../../lib/team";
+import { getTeamMembers, getYears, sortMembers } from "../../../lib/team";
 import fetchApi from "../../../lib/strapi";
 import TeamMember from "../../../components/TeamMember.astro";
 
@@ -10,18 +10,12 @@ export const getStaticPaths = (async () => {
   return years.map(year => ({ params: { year: year.toString() } }));
 }) satisfies GetStaticPaths;
 
-const year = Astro.params.year;
+const year = parseInt(Astro.params.year);
 if (!year) {
   throw new Response("Not found", { status: 404 });
 }
 
-const teamMembers = await fetchApi<ApiTeamMemberTeamMember[]>({
-  endpoint: "team-members", // the content type to fetch
-  wrappedByKey: "data", // the key to unwrap the response
-  query: { populate: "*", "filters[year][$eq]": year }
-});
-
-sortMembers(teamMembers);
+const teamMembers = await getTeamMembers(year);
 ---
 
 {

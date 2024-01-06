@@ -46,3 +46,20 @@ export async function getYears() {
 
   return years;
 }
+
+export async function getTeamMembers(year: number) {
+  const teamMembers = await fetchApi<ApiTeamMemberTeamMember[]>({
+    endpoint: "team-members", // the content type to fetch
+    wrappedByKey: "data", // the key to unwrap the response
+    query: {
+      populate: "*",
+      sort: "name:asc",
+      "filters[year]": year.toString(),
+      "pagination[limit]": "1000"
+    }
+  });
+
+  sortMembers(teamMembers);
+
+  return teamMembers;
+}
