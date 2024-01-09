@@ -29,6 +29,9 @@ const individualSponsors = await fetchApi<ApiIndividualSponsorIndividualSponsor[
                 src={import.meta.env.STRAPI_URL + sponsor.attributes.logo.data.attributes.url}
                 alt={sponsor.attributes.name + " Logo"}
                 width="250"
+                height={
+                  (sponsor.attributes.logo.data.attributes.height * 250) / sponsor.attributes.logo.data.attributes.width
+                }
               />
             </a>
           </div>

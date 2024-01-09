@@ -1,8 +1,6 @@
 ---
 import type { GetStaticPaths } from "astro";
-import type { ApiTeamMemberTeamMember } from "../../../lib/contentTypes";
-import { getTeamMembers, getYears, sortMembers } from "../../../lib/team";
-import fetchApi from "../../../lib/strapi";
+import { getTeamMembers, getYears } from "../../../lib/team";
 import TeamMember from "../../../components/TeamMember.astro";
 
 export const getStaticPaths = (async () => {

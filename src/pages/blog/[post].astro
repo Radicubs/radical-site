@@ -4,21 +4,20 @@ import Layout from "../../layouts/Layout.astro";
 import type { ApiBlogPostBlogPost } from "../../lib/contentTypes";
 import fetchApi from "../../lib/strapi";
 import { marked } from "marked";
+import { slugify } from "../../lib/blog";
 
 const slug = Astro.params.post;
 if (!slug) {
   throw new Response("Not found", { status: 404 });
 }
 
-console.log(slug);
-
 const posts = await fetchApi<ApiBlogPostBlogPost[]>({
   endpoint: "blog-posts", // the content type to fetch
   wrappedByKey: "data", // the key to unwrap the response
-  query: { populate: "*", "filters[slug][$eq]": slug }
+  query: { populate: "*" }
 });
 
-const post = posts[0];
+const post = posts.find(post => slugify(post.attributes.title) === slug);
 if (!post) {
   throw new Response("Not found", { status: 404 });
 }
@@ -30,7 +29,7 @@ export const getStaticPaths = (async () => {
     query: { populate: "*" }
   });
 
-  return posts.map(post => ({ params: { post: post.attributes.slug } }));
+  return posts.map(post => ({ params: { post: slugify(post.attributes.title) } }));
 }) satisfies GetStaticPaths;
 
 const html = marked.parse(post.attributes.content);
