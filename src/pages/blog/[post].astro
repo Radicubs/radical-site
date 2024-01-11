@@ -32,6 +32,16 @@ export const getStaticPaths = (async () => {
   return posts.map(post => ({ params: { post: slugify(post.attributes.title) } }));
 }) satisfies GetStaticPaths;
 
+marked.use({
+  renderer: {
+    image(href, title, text) {
+      return text
+        ? `<figure><img src="${href}?f=webp&w=736" alt="${text}" /><figcaption>${text}</figcaption></figure>`
+        : `<img src="${href}?f=webp&w=736" alt="${text}" />`;
+    }
+  }
+});
+
 const html = marked.parse(post.attributes.content);
 ---
 
@@ -72,7 +82,7 @@ const html = marked.parse(post.attributes.content);
 
   .title {
     color: var(--accent);
-    font-size: 48px;
+    font-size: 32px;
     margin-top: 4px;
     margin-bottom: 0;
     font-family: "Space Mono", monospace;
@@ -99,7 +109,7 @@ const html = marked.parse(post.attributes.content);
 
 <style is:global>
   article {
-    color: lightgray;
+    color: rgb(220, 220, 220);
     font-size: 18px;
   }
 
@@ -109,7 +119,8 @@ const html = marked.parse(post.attributes.content);
     color: var(--accent);
   }
 
-  article img {
+  article img,
+  article figure {
     width: 100%;
     border-radius: 25px;
   }
@@ -146,5 +157,22 @@ const html = marked.parse(post.attributes.content);
 
   article h6 {
     font-size: 12px;
+  }
+
+  article hr {
+    border: 1px solid var(--tertiary);
+    margin: 16px 0;
+  }
+
+  article figure {
+    margin: 0;
+  }
+
+  article figure figcaption {
+    font-family: "Space Mono", monospace;
+    color: darkgray;
+    font-size: 16px;
+    margin-top: 4px;
+    text-align: center;
   }
 </style>

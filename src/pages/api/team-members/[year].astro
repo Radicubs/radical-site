@@ -21,9 +21,7 @@ const teamMembers = await getTeamMembers(year);
     <TeamMember
       name={member.attributes.name}
       role={member.attributes.role}
-      photo_url={
-        member.attributes.avatar.data ? import.meta.env.STRAPI_URL + member.attributes.avatar.data.attributes.url : null
-      }
+      photo_url={member.attributes.avatar.data?.attributes.url}
     />
   ))
 }

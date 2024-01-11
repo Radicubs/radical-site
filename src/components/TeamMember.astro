@@ -1,4 +1,5 @@
 ---
+import Image from "./Image.astro";
 import Jdenticon from "./Jdenticon.astro";
 
 interface Props {
@@ -14,7 +15,7 @@ const { name, role, photo_url } = Astro.props;
   <div>
     {
       photo_url ? (
-        <img class="photo" src={photo_url} alt={name} width="128" height="128" />
+        <Image class="photo" src={photo_url} alt={name} width={128} height={128} />
       ) : (
         <Jdenticon seed={name} size={128} />
       )
