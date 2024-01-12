@@ -1,14 +1,9 @@
 ---
+import CorporateSponsors from "../components/CorporateSponsors.astro";
 import Image from "../components/Image.astro";
 import Layout from "../layouts/Layout.astro";
-import type { ApiCorporateSponsorCorporateSponsor, ApiIndividualSponsorIndividualSponsor } from "../lib/contentTypes";
+import type { ApiIndividualSponsorIndividualSponsor } from "../lib/contentTypes";
 import fetchApi from "../lib/strapi";
-
-const corporateSponsors = await fetchApi<ApiCorporateSponsorCorporateSponsor[]>({
-  endpoint: "corporate-sponsors", // the content type to fetch
-  wrappedByKey: "data", // the key to unwrap the response
-  query: { populate: "*" }
-});
 
 const individualSponsors = await fetchApi<ApiIndividualSponsorIndividualSponsor[]>({
   endpoint: "individual-sponsors", // the content type to fetch
@@ -21,21 +16,7 @@ const individualSponsors = await fetchApi<ApiIndividualSponsorIndividualSponsor[
   <div class="container">
     <h2>Corporate Sponsors</h2>
     <hr />
-    <div class="corporate-sponsors">
-      {
-        corporateSponsors.map(sponsor => (
-          <div class="card">
-            <a href={sponsor.attributes.link} target="_blank" rel="noopener noreferrer" title={sponsor.attributes.name}>
-              <Image
-                src={sponsor.attributes.logo.data.attributes.url}
-                alt={sponsor.attributes.name + " Logo"}
-                width={250}
-              />
-            </a>
-          </div>
-        ))
-      }
-    </div>
+    <CorporateSponsors />
     <h2>Individual Sponsors</h2>
     <hr />
     <ul class="individual-sponsors">
@@ -66,20 +47,6 @@ const individualSponsors = await fetchApi<ApiIndividualSponsorIndividualSponsor[
     max-width: 100px;
     margin-left: 0;
     margin-bottom: 20px;
-  }
-
-  .corporate-sponsors {
-    columns: 298px;
-    gap: 20px;
-  }
-
-  .corporate-sponsors > * {
-    margin: 20px 0;
-  }
-
-  .corporate-sponsors img {
-    display: block;
-    margin: auto;
   }
 
   .individual-sponsors {

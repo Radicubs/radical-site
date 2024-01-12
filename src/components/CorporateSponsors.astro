@@ -1,0 +1,43 @@
+---
+import type { ApiCorporateSponsorCorporateSponsor } from "../lib/contentTypes";
+import fetchApi from "../lib/strapi";
+import Image from "./Image.astro";
+
+const corporateSponsors = await fetchApi<ApiCorporateSponsorCorporateSponsor[]>({
+  endpoint: "corporate-sponsors", // the content type to fetch
+  wrappedByKey: "data", // the key to unwrap the response
+  query: { populate: "*" }
+});
+---
+
+<section class="corporate-sponsors">
+  {
+    corporateSponsors.map(sponsor => (
+      <div class="card">
+        <a href={sponsor.attributes.link} target="_blank" rel="noopener noreferrer" title={sponsor.attributes.name}>
+          <Image
+            src={sponsor.attributes.logo.data.attributes.url}
+            alt={sponsor.attributes.name + " Logo"}
+            width={250}
+          />
+        </a>
+      </div>
+    ))
+  }
+</section>
+
+<style>
+  .corporate-sponsors {
+    columns: 298px;
+    gap: 20px;
+  }
+
+  .corporate-sponsors > * {
+    margin: 20px 0;
+  }
+
+  .corporate-sponsors img {
+    display: block;
+    margin: auto;
+  }
+</style>

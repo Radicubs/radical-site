@@ -1,0 +1,89 @@
+---
+import { slugify } from "../lib/blog";
+import type { ApiBlogPostBlogPost } from "../lib/contentTypes";
+import Image from "./Image.astro";
+
+interface Props {
+  posts: ApiBlogPostBlogPost[];
+}
+
+const { posts } = Astro.props;
+---
+
+<section class="posts">
+  {
+    posts.map(post => (
+      <a class="post" href={`/blog/${slugify(post.attributes.title)}`}>
+        <Image
+          class="image"
+          height={200}
+          alt={post.attributes.title + " cover"}
+          src={post.attributes.cover.data.attributes.url}
+        />
+        <div class="content">
+          <div class="date">
+            {new Date(post.attributes.date).toLocaleString("en-CA", {
+              month: "long",
+              day: "numeric",
+              year: "numeric"
+            })}
+          </div>
+          <div class="title">{post.attributes.title}</div>
+          <div class="description">{post.attributes.description}</div>
+        </div>
+      </a>
+    ))
+  }
+</section>
+
+<style>
+  .posts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-top: 32px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .post {
+    color: white;
+    background-color: var(--secondary);
+    width: 100%;
+    border-radius: 10px;
+    max-width: 360px;
+    display: block;
+    text-decoration: none;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .image {
+    width: 100%;
+    height: 200px;
+    border-radius: 10px;
+    object-fit: cover;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .date {
+    color: darkgray;
+    font-family: "Space Mono", monospace;
+    font-size: 14px;
+  }
+
+  .title {
+    font-weight: bold;
+    font-size: 24px;
+    margin-top: 4px;
+  }
+
+  .description {
+    color: lightgray;
+    font-size: 16px;
+    margin-top: 4px;
+  }
+</style>
