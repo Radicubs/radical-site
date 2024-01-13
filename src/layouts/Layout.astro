@@ -42,88 +42,64 @@ const home = await fetchApi<ApiHomeHome>({
     <div id="root">
       <slot />
     </div>
-    <!-- ❗ DONT YOU DARE FUCKING UNCOMMENT THIS I WILL FIND YOU ❗ -->
-    <!-- <footer>
-      <div>The Radicubs Robotics Team is recognized as a non-profit organization under a 501(c)(3).</div>
-    </footer> -->
-    <style is:global>
-      h1 {
-        font-size: 64px;
-        font-weight: 700;
-        margin-top: 0;
-        margin-bottom: 10px;
-        font-family: "Space Mono", monospace;
-        color: var(--accent);
-      }
-
-      :root {
-        --primary: #101215;
-        --secondary: #1b1d23;
-        --tertiary: #2c303a;
-
-        --accent: #8efc5e;
-        --accent-dark: green;
-        --accent-gradient: linear-gradient(90deg, #8efc5e 0%, #2c8c03 100%);
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      html,
-      body {
-        width: 100%;
-        height: 100%;
-        background-color: var(--primary);
-      }
-
-      html {
-        font-family: Inter, sans-serif;
-        color: white;
-      }
-
-      body {
-        margin: 0;
-      }
-
-      #root {
-        width: 100%;
-        height: 100%;
-        padding-top: 58px;
-      }
-
-      code {
-        font-family:
-          Menlo,
-          Monaco,
-          Lucida Console,
-          Liberation Mono,
-          DejaVu Sans Mono,
-          Bitstream Vera Sans Mono,
-          Courier New,
-          monospace;
-      }
-
-      footer {
-        width: 100%;
-        text-align: center;
-        color: white;
-      }
-
-      @keyframes details-show {
-        0% {
-          opacity: 0;
-          transform: var(--details-translate, translateY(-0.5em));
-        }
-      }
-
-      details[open] > :not(summary) {
-        animation: details-show 0.15s ease-in-out;
-      }
-
-      details > summary {
-        cursor: pointer;
-      }
-    </style>
   </body>
 </html>
+
+<style is:global>
+  h1 {
+    font-size: 64px;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-family: "Space Mono", monospace;
+    color: var(--accent);
+  }
+
+  :root {
+    --primary: #101215;
+    --secondary: #1b1d23;
+    --tertiary: #2c303a;
+
+    --accent: #8efc5e;
+    --accent-dark: green;
+    --accent-gradient: linear-gradient(90deg, #8efc5e 0%, #2c8c03 100%);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary);
+  }
+
+  html {
+    font-family: Inter, sans-serif;
+    color: white;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  #root {
+    width: 100%;
+    height: 100%;
+    padding-top: 58px;
+  }
+
+  code {
+    font-family:
+      Menlo,
+      Monaco,
+      Lucida Console,
+      Liberation Mono,
+      DejaVu Sans Mono,
+      Bitstream Vera Sans Mono,
+      Courier New,
+      monospace;
+  }
+</style>

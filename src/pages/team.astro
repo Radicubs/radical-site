@@ -23,9 +23,9 @@ const currentMembers = await getTeamMembers(years[0]);
           ))
         }
       </select>
-    </div>
-    <div class="mentors">
-      <Link href="/mentors">View mentors <External /></Link>
+      <div class="view-mentors">
+        <Link href="/mentors">View mentors <External /></Link>
+      </div>
     </div>
     <div id="team-members" class="team-members">
       {
@@ -42,10 +42,11 @@ const currentMembers = await getTeamMembers(years[0]);
 </Layout>
 
 <style>
-  .mentors {
+  .view-mentors {
+    width: 100%;
     font-size: 20px;
     font-weight: bold;
-    margin: auto;
+    text-align: center;
   }
 
   .heading {
@@ -65,7 +66,6 @@ const currentMembers = await getTeamMembers(years[0]);
   }
 
   select {
-    margin-left: 10px;
     padding: 10px;
     font-size: 16px;
     border: 1px solid var(--accent);
