@@ -1,11 +1,10 @@
 ---
 import BlogPosts from "../components/BlogPosts.astro";
-import BlogPost from "../components/BlogPosts.astro";
 import CorporateSponsors from "../components/CorporateSponsors.astro";
-import Image from "../components/Image.astro";
 import Layout from "../layouts/Layout.astro";
 import type { ApiBlogPostBlogPost, ApiHomeHome } from "../lib/contentTypes";
 import fetchApi from "../lib/strapi";
+import Image from "../components/Image.astro";
 
 const home = await fetchApi<ApiHomeHome>({
   endpoint: "home", // the content type to fetch
@@ -21,13 +20,6 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
 ---
 
 <Layout title="Home">
-  <script is:inline>
-    function drive() {
-      const bobot = document.getElementById("bobot");
-      bobot.classList.add("drive");
-      setTimeout(() => bobot.classList.remove("drive"), 5000);
-    }
-  </script>
   <header>
     <div class="darken"></div>
     <div class="content">
@@ -40,7 +32,6 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
         <a href="https://youtube.com/channel/UCNuzQPRdm0OBcJaWgX8z6eQ"><i class="fa-brands fa-youtube"></i></a>
       </div>
     </div>
-    <img id="bobot" src="/bobot.png" alt="bobot" class="bobot" />
   </header>
   <div class="container">
     <div class="section-heading">
@@ -59,6 +50,19 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
       Header image designed by <a href="http://www.freepik.com" target="_blank" rel="noopener noreferrer">Freepik</a>
     </footer>
   </div>
+
+  <!-- bobot -->
+  <Image id="bobot" class="bobot" src={home.attributes.bobot.data.attributes.url} alt="bobot" />
+  <script is:inline>
+    const bobot = document.getElementById("bobot");
+
+    function drive() {
+      const clone = bobot.cloneNode();
+      clone.classList.add("drive");
+      document.body.appendChild(clone);
+      setTimeout(() => clone.remove(), 5000);
+    }
+  </script>
 </Layout>
 
 <style is:global>
@@ -72,14 +76,6 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
     max-width: 1200px;
     margin: auto;
     padding: 32px;
-  }
-
-  h2 {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 0px;
-    font-family: "Space Mono", monospace;
-    color: var(--accent);
   }
 
   hr {
@@ -118,19 +114,6 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
     z-index: 2;
   }
 
-  h1 {
-    font-size: 64px;
-    font-weight: 700;
-    margin: 0;
-    font-family: "Space Mono", monospace;
-    color: var(--accent);
-  }
-
-  .subheading {
-    color: lightgray;
-    font-size: 20px;
-  }
-
   .socials {
     margin-top: 32px;
     font-size: 32px;
@@ -140,6 +123,30 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
 
   .socials > a {
     color: var(--accent);
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 32px;
+    line-height: 1.5;
+    color: lightgray;
+  }
+
+  h2 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 0px;
+    font-family: "Space Mono", monospace;
+    color: var(--accent);
+  }
+
+  .subheading {
+    color: lightgray;
+    font-size: 20px;
+  }
+
+  footer > a {
+    color: lightgray;
   }
 
   .bobot {
@@ -164,16 +171,5 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
     100% {
       right: 100vw;
     }
-  }
-
-  footer {
-    text-align: center;
-    margin-top: 32px;
-    line-height: 1.5;
-    color: lightgray;
-  }
-
-  footer > a {
-    color: lightgray;
   }
 </style>

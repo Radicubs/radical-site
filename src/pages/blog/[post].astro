@@ -5,6 +5,7 @@ import type { ApiBlogPostBlogPost } from "../../lib/contentTypes";
 import fetchApi from "../../lib/strapi";
 import { marked } from "marked";
 import { slugify } from "../../lib/blog";
+import JumpTop from "../../components/JumpTop.astro";
 
 const slug = Astro.params.post;
 if (!slug) {
@@ -60,6 +61,7 @@ const html = marked.parse(post.attributes.content);
     />
     <article set:html={html} />
   </div>
+  <JumpTop />
 </Layout>
 
 <style>
