@@ -6,6 +6,7 @@ import fetchApi from "../../lib/strapi";
 import { marked } from "marked";
 import { slugify } from "../../lib/blog";
 import JumpTop from "../../components/JumpTop.astro";
+import { BlocksRenderer } from "@strapi/blocks-react-renderer";
 
 const slug = Astro.params.post;
 if (!slug) {
@@ -42,8 +43,6 @@ marked.use({
     }
   }
 });
-
-const html = marked.parse(post.attributes.content);
 ---
 
 <Layout title={post.attributes.title}>
@@ -59,122 +58,130 @@ const html = marked.parse(post.attributes.content);
       alt={post.attributes.title + " cover"}
       class="cover"
     />
-    <article set:html={html} />
+    <article>
+      {
+        post.attributes.contentNew ? (
+          <BlocksRenderer content={post.attributes.contentNew} />
+        ) : (
+          <Fragment set:html={marked.parse(post.attributes.content)} />
+        )
+      }
+    </article>
+    <JumpTop />
   </div>
-  <JumpTop />
+
+  <style>
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    hr {
+      border: 1px solid var(--tertiary);
+      margin: 16px 0;
+    }
+
+    .date {
+      color: darkgray;
+      font-family: "Space Mono", monospace;
+      font-size: 16px;
+    }
+
+    .title {
+      color: var(--accent);
+      font-size: 32px;
+      margin-top: 4px;
+      margin-bottom: 0;
+      font-family: "Space Mono", monospace;
+    }
+
+    .description {
+      color: lightgray;
+      font-family: "Space Mono", monospace;
+      font-size: 18px;
+      margin-top: 4px;
+      margin-bottom: 0;
+    }
+
+    img {
+      width: 100%;
+      min-height: 200px;
+      max-height: 400px;
+      margin: 25px auto;
+      border-radius: 25px;
+      object-fit: cover;
+      aspect-ratio: 2/1;
+    }
+  </style>
+
+  <style is:global>
+    article {
+      color: rgb(220, 220, 220);
+      font-size: 18px;
+    }
+
+    article a {
+      font-weight: bold;
+      font-family: "Space Mono", monospace;
+      color: var(--accent);
+    }
+
+    article img,
+    article figure {
+      width: 100%;
+      border-radius: 25px;
+    }
+
+    article h1,
+    article h2,
+    article h3,
+    article h4,
+    article h5,
+    article h6 {
+      font-family: "Space Mono", monospace;
+      color: var(--accent);
+    }
+
+    article h1 {
+      font-size: 32px;
+    }
+
+    article h2 {
+      font-size: 28px;
+    }
+
+    article h3 {
+      font-size: 24px;
+    }
+
+    article h4 {
+      font-size: 20px;
+    }
+
+    article h5 {
+      font-size: 16px;
+    }
+
+    article h6 {
+      font-size: 12px;
+    }
+
+    article hr {
+      border: 1px solid var(--tertiary);
+      margin: 16px 0;
+    }
+
+    article figure {
+      margin: 0;
+    }
+
+    article figure figcaption {
+      font-family: "Space Mono", monospace;
+      color: darkgray;
+      font-size: 16px;
+      margin-top: 4px;
+      text-align: center;
+    }
+  </style>
 </Layout>
-
-<style>
-  .container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 32px;
-  }
-
-  hr {
-    border: 1px solid var(--tertiary);
-    margin: 16px 0;
-  }
-
-  .date {
-    color: darkgray;
-    font-family: "Space Mono", monospace;
-    font-size: 16px;
-  }
-
-  .title {
-    color: var(--accent);
-    font-size: 32px;
-    margin-top: 4px;
-    margin-bottom: 0;
-    font-family: "Space Mono", monospace;
-  }
-
-  .description {
-    color: lightgray;
-    font-family: "Space Mono", monospace;
-    font-size: 18px;
-    margin-top: 4px;
-    margin-bottom: 0;
-  }
-
-  img {
-    width: 100%;
-    min-height: 200px;
-    max-height: 400px;
-    margin: 25px auto;
-    border-radius: 25px;
-    object-fit: cover;
-    aspect-ratio: 2/1;
-  }
-</style>
-
-<style is:global>
-  article {
-    color: rgb(220, 220, 220);
-    font-size: 18px;
-  }
-
-  article a {
-    font-weight: bold;
-    font-family: "Space Mono", monospace;
-    color: var(--accent);
-  }
-
-  article img,
-  article figure {
-    width: 100%;
-    border-radius: 25px;
-  }
-
-  article h1,
-  article h2,
-  article h3,
-  article h4,
-  article h5,
-  article h6 {
-    font-family: "Space Mono", monospace;
-    color: var(--accent);
-  }
-
-  article h1 {
-    font-size: 32px;
-  }
-
-  article h2 {
-    font-size: 28px;
-  }
-
-  article h3 {
-    font-size: 24px;
-  }
-
-  article h4 {
-    font-size: 20px;
-  }
-
-  article h5 {
-    font-size: 16px;
-  }
-
-  article h6 {
-    font-size: 12px;
-  }
-
-  article hr {
-    border: 1px solid var(--tertiary);
-    margin: 16px 0;
-  }
-
-  article figure {
-    margin: 0;
-  }
-
-  article figure figcaption {
-    font-family: "Space Mono", monospace;
-    color: darkgray;
-    font-size: 16px;
-    margin-top: 4px;
-    text-align: center;
-  }
-</style>

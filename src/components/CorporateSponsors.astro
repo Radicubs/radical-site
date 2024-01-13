@@ -12,17 +12,19 @@ const corporateSponsors = await fetchApi<ApiCorporateSponsorCorporateSponsor[]>(
 
 <section class="corporate-sponsors">
   {
-    corporateSponsors.map(sponsor => (
-      <div class="card">
-        <a href={sponsor.attributes.link} target="_blank" rel="noopener noreferrer" title={sponsor.attributes.name}>
-          <Image
-            src={sponsor.attributes.logo.data.attributes.url}
-            alt={sponsor.attributes.name + " Logo"}
-            width={250}
-          />
-        </a>
-      </div>
-    ))
+    corporateSponsors
+      .sort((a, b) => a.attributes.logo.data.attributes.height - b.attributes.logo.data.attributes.height)
+      .map(sponsor => (
+        <div class="card">
+          <a href={sponsor.attributes.link} target="_blank" rel="noopener noreferrer" title={sponsor.attributes.name}>
+            <Image
+              src={sponsor.attributes.logo.data.attributes.url}
+              alt={sponsor.attributes.name + " Logo"}
+              width={250}
+            />
+          </a>
+        </div>
+      ))
   }
 </section>
 
