@@ -5,6 +5,7 @@ import Layout from "../layouts/Layout.astro";
 import type { ApiBlogPostBlogPost, ApiHomeHome } from "../lib/contentTypes";
 import fetchApi from "../lib/strapi";
 import Image from "../components/Image.astro";
+import Countdown from "../components/Countdown.astro";
 
 const home = await fetchApi<ApiHomeHome>({
   endpoint: "home", // the content type to fetch
@@ -31,6 +32,7 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
         <a href="https://www.tiktok.com/@theradicubs"><i class="fa-brands fa-tiktok"></i></a>
         <a href="https://youtube.com/channel/UCNuzQPRdm0OBcJaWgX8z6eQ"><i class="fa-brands fa-youtube"></i></a>
       </div>
+      <Countdown date="2024-03-08" />
     </div>
   </header>
   <div class="container">
@@ -91,8 +93,8 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
     gap: 32px;
     padding: 32px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
     background-image: url(/bg.svg); /* we cant use this image its an adobe stock image */
     background-size: cover;
     background-position: center;
@@ -112,6 +114,13 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
   .content {
     max-width: 600px;
     z-index: 2;
+    margin-top: 100px;
+  }
+
+  @media screen and (max-width: 600px) {
+    .content {
+      margin-top: 20px;
+    }
   }
 
   .socials {
