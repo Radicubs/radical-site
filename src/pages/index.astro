@@ -32,8 +32,8 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
         <a href="https://www.tiktok.com/@theradicubs"><i class="fa-brands fa-tiktok"></i></a>
         <a href="https://youtube.com/channel/UCNuzQPRdm0OBcJaWgX8z6eQ"><i class="fa-brands fa-youtube"></i></a>
       </div>
-      <Countdown date="2024-03-08" />
     </div>
+    <Countdown date="2024-03-08" />
   </header>
   <div class="container">
     <div class="section-heading">
@@ -99,6 +99,7 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
     background-size: cover;
     background-position: center;
     position: relative;
+    justify-content: center;
   }
 
   .darken {
@@ -114,13 +115,6 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
   .content {
     max-width: 600px;
     z-index: 2;
-    margin-top: 100px;
-  }
-
-  @media screen and (max-width: 600px) {
-    .content {
-      margin-top: 20px;
-    }
   }
 
   .socials {
