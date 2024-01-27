@@ -33,7 +33,7 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
         <a href="https://youtube.com/channel/UCNuzQPRdm0OBcJaWgX8z6eQ"><i class="fa-brands fa-youtube"></i></a>
       </div>
     </div>
-    <Countdown date="2024-03-08" />
+    <Countdown date={home.attributes.nextComp} />
   </header>
   <div class="container">
     <div class="section-heading">
