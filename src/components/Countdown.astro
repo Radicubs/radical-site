@@ -6,38 +6,48 @@ interface Props {
 const { date } = Astro.props;
 ---
 
-<div class="countdown" data-to={date} style="display: none;">
-  <div class="square">
-    <div class="number days"></div>
-    <div class="label">Days</div>
-  </div>
-  <div class="square">
-    <div class="number hours"></div>
-    <div class="label">Hours</div>
-  </div>
-  <div class="square">
-    <div class="number minutes"></div>
-    <div class="label">Minutes</div>
-  </div>
-  <div class="square">
-    <div class="number seconds"></div>
-    <div class="label">Seconds</div>
+<div class="container">
+  <h4 class="heading">Countdown to our next competition...</h4>
+  <div class="countdown" data-to={date} style="display: none;">
+    <div class="square">
+      <div class="number days"></div>
+      <div class="label">Days</div>
+    </div>
+    <div class="square">
+      <div class="number hours"></div>
+      <div class="label">Hours</div>
+    </div>
+    <div class="square">
+      <div class="number minutes"></div>
+      <div class="label">Minutes</div>
+    </div>
+    <div class="square">
+      <div class="number seconds"></div>
+      <div class="label">Seconds</div>
+    </div>
   </div>
 </div>
 
 <style>
+  .container {
+    position: absolute;
+    bottom: -40px;
+    z-index: 1;
+  }
+
+  .heading {
+    text-align: center;
+    font-family: "Space Mono", monospace;
+  }
+
   .countdown {
     font-family: "Roboto Mono", monospace;
     display: flex;
     gap: 10px;
     justify-content: space-around;
-    margin-top: 60px;
-    position: absolute;
-    bottom: -40px;
   }
 
   .square {
-    z-index: 1;
     background-color: black;
     border: 2px solid var(--accent);
     width: 120px;
