@@ -54,7 +54,14 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
   </div>
 
   <!-- bobot -->
-  <Image id="bobot" class="bobot" src={home.attributes.bobot.data.attributes.url} alt="bobot" />
+  <Image
+    id="bobot"
+    class="bobot"
+    alt="bobot"
+    src={home.attributes.bobot.data.attributes.url}
+    width={356}
+    height={400}
+  />
   <script is:inline>
     const bobot = document.getElementById("bobot");
 
