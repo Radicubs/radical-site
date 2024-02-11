@@ -87,8 +87,8 @@ const { date } = Astro.props;
     }
   }
 
-  @media (max-width: 400px) {
-    .countdown {
+  @media screen and (max-width: 400px), screen and (max-height: 800px) {
+    .container {
       display: none;
     }
   }
