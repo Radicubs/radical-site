@@ -19,9 +19,11 @@ const home = await fetchApi<ApiHomeHome>({
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- meta -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
+    <!-- embed + seo -->
     <title>Radicubs | {title}</title>
     <meta name="og:site_name" content="radicubs.com" />
     <meta name="title" content={`Radicubs | ${title}`} />
@@ -29,12 +31,22 @@ const home = await fetchApi<ApiHomeHome>({
     <meta name="theme-color" content="#8efc5e" />
     <meta name="og:image" content={import.meta.env.STRAPI_URL + home.attributes.image.data.attributes.url} />
     <meta name="keywords" content={home.attributes.keywords} />
+    <!-- favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- pwa -->
+    <link rel="manifest" href="/site.webmanifest" />
+    <!-- fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Space+Mono:wght@400;700&display=swap"
       rel="stylesheet"
     />
+    <!-- icons -->
     <script src="https://kit.fontawesome.com/03998fe36f.js" crossorigin="anonymous"></script>
   </head>
   <body>
@@ -60,7 +72,7 @@ const home = await fetchApi<ApiHomeHome>({
     --secondary: #1b1d23;
     --tertiary: #2c303a;
 
-    --accent: #8efc5e;
+    --accent: #5ddb27;
   }
 
   * {
