@@ -3,6 +3,8 @@ import type { GetStaticPaths } from "astro";
 import { getTeamMembers, getYears } from "../../../lib/team";
 import TeamMember from "../../../components/TeamMember.astro";
 
+export const partial = true;
+
 export const getStaticPaths = (async () => {
   const years = await getYears();
   return years.map(year => ({ params: { year: year.toString() } }));
