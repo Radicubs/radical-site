@@ -12,6 +12,8 @@ import Layout from "../layouts/Layout.astro";
       <input type="text" id="name" name="name" placeholder="Name" required />
       <input type="email" id="email" name="email" placeholder="Email" required />
       <textarea id="message" name="message" placeholder="Message" maxlength="1500"></textarea>
+      <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY} data-callback="javascriptCallback">
+      </div>
       <button type="submit" id="submit" class="submit"><i class="fa-solid fa-paper-plane"></i> Send</button>
     </form>
   </div>
