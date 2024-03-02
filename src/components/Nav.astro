@@ -10,7 +10,7 @@ import Link from "./Link.astro";
     <Link href="/sponsors">Sponsors</Link>
     <Link href="/blog">Blog</Link>
     <Link href="/contact">Contact</Link>
-    <Link href="https://www.paypal.com/paypalme/radicubs">Donate</Link>
+    <Link href={import.meta.env.DONATE_URL}>Donate</Link>
   </div>
 </nav>
 
