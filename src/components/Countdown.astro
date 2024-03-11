@@ -6,9 +6,9 @@ interface Props {
 const { date } = Astro.props;
 ---
 
-<div class="container">
+<div class="container" style="display: none;">
   <h4 class="heading">Countdown to our next competition...</h4>
-  <div class="countdown" data-to={date} style="display: none;">
+  <div class="countdown" data-to={date}>
     <div class="square">
       <div class="number days"></div>
       <div class="label">Days</div>
@@ -97,14 +97,19 @@ const { date } = Astro.props;
 <script>
   for (const countdown of document.querySelectorAll<HTMLDivElement>(".countdown")) {
     const to = new Date(countdown.getAttribute("data-to")).getTime();
+    const diff = to - new Date().getTime();
+    if (diff < 0) continue;
 
     const $days = countdown.querySelector(".days");
     const $hours = countdown.querySelector(".hours");
     const $minutes = countdown.querySelector(".minutes");
     const $seconds = countdown.querySelector(".seconds");
 
+    let interval: ReturnType<typeof setTimeout>;
+
     function update() {
       const diff = to - Date.now();
+      if (diff < 0) return clearInterval(interval);
 
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -117,8 +122,9 @@ const { date } = Astro.props;
       $seconds.textContent = seconds.toString();
     }
 
-    setInterval(update, 1000);
+    interval = setInterval(update, 1000);
     update();
-    countdown.style.display = null;
+
+    countdown.parentElement.style.display = null;
   }
 </script>
