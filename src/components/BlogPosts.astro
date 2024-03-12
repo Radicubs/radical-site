@@ -3,6 +3,10 @@ import { slugify } from "../lib/blog";
 import type { ApiBlogPostBlogPost } from "../lib/contentTypes";
 import Image from "./Image.astro";
 
+const youtubeVideoRegex =
+  /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
+const getVideoId = url => url && youtubeVideoRegex.exec(url)?.[1];
+
 interface Props {
   posts: ApiBlogPostBlogPost[];
 }
@@ -12,27 +16,52 @@ const { posts } = Astro.props;
 
 <section class="posts">
   {
-    posts.map(post => (
-      <a class="post" href={`/blog/${slugify(post.attributes.title)}`}>
-        <Image
-          class="image"
-          height={200}
-          alt={post.attributes.title + " cover"}
-          src={post.attributes.cover.data.attributes.url}
-        />
-        <div class="content">
-          <div class="date">
-            {new Date(post.attributes.date).toLocaleString("en-CA", {
-              month: "long",
-              day: "numeric",
-              year: "numeric"
-            })}
+    posts.map(post => {
+      const youtubeVideoId = getVideoId(post.attributes.youtubeVideo);
+
+      return (
+        <a
+          class="post"
+          href={
+            youtubeVideoId ? `https://youtube.com/watch?v=${youtubeVideoId}` : `/blog/${slugify(post.attributes.title)}`
+          }
+          target={youtubeVideoId && "_blank"}
+        >
+          {youtubeVideoId ? (
+            <div class="video-cover">
+              <Image
+                class="cover"
+                width={360}
+                height={200}
+                alt={post.attributes.title + " cover"}
+                src={post.attributes.cover.data.attributes.url}
+              />
+              <div class="darken" />
+              <i class="fa-solid fa-play video-icon" />
+            </div>
+          ) : (
+            <Image
+              class="cover"
+              width={360}
+              height={200}
+              alt={post.attributes.title + " cover"}
+              src={post.attributes.cover.data.attributes.url}
+            />
+          )}
+          <div class="content">
+            <div class="date">
+              {new Date(post.attributes.date).toLocaleString("en-CA", {
+                month: "long",
+                day: "numeric",
+                year: "numeric"
+              })}
+            </div>
+            <div class="title">{post.attributes.title}</div>
+            <div class="description">{post.attributes.description}</div>
           </div>
-          <div class="title">{post.attributes.title}</div>
-          <div class="description">{post.attributes.description}</div>
-        </div>
-      </a>
-    ))
+        </a>
+      );
+    })
   }
 </section>
 
@@ -58,9 +87,33 @@ const { posts } = Astro.props;
     border: 1px solid rgba(0, 0, 0, 0.1);
   }
 
-  .image {
-    width: 100%;
+  .video-cover {
+    position: relative;
+    width: 360px;
     height: 200px;
+  }
+
+  .darken {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+  }
+
+  .video-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    color: white;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  }
+
+  .cover {
     border-radius: 10px;
     object-fit: cover;
   }

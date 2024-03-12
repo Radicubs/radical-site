@@ -695,6 +695,7 @@ export interface ApiBlogPostBlogPost extends Schema.CollectionType {
     description: Attribute.String;
     cover: Attribute.Media;
     contentNew: Attribute.Blocks;
+    youtubeVideo: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;
