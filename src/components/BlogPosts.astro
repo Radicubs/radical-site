@@ -27,19 +27,7 @@ const { posts } = Astro.props;
           }
           target={youtubeVideoId && "_blank"}
         >
-          {youtubeVideoId ? (
-            <div class="video-cover">
-              <Image
-                class="cover"
-                width={360}
-                height={200}
-                alt={post.attributes.title + " cover"}
-                src={post.attributes.cover.data.attributes.url}
-              />
-              <div class="darken" />
-              <i class="fa-solid fa-play video-icon" />
-            </div>
-          ) : (
+          <div class="cover-container">
             <Image
               class="cover"
               width={360}
@@ -47,7 +35,13 @@ const { posts } = Astro.props;
               alt={post.attributes.title + " cover"}
               src={post.attributes.cover.data.attributes.url}
             />
-          )}
+            {youtubeVideoId && (
+              <>
+                <div class="darken" />
+                <i class="fa-solid fa-play video-icon" />
+              </>
+            )}
+          </div>
           <div class="content">
             <div class="date">
               {new Date(post.attributes.date).toLocaleString("en-CA", {
@@ -87,10 +81,12 @@ const { posts } = Astro.props;
     border: 1px solid rgba(0, 0, 0, 0.1);
   }
 
-  .video-cover {
+  .cover-container {
     position: relative;
     width: 360px;
     height: 200px;
+    overflow: hidden;
+    border-radius: 10px;
   }
 
   .darken {
@@ -100,7 +96,7 @@ const { posts } = Astro.props;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.25);
-    border-radius: 10px;
+    transition: opacity 0.2s;
   }
 
   .video-icon {
@@ -111,11 +107,21 @@ const { posts } = Astro.props;
     font-size: 48px;
     color: white;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    transition: opacity 0.2s;
+  }
+
+  .cover-container:hover .darken,
+  .cover-container:hover .video-icon {
+    opacity: 0;
   }
 
   .cover {
-    border-radius: 10px;
     object-fit: cover;
+    transition: transform 0.2s;
+  }
+
+  .cover-container:hover .cover {
+    transform: scale(1.05);
   }
 
   .content {
