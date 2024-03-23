@@ -13,14 +13,17 @@ let { src, alt, width, height, format, ...rest } = Astro.props;
 
 let url = new URL(src, import.meta.env.STRAPI_URL);
 if (!src.endsWith(".svg")) url.searchParams.append("f", format || "webp");
-if (width) {
-  width = Math.round(Number(width));
-  url.searchParams.append("w", width.toString());
-}
+if (width || height) {
+  width = width ? Math.round(Number(width)) : null;
+  height = height ? Math.round(Number(height)) : null;
 
-if (height) {
-  height = Math.round(Number(height));
-  url.searchParams.append("h", height.toString());
+  if (width && height) {
+    url.searchParams.append("s", `${width}x${height}`);
+  } else if (width) {
+    url.searchParams.append("w", width.toString());
+  } else if (height) {
+    url.searchParams.append("h", height.toString());
+  }
 }
 ---
 

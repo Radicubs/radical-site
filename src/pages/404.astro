@@ -4,24 +4,24 @@ import Layout from "../layouts/Layout.astro";
 import type { ApiHomeHome } from "../lib/contentTypes";
 import fetchApi from "../lib/strapi";
 
-const home = await fetchApi<ApiHomeHome>({
-  endpoint: "home", // the content type to fetch
-  wrappedByKey: "data", // the key to unwrap the response
-  query: { populate: "*" }
-});
+// const home = await fetchApi<ApiHomeHome>({
+//   endpoint: "home", // the content type to fetch
+//   wrappedByKey: "data", // the key to unwrap the response
+//   query: { populate: "*" }
+// });
 ---
 
 <Layout title="Not Found">
   <div class="container">
     <a href="/">
-      <Image
+      <!-- <Image
         id="bobot"
         class="bobot"
         alt="bobot"
         src={home.attributes.bobot.data.attributes.url}
         width={355.77}
         height={400}
-      />
+      /> -->
     </a>
     <h1>Page not found!</h1>
     <p>Click the robot to return home</p>

@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@astrojs/react": "^3.0.9",
+    "@egjs/grid": "^1.15.0",
+    "@egjs/react-grid": "^1.16.0",
     "@strapi/blocks-react-renderer": "^1.0.0",
     "@types/react": "^18.0.21",
     "@types/react-dom": "^18.0.6",
@@ -20,8 +22,11 @@
     "marked": "^9.1.5",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-justified-grid": "^1.0.0",
+    "react-justified-grid-ssr": "^1.0.0",
     "resend": "^2.0.0",
     "shiki": "^1.0.0-beta.6",
-    "svelte": "^5.0.0-next.1"
+    "svelte": "^5.0.0-next.1",
+    "viewerjs": "^1.11.6"
   }
 }

@@ -7,6 +7,18 @@ import Layout from "../../layouts/Layout.astro";
 import { slugify } from "../../lib/blog";
 import type { ApiBlogPostBlogPost } from "../../lib/contentTypes";
 import fetchApi from "../../lib/strapi";
+import Image from "../../components/Image.astro";
+import { imageConfig } from "astro:assets";
+
+export const getStaticPaths = (async () => {
+  const posts = await fetchApi<ApiBlogPostBlogPost[]>({
+    endpoint: "blog-posts", // the content type to fetch
+    wrappedByKey: "data", // the key to unwrap the response
+    query: { populate: "*" }
+  });
+
+  return posts.map(post => ({ params: { post: slugify(post.attributes.title) } }));
+}) satisfies GetStaticPaths;
 
 const slug = Astro.params.post;
 if (!slug) {
@@ -23,16 +35,6 @@ const post = posts.find(post => slugify(post.attributes.title) === slug);
 if (!post) {
   throw new Response("Not found", { status: 404 });
 }
-
-export const getStaticPaths = (async () => {
-  const posts = await fetchApi<ApiBlogPostBlogPost[]>({
-    endpoint: "blog-posts", // the content type to fetch
-    wrappedByKey: "data", // the key to unwrap the response
-    query: { populate: "*" }
-  });
-
-  return posts.map(post => ({ params: { post: slugify(post.attributes.title) } }));
-}) satisfies GetStaticPaths;
 
 marked.use({
   renderer: {
@@ -53,10 +55,12 @@ marked.use({
     <h2 class="title">{post.attributes.title}</h2>
     <p class="description">{post.attributes.description}</p>
     <hr />
-    <img
-      src={import.meta.env.STRAPI_URL + post.attributes.cover.data.attributes.url}
-      alt={post.attributes.title + " cover"}
+    <Image
       class="cover"
+      alt={post.attributes.title + " cover"}
+      src={post.attributes.cover.data.attributes.url}
+      width={736}
+      height={post.attributes.cover.data.attributes.height * (736 / post.attributes.cover.data.attributes.width)}
     />
     <article>
       {

@@ -1,5 +1,4 @@
 ---
-import { ViewTransitions } from "astro:transitions";
 import Nav from "../components/Nav.astro";
 import type { ApiHomeHome } from "../lib/contentTypes";
 import fetchApi from "../lib/strapi";
@@ -18,7 +17,7 @@ const home = await fetchApi<ApiHomeHome>({
 ---
 
 <!doctype html>
-<html lang="en" transition:animate="none">
+<html lang="en">
   <head>
     <!-- meta -->
     <meta charset="UTF-8" />
@@ -51,7 +50,6 @@ const home = await fetchApi<ApiHomeHome>({
     <script src="https://kit.fontawesome.com/03998fe36f.js" crossorigin="anonymous"></script>
     <!-- turnstile -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-    <ViewTransitions />
   </head>
   <body>
     <Nav />
