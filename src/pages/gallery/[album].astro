@@ -89,7 +89,7 @@ if (!album) {
   const photos = document.getElementById("photos")!;
   const grid = new JustifiedGrid(photos, {
     gap: 8,
-    columnRange: [1, 3],
+    sizeRange: [200, 600],
     isConstantSize: true,
     useResizeObserver: true,
     observeChildren: true
