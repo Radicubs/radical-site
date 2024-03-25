@@ -13,7 +13,9 @@ import Layout from "../layouts/Layout.astro";
       <input type="email" id="email" name="email" placeholder="Email" required />
       <textarea id="message" name="message" placeholder="Message" maxlength="1500"></textarea>
       <button type="submit" id="submit" class="submit"><i class="fa-solid fa-paper-plane"></i> Send</button>
+      <!-- turnstile -->
       <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
+      <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     </form>
   </div>
 </Layout>
