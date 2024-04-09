@@ -20,9 +20,9 @@ const corporateSponsors = await fetchApi<ApiCorporateSponsorCorporateSponsor[]>(
             <Image
               src={sponsor.attributes.logo.data.attributes.url}
               alt={sponsor.attributes.name + " Logo"}
-              width={320}
+              width={280}
               height={
-                sponsor.attributes.logo.data.attributes.height * (320 / sponsor.attributes.logo.data.attributes.width)
+                sponsor.attributes.logo.data.attributes.height * (280 / sponsor.attributes.logo.data.attributes.width)
               }
             />
           </a>
@@ -33,7 +33,7 @@ const corporateSponsors = await fetchApi<ApiCorporateSponsorCorporateSponsor[]>(
 
 <style>
   .corporate-sponsors {
-    columns: 320px;
+    columns: 280px;
     gap: 20px;
   }
 
