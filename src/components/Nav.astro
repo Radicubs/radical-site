@@ -1,5 +1,13 @@
 ---
+import type { ApiHomeHome } from "../lib/contentTypes";
+import fetchApi from "../lib/strapi";
 import Link from "./Link.astro";
+
+const home = await fetchApi<ApiHomeHome>({
+  endpoint: "home", // the content type to fetch
+  wrappedByKey: "data", // the key to unwrap the response
+  query: { populate: "*" }
+});
 ---
 
 <nav>
@@ -11,6 +19,7 @@ import Link from "./Link.astro";
     <Link href="/gallery">Gallery</Link>
     <Link href="/blog">Blog</Link>
     <Link href="/contact">Contact</Link>
+    <Link href={home.attributes.applicationUrl}>Apply</Link>
     <Link href={import.meta.env.DONATE_URL}>Donate</Link>
   </div>
 </nav>
@@ -58,13 +67,15 @@ import Link from "./Link.astro";
     }
 
     nav .links.active {
-      max-height: 200px;
+      max-height: var(--height, fit-content);
     }
   }
 </style>
 
 <script>
-  document.getElementById("burger").addEventListener("click", () => {
-    document.getElementById("links").classList.toggle("active");
-  });
+  const $burger = document.getElementById("burger");
+  const $links = document.getElementById("links");
+
+  $burger.addEventListener("click", () => $links.classList.toggle("active"));
+  $links.style.setProperty("--height", `${$links.scrollHeight}px`);
 </script>

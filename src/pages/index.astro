@@ -6,6 +6,7 @@ import type { ApiBlogPostBlogPost, ApiHomeHome } from "../lib/contentTypes";
 import fetchApi from "../lib/strapi";
 import Image from "../components/Image.astro";
 import Countdown from "../components/Countdown.astro";
+import Application from "../components/Application.astro";
 
 const home = await fetchApi<ApiHomeHome>({
   endpoint: "home", // the content type to fetch
@@ -34,6 +35,7 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
       </div>
     </div>
     <Countdown date={home.attributes.nextComp} />
+    <Application url={home.attributes.applicationUrl} season={home.attributes.applicationSeason} />
   </header>
   <div class="container">
     <div class="section-heading">

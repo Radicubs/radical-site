@@ -19,3 +19,8 @@ Website built in Astro and deployed using GitHub Pages
 1. Install dependencies (`yarn`)
 1. Run website locally with `yarn dev`
 1. Build website to `dist` folder with `yarn build`
+
+# Types
+
+If you modify any of the data models in the CMS, you should update the types with this script
+`scp root@146.235.200.21:~/radical-site-cms/types/generated/contentTypes.d.ts src/lib`

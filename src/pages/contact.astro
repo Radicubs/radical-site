@@ -1,5 +1,15 @@
 ---
+import External from "../components/External.astro";
+import Link from "../components/Link.astro";
 import Layout from "../layouts/Layout.astro";
+import type { ApiHomeHome } from "../lib/contentTypes";
+import fetchApi from "../lib/strapi";
+
+const home = await fetchApi<ApiHomeHome>({
+  endpoint: "home", // the content type to fetch
+  wrappedByKey: "data", // the key to unwrap the response
+  query: { populate: "*" }
+});
 ---
 
 <Layout title="Contact">
@@ -17,6 +27,11 @@ import Layout from "../layouts/Layout.astro";
       <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
       <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     </form>
+    <div class="application">
+      <Link href={home.attributes.applicationUrl}>
+        Apply for the {home.attributes.applicationSeason}-{home.attributes.applicationSeason + 1} season <External />
+      </Link>
+    </div>
   </div>
 </Layout>
 
@@ -127,5 +142,10 @@ import Layout from "../layouts/Layout.astro";
     align-items: center;
     color: var(--accent);
     font-size: 32px;
+  }
+
+  .application {
+    text-align: center;
+    font-weight: bold;
   }
 </style>
