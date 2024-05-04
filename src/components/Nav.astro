@@ -19,8 +19,14 @@ const home = await fetchApi<ApiHomeHome>({
     <Link href="/gallery">Gallery</Link>
     <Link href="/blog">Blog</Link>
     <Link href="/contact">Contact</Link>
-    <Link href={home.attributes.applicationUrl}>Apply</Link>
-    <Link href={import.meta.env.DONATE_URL}>Donate</Link>
+    <Link href={import.meta.env.DONATE_URL}><i class="fa-solid fa-dollar-sign"></i> Donate</Link>
+    {
+      home.attributes.applicationUrl && (
+        <Link href={home.attributes.applicationUrl}>
+          <i class="fa-solid fa-pen-to-square" /> Apply
+        </Link>
+      )
+    }
   </div>
 </nav>
 

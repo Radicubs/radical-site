@@ -27,11 +27,16 @@ const home = await fetchApi<ApiHomeHome>({
       <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
       <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     </form>
-    <div class="application">
-      <Link href={home.attributes.applicationUrl}>
-        Apply for the {home.attributes.applicationSeason}-{home.attributes.applicationSeason + 1} season <External />
-      </Link>
-    </div>
+    {
+      home.attributes.applicationUrl && (
+        <div class="application">
+          <Link href={home.attributes.applicationUrl}>
+            Apply for the {home.attributes.applicationSeason}-{home.attributes.applicationSeason + 1} season{" "}
+            <External />
+          </Link>
+        </div>
+      )
+    }
   </div>
 </Layout>
 

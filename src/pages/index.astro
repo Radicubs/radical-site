@@ -35,7 +35,11 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
       </div>
     </div>
     <Countdown date={home.attributes.nextComp} />
-    <Application url={home.attributes.applicationUrl} season={home.attributes.applicationSeason} />
+    {
+      home.attributes.applicationUrl && (
+        <Application url={home.attributes.applicationUrl} season={home.attributes.applicationSeason} />
+      )
+    }
   </header>
   <div class="container">
     <div class="section-heading">
