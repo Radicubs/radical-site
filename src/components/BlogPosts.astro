@@ -28,13 +28,23 @@ const { posts } = Astro.props;
           target={youtubeVideoId && "_blank"}
         >
           <div class="cover-container">
-            <Image
-              class="cover"
-              width={360}
-              height={200}
-              alt={post.attributes.title + " cover"}
-              src={post.attributes.cover.data.attributes.url}
-            />
+            {youtubeVideoId ? (
+              <img
+                class="cover"
+                width={360}
+                height={200}
+                alt={post.attributes.title + " cover"}
+                src={`https://img.youtube.com/vi/${youtubeVideoId}/mqdefault.jpg`}
+              />
+            ) : (
+              <Image
+                class="cover"
+                width={360}
+                height={200}
+                alt={post.attributes.title + " cover"}
+                src={post.attributes.cover.data.attributes.url}
+              />
+            )}
             {youtubeVideoId && (
               <>
                 <div class="darken" />
