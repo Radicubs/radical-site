@@ -8,7 +8,6 @@ import { slugify } from "../../lib/blog";
 import type { ApiBlogPostBlogPost } from "../../lib/contentTypes";
 import fetchApi from "../../lib/strapi";
 import Image from "../../components/Image.astro";
-import { imageConfig } from "astro:assets";
 
 export const getStaticPaths = (async () => {
   const posts = await fetchApi<ApiBlogPostBlogPost[]>({
@@ -17,7 +16,9 @@ export const getStaticPaths = (async () => {
     query: { populate: "*" }
   });
 
-  return posts.map(post => ({ params: { post: slugify(post.attributes.title) } }));
+  return posts
+    .filter(post => !post.attributes.youtubeVideo)
+    .map(post => ({ params: { post: slugify(post.attributes.title) } }));
 }) satisfies GetStaticPaths;
 
 const slug = Astro.params.post;
