@@ -14,6 +14,7 @@
     "@egjs/grid": "^1.15.0",
     "@strapi/blocks-react-renderer": "^1.0.1",
     "astro": "^4.5.9",
+    "astro-icon": "^1.1.0",
     "jdenticon": "^3.2.0",
     "marked": "^12.0.1",
     "react": "^18.2.0",

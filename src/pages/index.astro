@@ -7,6 +7,7 @@ import fetchApi from "../lib/strapi";
 import Image from "../components/Image.astro";
 import Countdown from "../components/Countdown.astro";
 import Application from "../components/Application.astro";
+import { Icon } from "astro-icon/components";
 
 const home = await fetchApi<ApiHomeHome>({
   endpoint: "home", // the content type to fetch
@@ -29,9 +30,13 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
       <div class="subheading">{home.attributes.description}</div>
       <div class="socials">
         <a href="https://instagram.com/theradicubs"><i class="fa-brands fa-instagram"></i></a>
-        <a href="https://twitter.com/theradicubs"><i class="fa-brands fa-twitter"></i></a>
+        <!-- <a href="https://twitter.com/theradicubs"><i class="fa-brands fa-twitter"></i></a> -->
         <a href="https://www.tiktok.com/@theradicubs"><i class="fa-brands fa-tiktok"></i></a>
         <a href="https://youtube.com/channel/UCNuzQPRdm0OBcJaWgX8z6eQ"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://www.linkedin.com/company/radicubs-robotics"><i class="fa-brands fa-linkedin"></i></a>
+        <a href="https://www.thebluealliance.com/team/7503"
+          ><Icon name="thebluealliance" height={30} style={{ marginTop: "4px" }} /></a
+        >
       </div>
     </div>
     <Countdown date={home.attributes.nextComp} />
