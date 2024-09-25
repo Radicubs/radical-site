@@ -15,7 +15,7 @@ const { name, role, photo_url } = Astro.props;
   <div>
     {
       photo_url ? (
-        <Image class="photo" src={photo_url} alt={name} width={128} height={128} />
+        <Image class="photo" src={photo_url + '?animated=true'} alt={name} width={128} height={128} />
       ) : (
         <Jdenticon seed={name} size={128} />
       )
