@@ -1,4 +1,6 @@
 ---
+import { Image } from "astro:assets";
+
 interface Props {
   src: string;
   alt?: string;
@@ -12,19 +14,6 @@ interface Props {
 let { src, alt, width, height, format, ...rest } = Astro.props;
 
 let url = new URL(src, import.meta.env.STRAPI_URL);
-if (!src.endsWith(".svg")) url.searchParams.append("f", format || "webp");
-if (width || height) {
-  width = width ? Math.round(Number(width)) : null;
-  height = height ? Math.round(Number(height)) : null;
-
-  if (width && height) {
-    url.searchParams.append("s", `${width}x${height}`);
-  } else if (width) {
-    url.searchParams.append("w", width.toString());
-  } else if (height) {
-    url.searchParams.append("h", height.toString());
-  }
-}
 ---
 
-<img src={url.toString()} alt={alt} width={width} height={height} {...rest} />
+<Image src={url.toString()} alt={alt} width={width} height={height} {...rest} />
