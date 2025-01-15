@@ -51,7 +51,7 @@ marked.use({
 <Layout title={post.attributes.title}>
   <div class="container">
     <div class="date">
-      {new Date(post.attributes.createdAt).toLocaleString("en-CA", { month: "long", day: "numeric", year: "numeric" })}
+      {new Date(post.attributes.date).toLocaleString("en-CA", { month: "long", day: "numeric", year: "numeric" })}
     </div>
     <h2 class="title">{post.attributes.title}</h2>
     <p class="description">{post.attributes.description}</p>
