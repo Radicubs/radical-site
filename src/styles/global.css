@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --c-bg-main: #101215;
+  --c-bg-sec: #1b1d23;
+  --c-bg-card: #2c303a;
+  --c-accent: #5ddb27;
+  --c-white: #ffffff;
+  --c-gray-lt: #d3d3d3;
+  --c-gray-dk: #a9a9a9;
+}
+
+body {
+  background-color: var(--c-bg-main);
+  color: var(--c-gray-lt);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-mono {
+  font-family: 'Space Mono', monospace;
+}
+
+.text-accent {
+  color: var(--c-accent);
+}
+.bg-accent {
+  background-color: var(--c-accent);
+}
+.border-accent {
+  border-color: var(--c-accent);
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px -10px rgba(93, 219, 39, 0.1);
+  border-color: rgba(93, 219, 39, 0.4);
+}
+
+/* Vertical Timeline styling */
+.timeline-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 20px;
+  width: 2px;
+  background: #2c303a;
+}
+@media (min-width: 768px) {
+  .timeline-container::before {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}

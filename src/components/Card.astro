@@ -1,0 +1,13 @@
+---
+const { className = '', onClick } = Astro.props;
+---
+
+<div
+  class:list={[
+    'bg-[#2c303a] border border-[#1b1d23] rounded-lg p-6 card-hover',
+    onClick ? 'cursor-pointer' : '',
+    className,
+  ]}
+>
+  <slot />
+</div>

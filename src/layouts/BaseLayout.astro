@@ -1,0 +1,26 @@
+---
+import '../styles/global.css';
+import Navbar from '../components/Navbar.jsx';
+import Footer from '../components/Footer.jsx';
+
+const { title = 'Radicubs' } = Astro.props;
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <Navbar client:load currentPath={currentPath} />
+
+    <main class="flex-grow bg-[#101215]">
+      <slot />
+    </main>
+
+    <Footer client:load currentPath={currentPath} />
+  </body>
+</html>
