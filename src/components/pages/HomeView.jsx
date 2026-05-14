@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ArrowRight,
   Award,
@@ -12,25 +12,94 @@ import Button from '../ui/Button.jsx';
 import Card from '../ui/Card.jsx';
 import SectionHeader from '../ui/SectionHeader.jsx';
 import { navigateTo } from '../../lib/navigation.js';
-import { blogPosts, sponsorLogos } from '../../lib/api.js';
+import { blogPosts } from '../../lib/api.js';
+import { fetchLatestAwards } from '../../lib/strapiAwards.js';
+import { fetchSponsors } from '../../lib/strapiSponsors.js';
+import { fetchHomepage } from '../../lib/strapiHomepage.js';
 
 const HomeView = () => {
   const navigate = navigateTo;
 
   const currentYear = new Date().getFullYear();
-  const seasons = currentYear - 2019 + 1;
+  const fallbackSeasons = currentYear - 2019 + 1;
 
-  const flatAwards = [
-    { year: 2026, event: 'Farmersville', name: 'Creativity Award' },
-    { year: 2026, event: 'Fort Worth', name: 'Spirit Award' },
-    { year: 2023, event: 'Fort Worth', name: 'Judges Award' },
-    { year: 2022, event: 'Irving', name: 'Gracious Professionalism Award' },
-    { year: 2020, event: 'Plano', name: 'Entrepreneurship Award' },
-    { year: 2019, event: 'Plano', name: 'Highest Rookie Seed' },
-    { year: 2019, event: 'Greenville', name: 'Highest Rookie Seed' },
-    { year: 2019, event: 'Plano', name: 'Rookie Inspiration' },
-    { year: 2019, event: 'Greenville', name: 'Rookie All-Star' },
-  ];
+  const [awards, setAwards] = useState([]);
+  const [awardsLoading, setAwardsLoading] = useState(true);
+
+  const [sponsors, setSponsors] = useState([]);
+  const [sponsorsLoading, setSponsorsLoading] = useState(true);
+
+  const [teamPhotoUrl, setTeamPhotoUrl] = useState(null);
+  const [homepageDescription, setHomepageDescription] = useState(
+    'We are a student-led, 501(c)(3) nonprofit robotics organization redefining STEM access, innovation, and community impact across North Texas.'
+  );
+
+  const [homepageStats, setHomepageStats] = useState({
+    foundingYear: '2019',
+    teamNumber: '7503',
+    activeSeasons: fallbackSeasons,
+    totalAwards: '8+',
+  });
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    (async () => {
+      setAwardsLoading(true);
+      const latest = await fetchLatestAwards({ limit: 8, signal: controller.signal });
+      setAwards(latest);
+      setAwardsLoading(false);
+    })();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    (async () => {
+      const homepage = await fetchHomepage({ signal: controller.signal });
+      if (!homepage) return;
+
+      setTeamPhotoUrl(homepage.teamPhotoUrl ?? null);
+
+      if (typeof homepage.description === 'string' && homepage.description.trim().length > 0) {
+        setHomepageDescription(homepage.description.trim());
+      }
+
+      setHomepageStats((prev) => ({
+        ...prev,
+        foundingYear:
+          homepage.foundingYear != null ? String(homepage.foundingYear) : prev.foundingYear,
+        teamNumber: homepage.teamNumber != null ? String(homepage.teamNumber) : prev.teamNumber,
+        activeSeasons:
+          homepage.activeSeasons != null ? homepage.activeSeasons : prev.activeSeasons,
+        totalAwards:
+          homepage.totalAwards != null ? String(homepage.totalAwards) : prev.totalAwards,
+      }));
+    })();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    (async () => {
+      setSponsorsLoading(true);
+      const rows = await fetchSponsors({ signal: controller.signal });
+      setSponsors(rows);
+      setSponsorsLoading(false);
+    })();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   return (
     <div className="w-full bg-[#101215]">
@@ -44,8 +113,7 @@ const HomeView = () => {
             RADICUBS <br /> <span className="text-[#5ddb27]">ROBOTICS</span>.
           </h1>
           <p className="text-xl text-[#d3d3d3] mb-10 max-w-2xl leading-relaxed">
-            We are a student-led, 501(c)(3) nonprofit robotics organization redefining STEM access,
-            innovation, and community impact across North Texas.
+            {homepageDescription}
           </p>
           <div className="flex flex-wrap gap-4">
             <Button onClick={() => navigate('join')}>
@@ -61,10 +129,10 @@ const HomeView = () => {
       <section className="py-12 bg-[#1b1d23] border-y border-[#2c303a]">
         <div className="container mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            { label: 'Founded', value: '2019' },
-            { label: 'Team Number', value: '7503' },
-            { label: 'Active Seasons', value: seasons },
-            { label: 'Awards Won', value: '8+' },
+            { label: 'Founded', value: homepageStats.foundingYear },
+            { label: 'Team Number', value: homepageStats.teamNumber },
+            { label: 'Active Seasons', value: homepageStats.activeSeasons },
+            { label: 'Awards Won', value: homepageStats.totalAwards },
           ].map((stat, i) => (
             <div
               key={i}
@@ -88,9 +156,40 @@ const HomeView = () => {
             Powered By Our Sponsors
           </h3>
 
-          {sponsorLogos.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-              {' '}
+          {!sponsorsLoading && sponsors.length > 0 ? (
+            <div className="flex flex-wrap justify-center gap-8 transition-all duration-500 max-w-5xl mx-auto">
+              {sponsors.map((sponsor, i) => {
+                const content = (
+                  <img
+                    src={sponsor.logoUrl}
+                    alt={sponsor.name || 'Sponsor logo'}
+                    className="h-16 md:h-20 w-auto object-contain"
+                    loading="lazy"
+                  />
+                );
+
+                const wrapperClass = "basis-1/2 md:basis-1/4 flex items-center justify-center";
+
+                if (sponsor.website) {
+                  return (
+                    <a
+                      key={i}
+                      href={sponsor.website}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={wrapperClass}
+                    >
+                      {content}
+                    </a>
+                  );
+                }
+
+                return (
+                  <div key={i} className={wrapperClass}>
+                    {content}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 opacity-50 max-w-5xl mx-auto">
@@ -113,40 +212,62 @@ const HomeView = () => {
           subtitle="A legacy of engineering excellence, spirit, and community outreach."
         />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start max-w-7xl mx-auto">
-          <div className="space-y-4">
-            {flatAwards.map((award, i) => (
-              <div
-                key={i}
-                className="flex items-start md:items-center gap-4 border-b border-[#2c303a] pb-4 text-left"
-              >
-                <span className="text-[#5ddb27] font-mono text-xl md:text-2xl font-bold w-16 shrink-0">
-                  {award.year}
-                </span>
-                <span className="text-[#a9a9a9] font-mono text-sm uppercase tracking-wider w-32 shrink-0 hidden md:block">
-                  {award.event}
-                </span>
-                <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 text-white font-medium text-lg w-full">
-                  <span className="text-[#a9a9a9] font-mono text-xs uppercase tracking-wider md:hidden">
+          <div className="space-y-4 overflow-y-auto lg:max-h-[420px] lg:pr-2">
+            {awardsLoading ? (
+              <div className="text-[#a9a9a9] font-mono text-sm">Loading awards…</div>
+            ) : awards.length === 0 ? (
+              <div className="text-[#a9a9a9] font-mono text-sm">
+                No awards found yet. (Check Strapi publishing + permissions.)
+              </div>
+            ) : (
+              awards.map((award, i) => (
+                <div
+                  key={i}
+                  className="flex items-start md:items-center gap-4 border-b border-[#2c303a] pb-4 text-left"
+                >
+                  <span className="text-[#5ddb27] font-mono text-xl md:text-2xl font-bold w-16 shrink-0">
+                    {award.year}
+                  </span>
+                  <span className="text-[#a9a9a9] font-mono text-sm uppercase tracking-wider w-32 shrink-0 hidden md:block">
                     {award.event}
                   </span>
-                  <span className="flex items-center gap-2">
-                    <Award size={16} className="text-[#5ddb27] hidden md:block" />
-                    {award.name}
-                  </span>
+                  <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 text-white font-medium text-lg w-full">
+                    <span className="text-[#a9a9a9] font-mono text-xs uppercase tracking-wider md:hidden">
+                      {award.event}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <Award size={16} className="text-[#5ddb27] hidden md:block" />
+                      {award.name}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="bg-[#101215] border border-[#2c303a] rounded-xl aspect-[4/3] lg:aspect-auto lg:h-full min-h-[400px] flex flex-col items-center justify-center relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#1b1d23] to-transparent opacity-60 z-10"></div>
-            <ImageIcon
-              size={64}
-              className="text-[#2c303a] mb-4 z-20 group-hover:scale-110 transition-transform duration-500"
-            />
-            <span className="text-[#a9a9a9] font-mono font-bold z-20 tracking-widest text-sm bg-[#101215]/80 px-4 py-2 rounded">
-              TEAM AWARD PLACEHOLDER
-            </span>
+            {teamPhotoUrl ? (
+              <>
+                <img
+                  src={teamPhotoUrl}
+                  alt="Team photo"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#1b1d23] to-transparent opacity-60 z-10"></div>
+              </>
+            ) : (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#1b1d23] to-transparent opacity-60 z-10"></div>
+                <ImageIcon
+                  size={64}
+                  className="text-[#2c303a] mb-4 z-20 group-hover:scale-110 transition-transform duration-500"
+                />
+                <span className="text-[#a9a9a9] font-mono font-bold z-20 tracking-widest text-sm bg-[#101215]/80 px-4 py-2 rounded">
+                  TEAM AWARD PLACEHOLDER
+                </span>
+              </>
+            )}
           </div>
         </div>
       </section>

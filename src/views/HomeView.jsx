@@ -1,12 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowRight, Award, Image as ImageIcon, BookOpen, Calendar, ChevronRight } from 'lucide-react';
 import { Button, SectionHeader, Card } from '../shared/ui.jsx';
 import { blogPosts, sponsorLogos } from '../shared/data.js';
+import { fetchHomepage } from '../lib/strapiHomepage.js';
 
 // 1. HOME VIEW (UPDATED)
 const HomeView = ({ navigate }) => {
   const currentYear = new Date().getFullYear();
-  const seasons = currentYear - 2019 + 1;
+  const fallbackSeasons = currentYear - 2019 + 1;
+
+  const [homepageStats, setHomepageStats] = useState({
+    foundingYear: '2019',
+    teamNumber: '7503',
+    activeSeasons: fallbackSeasons,
+    totalAwards: '8+',
+  });
+
+  const [homepageDescription, setHomepageDescription] = useState(
+    'We are a student-led, 501(c)(3) nonprofit robotics organization redefining STEM access, innovation, and community impact across North Texas.'
+  );
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    (async () => {
+      const homepage = await fetchHomepage({ signal: controller.signal });
+      if (!homepage) return;
+
+      if (typeof homepage.description === 'string' && homepage.description.trim().length > 0) {
+        setHomepageDescription(homepage.description.trim());
+      }
+
+      setHomepageStats((prev) => ({
+        ...prev,
+        foundingYear:
+          homepage.foundingYear != null ? String(homepage.foundingYear) : prev.foundingYear,
+        teamNumber: homepage.teamNumber != null ? String(homepage.teamNumber) : prev.teamNumber,
+        activeSeasons:
+          homepage.activeSeasons != null ? homepage.activeSeasons : prev.activeSeasons,
+        totalAwards:
+          homepage.totalAwards != null ? String(homepage.totalAwards) : prev.totalAwards,
+      }));
+    })();
+
+    return () => controller.abort();
+  }, []);
 
   const flatAwards = [
     { year: 2026, event: "Farmersville", name: "Creativity Award" },
@@ -33,8 +71,7 @@ const HomeView = ({ navigate }) => {
             RADICUBS <br/> <span className="text-[#5ddb27]">ROBOTICS</span>.
           </h1>
           <p className="text-xl text-[#d3d3d3] mb-10 max-w-2xl leading-relaxed">
-            We are a student-led, 501(c)(3) nonprofit robotics organization redefining STEM access, 
-            innovation, and community impact across North Texas.
+            {homepageDescription}
           </p>
           <div className="flex flex-wrap gap-4">
             <Button onClick={() => navigate('join')}>Join The Team <ArrowRight size={18}/></Button>
@@ -47,10 +84,10 @@ const HomeView = ({ navigate }) => {
       <section className="py-12 bg-[#1b1d23] border-y border-[#2c303a]">
         <div className="container mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            { label: "Founded", value: "2019" },
-            { label: "Team Number", value: "7503" },
-            { label: "Active Seasons", value: seasons },
-            { label: "Awards Won", value: "8+" }
+            { label: "Founded", value: homepageStats.foundingYear },
+            { label: "Team Number", value: homepageStats.teamNumber },
+            { label: "Active Seasons", value: homepageStats.activeSeasons },
+            { label: "Awards Won", value: homepageStats.totalAwards }
           ].map((stat, i) => (
             <div key={i} className="text-center fade-in-up" style={{ animationDelay: `${i * 0.1}s` }}>
               <div className="text-4xl md:text-5xl font-mono font-bold text-white mb-2">{stat.value}</div>
