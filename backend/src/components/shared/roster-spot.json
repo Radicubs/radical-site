@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_shared_roster_spots",
+  "info": {
+    "displayName": "Roster Spot"
+  },
+  "options": {},
+  "attributes": {
+    "Role": {
+      "type": "string",
+      "required": true
+    },
+    "members": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::team-member.team-member"
+    }
+  },
+  "config": {}
+}

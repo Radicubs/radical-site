@@ -1,0 +1,24 @@
+{
+  "kind": "collectionType",
+  "collectionName": "rosters",
+  "info": {
+    "singularName": "roster",
+    "pluralName": "rosters",
+    "displayName": "Roster"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Year": {
+      "type": "integer",
+      "required": true
+    },
+    "RosterSpots": {
+      "type": "component",
+      "component": "shared.roster-spot",
+      "repeatable": true
+    }
+  }
+}

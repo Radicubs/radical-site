@@ -16,6 +16,17 @@ import { blogPosts } from '../../lib/api.js';
 import { fetchLatestAwards } from '../../lib/strapiAwards.js';
 import { fetchSponsors } from '../../lib/strapiSponsors.js';
 import { fetchHomepage } from '../../lib/strapiHomepage.js';
+import { fetchProjects } from '../../lib/strapiProjects.js';
+
+const pickProjectPreview = (rawDescription) => {
+  if (typeof rawDescription !== 'string') return '';
+  const trimmed = rawDescription.trim();
+  if (!trimmed) return '';
+
+  // Use the first paragraph to keep homepage cards concise.
+  const firstParagraph = trimmed.split(/\n\s*\n/)[0]?.trim();
+  return firstParagraph || trimmed;
+};
 
 const HomeView = () => {
   const navigate = navigateTo;
@@ -34,6 +45,9 @@ const HomeView = () => {
     'We are a student-led, 501(c)(3) nonprofit robotics organization redefining STEM access, innovation, and community impact across North Texas.'
   );
 
+  const [ongoingProjects, setOngoingProjects] = useState([]);
+  const [ongoingProjectsLoading, setOngoingProjectsLoading] = useState(true);
+
   const [homepageStats, setHomepageStats] = useState({
     foundingYear: '2019',
     teamNumber: '7503',
@@ -49,6 +63,22 @@ const HomeView = () => {
       const latest = await fetchLatestAwards({ limit: 8, signal: controller.signal });
       setAwards(latest);
       setAwardsLoading(false);
+    })();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    (async () => {
+      setOngoingProjectsLoading(true);
+      const rows = await fetchProjects({ signal: controller.signal });
+      const present = Array.isArray(rows) ? rows.filter((p) => p?.timeline === 'Present') : [];
+      setOngoingProjects(present.slice(0, 2));
+      setOngoingProjectsLoading(false);
     })();
 
     return () => {
@@ -280,33 +310,25 @@ const HomeView = () => {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            <Card className="flex flex-col text-left !p-0 overflow-hidden !bg-[#1b1d23]">
-              <div className="h-40 bg-[#2c303a] flex items-center justify-center border-b border-[#101215]">
-                <span className="text-[#101215] font-mono font-bold tracking-widest text-xs">
-                  PROJECT IMAGE
-                </span>
-              </div>
-              <div className="p-6 flex flex-col flex-grow">
-                <h3 className="text-xl font-mono text-white mb-3">Central Elementary Supply Drive</h3>
-                <p className="text-[#a9a9a9] text-sm mb-4 flex-grow">
-                  Incentivizing community giving through a unique "1 supply = 1 volunteer hour" exchange model to maximize local impact.
-                </p>
-              </div>
-            </Card>
-
-            <Card className="flex flex-col text-left !p-0 overflow-hidden !bg-[#1b1d23]">
-              <div className="h-40 bg-[#2c303a] flex items-center justify-center border-b border-[#101215]">
-                <span className="text-[#101215] font-mono font-bold tracking-widest text-xs">
-                  PROJECT IMAGE
-                </span>
-              </div>
-              <div className="p-6 flex flex-col flex-grow">
-                <h3 className="text-xl font-mono text-white mb-3">Community Robot Showcases</h3>
-                <p className="text-[#a9a9a9] text-sm mb-4 flex-grow">
-                  Bringing interactive robotics demos to local events like Colorpalooza and Touch-A-Truck to blend education with engagement.
-                </p>
-              </div>
-            </Card>
+            {ongoingProjectsLoading ? (
+              <div className="text-[#a9a9a9] font-mono text-sm col-span-full">Loading projects…</div>
+            ) : ongoingProjects.length === 0 ? (
+              <div className="text-[#a9a9a9] font-mono text-sm col-span-full">No ongoing projects yet.</div>
+            ) : (
+              ongoingProjects.map((project, i) => (
+                <Card
+                  key={project.id ?? `${project.title}-${i}`}
+                  className="flex flex-col text-left !p-0 overflow-hidden !bg-[#1b1d23]"
+                >
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="text-xl font-mono text-white mb-3">{project.title}</h3>
+                    <p className="text-[#a9a9a9] text-sm mb-4 flex-grow whitespace-pre-line">
+                      {pickProjectPreview(project.description)}
+                    </p>
+                  </div>
+                </Card>
+              ))
+            )}
           </div>
 
           <div className="text-center">

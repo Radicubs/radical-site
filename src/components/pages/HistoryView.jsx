@@ -1,71 +1,44 @@
-import React from 'react';
-import { Award, Cpu } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Cpu } from 'lucide-react';
 
 import SectionHeader from '../ui/SectionHeader.jsx';
+import { fetchHistories } from '../../lib/strapiHistories.js';
 
 const HistoryView = () => {
-  const seasonsTimeline = [
-    {
-      year: '2026',
-      game: 'Rebuilt',
-      robot: 'Chimera',
-      description: 'Data pending synchronization with team records.',
-      awards: 'Creativity Award, Spirit Award',
-    },
-    {
-      year: '2025',
-      game: 'Reefscape',
-      robot: 'Robot Name TBD',
-      description: 'Data pending synchronization with team records.',
-      awards: '',
-    },
-    {
-      year: '2024',
-      game: 'CRESCENDO',
-      robot: 'Schrödinger',
-      description: 'Data pending synchronization with team records.',
-      awards: 'Regional Competitor',
-    },
-    {
-      year: '2023',
-      game: 'CHARGED UP',
-      robot: 'Robot Name TBD',
-      description: 'Data pending synchronization with team records.',
-      awards: 'Judges Award',
-    },
-    {
-      year: '2022',
-      game: 'RAPID REACT',
-      robot: 'Robot Name TBD',
-      description: 'Data pending synchronization with team records.',
-      awards: 'Gracious Professionalism Award',
-    },
-    {
-      year: '2021',
-      game: 'INFINITE RECHARGE',
-      robot: 'Robot Name TBD',
-      description: 'Data pending synchronization with team records.',
-      awards: '',
-    },
-    {
-      year: '2019',
-      game: 'DESTINATION: DEEP SPACE',
-      robot: 'Robot Name TBD',
-      description: 'Data pending synchronization with team records.',
-      awards: 'Highest Rookie Seed x2, Rookie Inspiration, Rookie All-Star',
-    },
-  ];
+  const [seasonsTimeline, setSeasonsTimeline] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    (async () => {
+      setIsLoading(true);
+      const rows = await fetchHistories({ signal: controller.signal });
+      setSeasonsTimeline(Array.isArray(rows) ? rows : []);
+      setIsLoading(false);
+    })();
+
+    return () => controller.abort();
+  }, []);
 
   return (
     <div className="w-full pt-24 px-6 md:px-16 lg:px-24 bg-[#101215] min-h-screen pb-24 overflow-hidden">
       <SectionHeader title="Team History" subtitle="Our journey through the FIRST Robotics Competition." />
 
       <div className="max-w-4xl mx-auto relative timeline-container mt-16">
+        {isLoading && (
+          <div className="text-center text-[#a9a9a9] font-mono text-sm">Loading history…</div>
+        )}
+
+        {!isLoading && seasonsTimeline.length === 0 && (
+          <div className="text-center text-[#a9a9a9] font-mono text-sm">No history entries yet.</div>
+        )}
+
         {seasonsTimeline.map((item, i) => {
           const isLeft = i % 2 === 0;
           return (
             <div
-              key={i}
+              key={item?.id ?? `${item?.year ?? 'year'}-${i}`}
               className={`relative flex items-center justify-between md:justify-normal mb-16 fade-in-up w-full ${
                 isLeft ? 'md:flex-row-reverse' : ''
               }`}
@@ -80,8 +53,24 @@ const HistoryView = () => {
               >
                 <div className="bg-[#1b1d23] border border-[#2c303a] rounded-lg overflow-hidden card-hover">
                   <div className="w-full h-40 bg-[#2c303a] flex items-center justify-center relative group">
-                    <Cpu size={48} className="text-[#101215] group-hover:scale-110 transition-transform duration-500" />
-                    <span className="absolute bottom-3 right-3 text-xs font-mono text-[#101215] font-bold">ROBOT IMAGE</span>
+                    {item.robotPictureUrl ? (
+                      <img
+                        src={item.robotPictureUrl}
+                        alt={item.robot ? `${item.robot} robot` : 'Robot'}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <>
+                        <Cpu
+                          size={48}
+                          className="text-[#101215] group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <span className="absolute bottom-3 right-3 text-xs font-mono text-[#101215] font-bold">
+                          ROBOT IMAGE
+                        </span>
+                      </>
+                    )}
                     <div className="absolute top-3 left-3 bg-[#101215]/80 backdrop-blur text-white px-3 py-1 rounded text-xs font-mono border border-[#5ddb27]/30">
                       {item.game}
                     </div>
@@ -95,15 +84,6 @@ const HistoryView = () => {
                     </div>
 
                     <p className="text-[#d3d3d3] text-sm mb-3">{item.description}</p>
-
-                    {item.awards && (
-                      <div className="mt-4 pt-3 border-t border-[#101215]">
-                        <div className="text-[#a9a9a9] text-xs flex items-start gap-2">
-                          <Award size={16} className="text-[#5ddb27] shrink-0 mt-0.5" />
-                          <span>{item.awards}</span>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>

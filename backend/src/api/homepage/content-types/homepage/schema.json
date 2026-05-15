@@ -17,8 +17,7 @@
       "allowedTypes": [
         "images",
         "files",
-        "videos",
-        "audios"
+        "videos"
       ]
     },
     "FoundingYear": {

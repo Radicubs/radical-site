@@ -1,0 +1,26 @@
+{
+  "kind": "singleType",
+  "collectionName": "team_pages",
+  "info": {
+    "singularName": "team-page",
+    "pluralName": "team-pages",
+    "displayName": "TeamPage"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Description": {
+      "type": "text"
+    },
+    "ApplicationLink": {
+      "type": "string"
+    },
+    "ApplicationOpen": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    }
+  }
+}

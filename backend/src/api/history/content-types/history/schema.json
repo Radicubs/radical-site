@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "histories",
+  "info": {
+    "singularName": "history",
+    "pluralName": "histories",
+    "displayName": "History"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "SeasonName": {
+      "type": "string",
+      "required": true
+    },
+    "Year": {
+      "type": "integer",
+      "required": true
+    },
+    "RobotName": {
+      "type": "string",
+      "required": true
+    },
+    "ShortDescription": {
+      "type": "text",
+      "required": true
+    },
+    "RobotPicture": {
+      "type": "media",
+      "multiple": true,
+      "required": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ]
+    }
+  }
+}
