@@ -1,20 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BookOpen, Calendar, ChevronRight } from 'lucide-react';
 
 import Card from '../ui/Card.jsx';
 import SectionHeader from '../ui/SectionHeader.jsx';
-import { blogPosts } from '../../lib/api.js';
 import { navigateTo } from '../../lib/navigation.js';
+import { fetchAllBlogPosts } from '../../lib/strapiBlogPosts.js';
+
+const formatDate = (value) => {
+  if (!value) return '';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return String(value);
+  return parsed.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
 
 const BlogView = () => {
   const navigate = navigateTo;
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    (async () => {
+      setLoading(true);
+      const rows = await fetchAllBlogPosts({ signal: controller.signal });
+      setPosts(rows);
+      setLoading(false);
+    })();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   return (
     <div className="w-full pt-32 px-6 md:px-16 lg:px-24 bg-[#101215] min-h-screen">
       <SectionHeader title="Team Blog" subtitle="News, updates, and stories from the Radicubs." />
 
       <div className="max-w-7xl mx-auto">
-        {blogPosts.length === 0 ? (
+        {loading ? (
+          <div className="text-[#a9a9a9] font-mono text-sm">Loading posts…</div>
+        ) : posts.length === 0 ? (
           <div className="border border-dashed border-[#2c303a] rounded-lg p-16 text-center">
             <BookOpen size={48} className="mx-auto text-[#2c303a] mb-4" />
             <h3 className="text-xl font-mono text-white mb-2">Blog posts coming soon.</h3>
@@ -22,10 +52,10 @@ const BlogView = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.map((post) => (
+            {posts.map((post) => (
               <Card
-                key={post.id}
-                onClick={() => navigate('blogPost', { postId: post.id })}
+                key={post.slug ?? post.id}
+                onClick={() => navigate('blogPost', { slug: post.slug })}
                 className="flex flex-col h-full !p-0 overflow-hidden cursor-pointer"
               >
                 <div className="w-full h-48 bg-[#2c303a] relative flex items-center justify-center border-b border-[#1b1d23]">
@@ -38,7 +68,7 @@ const BlogView = () => {
                 <div className="p-6 flex flex-col flex-grow bg-[#1b1d23]">
                   <div className="flex items-center gap-2 text-[#a9a9a9] font-mono text-xs mb-3">
                     <Calendar size={14} />
-                    {post.date}
+                    {formatDate(post.date)}
                   </div>
                   <h3 className="text-xl font-mono font-bold text-white mb-3">{post.title}</h3>
                   <p className="text-[#d3d3d3] text-sm mb-6 flex-grow">{post.description}</p>

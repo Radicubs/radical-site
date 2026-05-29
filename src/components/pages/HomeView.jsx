@@ -12,11 +12,11 @@ import Button from '../ui/Button.jsx';
 import Card from '../ui/Card.jsx';
 import SectionHeader from '../ui/SectionHeader.jsx';
 import { navigateTo } from '../../lib/navigation.js';
-import { blogPosts } from '../../lib/api.js';
 import { fetchLatestAwards } from '../../lib/strapiAwards.js';
 import { fetchSponsors } from '../../lib/strapiSponsors.js';
 import { fetchHomepage } from '../../lib/strapiHomepage.js';
 import { fetchProjects } from '../../lib/strapiProjects.js';
+import { fetchLatestBlogPosts } from '../../lib/strapiBlogPosts.js';
 
 const pickProjectPreview = (rawDescription) => {
   if (typeof rawDescription !== 'string') return '';
@@ -26,6 +26,17 @@ const pickProjectPreview = (rawDescription) => {
   // Use the first paragraph to keep homepage cards concise.
   const firstParagraph = trimmed.split(/\n\s*\n/)[0]?.trim();
   return firstParagraph || trimmed;
+};
+
+const formatDate = (value) => {
+  if (!value) return '';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return String(value);
+  return parsed.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 };
 
 const HomeView = () => {
@@ -48,6 +59,9 @@ const HomeView = () => {
   const [ongoingProjects, setOngoingProjects] = useState([]);
   const [ongoingProjectsLoading, setOngoingProjectsLoading] = useState(true);
 
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [blogPostsLoading, setBlogPostsLoading] = useState(true);
+
   const [homepageStats, setHomepageStats] = useState({
     foundingYear: '2019',
     teamNumber: '7503',
@@ -63,6 +77,21 @@ const HomeView = () => {
       const latest = await fetchLatestAwards({ limit: 8, signal: controller.signal });
       setAwards(latest);
       setAwardsLoading(false);
+    })();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    (async () => {
+      setBlogPostsLoading(true);
+      const rows = await fetchLatestBlogPosts({ limit: 4, signal: controller.signal });
+      setBlogPosts(rows);
+      setBlogPostsLoading(false);
     })();
 
     return () => {
@@ -351,18 +380,20 @@ const HomeView = () => {
         </div>
 
         <div className="max-w-7xl mx-auto">
-          {blogPosts.length === 0 ? (
+          {blogPostsLoading ? (
+            <div className="text-[#a9a9a9] font-mono text-sm">Loading posts…</div>
+          ) : blogPosts.length === 0 ? (
             <div className="border border-dashed border-[#2c303a] rounded-lg p-12 text-center bg-[#101215]">
               <BookOpen size={48} className="mx-auto text-[#2c303a] mb-4" />
               <h3 className="text-xl font-mono text-white mb-2">Blog posts coming soon.</h3>
               <p className="text-[#a9a9a9]">We are currently syncing our latest updates from radicubs.com.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {blogPosts.slice(0, 3).map((post) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {blogPosts.slice(0, 4).map((post) => (
                 <Card
-                  key={post.id}
-                  onClick={() => navigate('blogPost', { postId: post.id })}
+                  key={post.slug ?? post.id}
+                  onClick={() => navigate('blogPost', { slug: post.slug })}
                   className="flex flex-col h-full !p-0 overflow-hidden cursor-pointer !bg-[#101215]"
                 >
                   <div className="w-full h-48 bg-[#2c303a] relative flex items-center justify-center border-b border-[#1b1d23]">
@@ -377,7 +408,7 @@ const HomeView = () => {
                   <div className="p-6 flex flex-col flex-grow">
                     <div className="flex items-center gap-2 text-[#a9a9a9] font-mono text-xs mb-3">
                       <Calendar size={14} />
-                      {post.date}
+                      {formatDate(post.date)}
                     </div>
                     <h3 className="text-xl font-mono font-bold text-white mb-3">{post.title}</h3>
                     <p className="text-[#d3d3d3] text-sm mb-6 flex-grow">{post.description}</p>

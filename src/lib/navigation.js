@@ -16,7 +16,7 @@ export const routeFor = (id, params = {}) => {
     case 'blog':
       return '/blog';
     case 'blogPost':
-      return params.postId ? `/blog/${params.postId}` : '/blog';
+      return params.slug ? `/blog/${params.slug}/` : '/blog';
     case 'sponsors':
       return '/sponsors';
     default:
