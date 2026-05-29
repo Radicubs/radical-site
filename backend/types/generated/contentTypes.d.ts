@@ -440,6 +440,41 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiAboutPageAboutPage extends Struct.SingleTypeSchema {
+  collectionName: 'about_pages';
+  info: {
+    displayName: 'AboutPage';
+    pluralName: 'about-pages';
+    singularName: 'about-page';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    DiversityCards: Schema.Attribute.Component<'shared.diversity-card', true>;
+    DiversityHeading: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::about-page.about-page'
+    > &
+      Schema.Attribute.Private;
+    MissionCards: Schema.Attribute.Component<'shared.mission-card', true>;
+    MissionHeading: Schema.Attribute.String;
+    MissionStatement: Schema.Attribute.Text;
+    OriginBody: Schema.Attribute.Text;
+    OriginHeading: Schema.Attribute.String;
+    OriginSubheading: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiAwardAward extends Struct.CollectionTypeSchema {
   collectionName: 'awards';
   info: {
@@ -625,6 +660,53 @@ export interface ApiSponsorSponsor extends Struct.CollectionTypeSchema {
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     Website: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface ApiSponsorsPageSponsorsPage extends Struct.SingleTypeSchema {
+  collectionName: 'sponsors_pages';
+  info: {
+    displayName: 'SponsorsPage';
+    pluralName: 'sponsors-pages';
+    singularName: 'sponsors-page';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    BenefitsCards: Schema.Attribute.Component<
+      'shared.sponsors-benefit-card',
+      true
+    >;
+    BenefitsHeading: Schema.Attribute.String;
+    Body: Schema.Attribute.Text;
+    Buttons: Schema.Attribute.Component<'shared.sponsors-button', true>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::sponsors-page.sponsors-page'
+    > &
+      Schema.Attribute.Private;
+    LogosHeading: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    StatisticsCards: Schema.Attribute.Component<
+      'shared.sponsors-stat-card',
+      true
+    >;
+    StatisticsText: Schema.Attribute.String;
+    Title: Schema.Attribute.Text;
+    TitleHighlightColor: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.CustomField<'plugin::color-picker.color'> &
+      Schema.Attribute.DefaultTo<'#5ddb27'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    WaysCards: Schema.Attribute.Component<'shared.sponsors-support-card', true>;
+    WaysHeading: Schema.Attribute.String;
   };
 }
 
@@ -1200,12 +1282,14 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::about-page.about-page': ApiAboutPageAboutPage;
       'api::award.award': ApiAwardAward;
       'api::history.history': ApiHistoryHistory;
       'api::homepage.homepage': ApiHomepageHomepage;
       'api::project.project': ApiProjectProject;
       'api::roster.roster': ApiRosterRoster;
       'api::sponsor.sponsor': ApiSponsorSponsor;
+      'api::sponsors-page.sponsors-page': ApiSponsorsPageSponsorsPage;
       'api::team-member.team-member': ApiTeamMemberTeamMember;
       'api::team-page.team-page': ApiTeamPageTeamPage;
       'plugin::content-releases.release': PluginContentReleasesRelease;

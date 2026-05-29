@@ -1,0 +1,48 @@
+{
+  "collectionName": "components_shared_sponsors_buttons",
+  "info": {
+    "displayName": "Sponsors Button"
+  },
+  "options": {},
+  "attributes": {
+    "Label": {
+      "type": "string",
+      "required": true
+    },
+    "Variant": {
+      "type": "enumeration",
+      "required": true,
+      "default": "primary",
+      "enum": [
+        "primary",
+        "outline",
+        "secondary"
+      ]
+    },
+    "Action": {
+      "type": "enumeration",
+      "required": true,
+      "default": "link",
+      "enum": [
+        "link",
+        "toast",
+        "download"
+      ]
+    },
+    "Href": {
+      "type": "string"
+    },
+    "OpenInNewTab": {
+      "type": "boolean",
+      "default": false
+    },
+    "DownloadFilename": {
+      "type": "string"
+    },
+    "HasGreenBorder": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "config": {}
+}

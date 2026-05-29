@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_shared_sponsors_benefit_cards",
+  "info": {
+    "displayName": "Sponsors Benefit Card"
+  },
+  "options": {},
+  "attributes": {
+    "Title": {
+      "type": "string",
+      "required": true
+    },
+    "Body": {
+      "type": "text"
+    },
+    "ListItems": {
+      "type": "component",
+      "component": "shared.sponsors-list-item",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

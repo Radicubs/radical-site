@@ -1,0 +1,26 @@
+{
+  "collectionName": "components_shared_sponsors_stat_cards",
+  "info": {
+    "displayName": "Sponsors Stat Card"
+  },
+  "options": {},
+  "attributes": {
+    "Value": {
+      "type": "string",
+      "required": true
+    },
+    "Label": {
+      "type": "string",
+      "required": true
+    },
+    "Body": {
+      "type": "text"
+    },
+    "ListItems": {
+      "type": "component",
+      "component": "shared.sponsors-list-item",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

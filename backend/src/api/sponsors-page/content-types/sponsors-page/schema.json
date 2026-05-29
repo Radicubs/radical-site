@@ -1,0 +1,59 @@
+{
+  "kind": "singleType",
+  "collectionName": "sponsors_pages",
+  "info": {
+    "singularName": "sponsors-page",
+    "pluralName": "sponsors-pages",
+    "displayName": "SponsorsPage"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "text"
+    },
+    "TitleHighlightColor": {
+      "type": "customField",
+      "customField": "plugin::color-picker.color",
+      "required": true,
+      "default": "#5ddb27"
+    },
+    "Body": {
+      "type": "text"
+    },
+    "Buttons": {
+      "type": "component",
+      "component": "shared.sponsors-button",
+      "repeatable": true
+    },
+    "LogosHeading": {
+      "type": "string"
+    },
+    "WaysHeading": {
+      "type": "string"
+    },
+    "WaysCards": {
+      "type": "component",
+      "component": "shared.sponsors-support-card",
+      "repeatable": true
+    },
+    "BenefitsHeading": {
+      "type": "string"
+    },
+    "BenefitsCards": {
+      "type": "component",
+      "component": "shared.sponsors-benefit-card",
+      "repeatable": true
+    },
+    "StatisticsText": {
+      "type": "string"
+    },
+    "StatisticsCards": {
+      "type": "component",
+      "component": "shared.sponsors-stat-card",
+      "repeatable": true
+    }
+  }
+}

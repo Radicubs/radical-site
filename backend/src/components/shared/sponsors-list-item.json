@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_shared_sponsors_list_items",
+  "info": {
+    "displayName": "Sponsors List Item"
+  },
+  "options": {},
+  "attributes": {
+    "Text": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "config": {}
+}

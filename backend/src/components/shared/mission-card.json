@@ -1,0 +1,25 @@
+{
+  "collectionName": "components_shared_mission_cards",
+  "info": {
+    "displayName": "Mission Card"
+  },
+  "options": {},
+  "attributes": {
+    "Title": {
+      "type": "string",
+      "required": true
+    },
+    "Icon": {
+      "type": "enumeration",
+      "required": true,
+      "default": "Target",
+      "enum": [
+        "Target",
+        "Globe",
+        "Heart",
+        "Users"
+      ]
+    }
+  },
+  "config": {}
+}
