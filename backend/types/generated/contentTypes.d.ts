@@ -475,6 +475,44 @@ export interface ApiAboutPageAboutPage extends Struct.SingleTypeSchema {
   };
 }
 
+export interface ApiAlbumAlbum extends Struct.CollectionTypeSchema {
+  collectionName: 'albums';
+  info: {
+    description: 'A collection of photos for a specific season/event.';
+    displayName: 'Album';
+    pluralName: 'albums';
+    singularName: 'album';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    CoverPhoto: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::album.album'> &
+      Schema.Attribute.Private;
+    Photos: Schema.Attribute.Media<'images', true>;
+    publishedAt: Schema.Attribute.DateTime;
+    Slug: Schema.Attribute.UID<'Title'> & Schema.Attribute.Required;
+    Title: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    Year: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 2100;
+          min: 1900;
+        },
+        number
+      >;
+  };
+}
+
 export interface ApiAwardAward extends Struct.CollectionTypeSchema {
   collectionName: 'awards';
   info: {
@@ -1317,6 +1355,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::about-page.about-page': ApiAboutPageAboutPage;
+      'api::album.album': ApiAlbumAlbum;
       'api::award.award': ApiAwardAward;
       'api::blog-post.blog-post': ApiBlogPostBlogPost;
       'api::history.history': ApiHistoryHistory;
