@@ -15,8 +15,16 @@
       "type": "string",
       "required": true
     },
+    "Image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
     "Description": {
-      "type": "text",
+      "type": "blocks",
       "required": true
     },
     "Timeline": {

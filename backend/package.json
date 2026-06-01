@@ -8,6 +8,7 @@
     "console": "strapi console",
     "deploy": "strapi deploy",
     "dev": "strapi develop",
+    "dev:clean": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev.ps1",
     "develop": "strapi develop",
     "start": "strapi start",
     "strapi": "strapi",

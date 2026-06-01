@@ -1,9 +1,33 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BookOpen, Cpu, Users, Zap } from 'lucide-react';
+import { BlocksRenderer } from '@strapi/blocks-react-renderer';
 
 import Card from '../ui/Card.jsx';
 import SectionHeader from '../ui/SectionHeader.jsx';
 import { fetchProjects } from '../../lib/strapiProjects.js';
+
+const blocksRendererConfig = {
+  blocks: {
+    paragraph: ({ children }) => (
+      <p className="text-[#d3d3d3] whitespace-pre-line leading-relaxed">{children}</p>
+    ),
+    list: ({ children, format }) => {
+      if (format === 'ordered') {
+        return <ol className="list-decimal ml-6 space-y-2 text-[#d3d3d3]">{children}</ol>;
+      }
+      return <ul className="list-disc ml-6 space-y-2 text-[#d3d3d3]">{children}</ul>;
+    },
+  },
+  modifiers: {
+    bold: ({ children }) => <strong className="text-white">{children}</strong>,
+    link: ({ children, url }) => (
+      <a href={url} className="text-[#5ddb27] underline" target="_blank" rel="noreferrer">
+        {children}
+      </a>
+    ),
+    highlight: ({ children }) => <mark className="bg-transparent text-[#5ddb27]">{children}</mark>,
+  },
+};
 
 const ProjectsView = () => {
   const [projects, setProjects] = useState([]);
@@ -72,11 +96,27 @@ const ProjectsView = () => {
                   key={project.id ?? `${project.title}-${index}`}
                   className="bg-[#101215] rounded-lg p-8 border border-[#2c303a] card-hover flex flex-col"
                 >
+                  {project.imageUrl ? (
+                    <div className="w-full h-56 bg-[#2c303a] rounded-md overflow-hidden mb-6">
+                      <img
+                        src={project.imageUrl}
+                        alt={project.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  ) : null}
                   <div className="flex flex-col mb-6">
                     <h4 className="text-2xl font-mono text-white mb-2">{project.title}</h4>
                   </div>
 
-                  <p className="text-[#d3d3d3] mb-6 whitespace-pre-line">{project.description}</p>
+                  <div className="mb-6 space-y-4">
+                    {Array.isArray(project.descriptionBlocks) && project.descriptionBlocks.length > 0 ? (
+                      <BlocksRenderer content={project.descriptionBlocks} {...blocksRendererConfig} />
+                    ) : (
+                      <p className="text-[#d3d3d3] whitespace-pre-line">{project.description}</p>
+                    )}
+                  </div>
 
                   {project.button && (
                     <div className="mt-auto pt-6 border-t border-[#2c303a]">
@@ -114,11 +154,27 @@ const ProjectsView = () => {
             return (
               <Card key={project.id ?? `${project.title}-${index}`}
               >
+                {project.imageUrl ? (
+                  <div className="w-full h-40 bg-[#1b1d23] rounded-md overflow-hidden mb-4 border border-[#1b1d23]">
+                    <img
+                      src={project.imageUrl}
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                ) : null}
                 <div className="text-[#5ddb27] mb-4">
                   <Icon size={32} />
                 </div>
                 <h4 className="text-xl font-mono text-white mb-3">{project.title}</h4>
-                <p className="text-[#a9a9a9] mb-4">{project.description}</p>
+                <div className="text-[#a9a9a9] mb-4 space-y-3">
+                  {Array.isArray(project.descriptionBlocks) && project.descriptionBlocks.length > 0 ? (
+                    <BlocksRenderer content={project.descriptionBlocks} {...blocksRendererConfig} />
+                  ) : (
+                    <p className="whitespace-pre-line">{project.description}</p>
+                  )}
+                </div>
               </Card>
             );
           })}

@@ -349,6 +349,16 @@ const HomeView = () => {
                   key={project.id ?? `${project.title}-${i}`}
                   className="flex flex-col text-left !p-0 overflow-hidden !bg-[#1b1d23]"
                 >
+                  {project.imageUrl ? (
+                    <div className="w-full h-44 bg-[#2c303a] relative flex items-center justify-center border-b border-[#101215]">
+                      <img
+                        src={project.imageUrl}
+                        alt={project.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  ) : null}
                   <div className="p-6 flex flex-col flex-grow">
                     <h3 className="text-xl font-mono text-white mb-3">{project.title}</h3>
                     <p className="text-[#a9a9a9] text-sm mb-4 flex-grow whitespace-pre-line">

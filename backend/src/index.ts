@@ -198,6 +198,44 @@ const seedSponsorsPage = async (strapi: any) => {
   });
 };
 
+const toBlocks = (value: unknown) => {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== 'string') return null;
+
+  const parts = value
+    .split(/\n\s*\n/g)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  const paragraphs = parts.length > 0 ? parts : [''];
+
+  return paragraphs.map((text) => ({
+    type: 'paragraph',
+    children: [{ type: 'text', text }],
+  }));
+};
+
+const migrateProjectDescriptions = async (strapi: any) => {
+  // When Project.Description was a plain string and later changed to blocks,
+  // existing records can break the admin UI/API. Convert legacy strings to blocks.
+  const projects = await strapi.db.query('api::project.project').findMany({
+    select: ['id', 'Description'],
+    limit: 1000,
+  });
+
+  for (const project of projects) {
+    const id = (project as any)?.id;
+    const nextBlocks = toBlocks((project as any)?.Description);
+    if (!id || !nextBlocks) continue;
+
+    await strapi.entityService.update('api::project.project', id, {
+      data: {
+        Description: nextBlocks,
+      },
+    });
+  }
+};
+
 export default {
   /**
    * An asynchronous register function that runs before
@@ -217,5 +255,6 @@ export default {
   async bootstrap({ strapi }: { strapi: any }) {
     await seedAboutPage(strapi);
     await seedSponsorsPage(strapi);
+    await migrateProjectDescriptions(strapi);
   },
 };
