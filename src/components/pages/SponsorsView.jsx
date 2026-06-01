@@ -37,7 +37,7 @@ const parseHighlightedTitleSegments = (value) => {
 };
 
 const SponsorsView = () => {
-  const [showToast, setShowToast] = useState(false);
+  const [activeToast, setActiveToast] = useState(null);
   const [sponsors, setSponsors] = useState([]);
   const [sponsorsLoading, setSponsorsLoading] = useState(true);
   const [page, setPage] = useState({
@@ -161,11 +161,11 @@ const SponsorsView = () => {
   });
 
   useEffect(() => {
-    if (showToast) {
-      const timer = setTimeout(() => setShowToast(false), 5000);
+    if (activeToast) {
+      const timer = setTimeout(() => setActiveToast(null), 5000);
       return () => clearTimeout(timer);
     }
-  }, [showToast]);
+  }, [activeToast]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -196,7 +196,7 @@ const SponsorsView = () => {
     const href = typeof btn?.href === 'string' ? btn.href.trim() : '';
 
     if (action === 'toast') {
-      setShowToast(true);
+      setActiveToast(btn);
       return;
     }
 
@@ -212,13 +212,19 @@ const SponsorsView = () => {
     }
 
     if (action === 'download') {
-      if (!href) return;
+      const downloadHref = btn?.fileUrl || href || (typeof btn?.downloadFilename === 'string' ? btn.downloadFilename.trim() : '');
+      if (!downloadHref) return;
 
       const a = document.createElement('a');
-      a.href = href;
+      a.href = downloadHref;
 
       const filename = typeof btn?.downloadFilename === 'string' ? btn.downloadFilename.trim() : '';
       if (filename) a.download = filename;
+
+      if (btn?.openInNewTab) {
+        a.target = '_blank';
+        a.rel = 'noreferrer';
+      }
 
       document.body.appendChild(a);
       a.click();
@@ -231,7 +237,7 @@ const SponsorsView = () => {
 
     if (action === 'toast') return true;
     if (action === 'link') return isNonEmptyString(btn?.href);
-    if (action === 'download') return isNonEmptyString(btn?.href);
+    if (action === 'download') return isNonEmptyString(btn?.fileUrl) || isNonEmptyString(btn?.href) || isNonEmptyString(btn?.downloadFilename);
 
     return false;
   };
@@ -391,11 +397,11 @@ const SponsorsView = () => {
         </div>
       </section>
 
-      {showToast && (
+      {activeToast && (
         <div className="fixed bottom-8 right-8 z-50 fade-in-up">
           <div className="bg-[#1b1d23] border border-[#2c303a] border-l-4 border-l-[#5ddb27] rounded-lg shadow-2xl p-6 max-w-sm flex flex-col gap-2 relative">
             <button
-              onClick={() => setShowToast(false)}
+              onClick={() => setActiveToast(null)}
               className="absolute top-3 right-3 text-[#a9a9a9] hover:text-white transition-colors text-lg leading-none"
               aria-label="Close pop-up"
             >
@@ -403,17 +409,28 @@ const SponsorsView = () => {
             </button>
             <div className="flex items-center gap-2 text-[#5ddb27] font-mono font-bold mb-2">
               <FileText size={18} />
-              <span>Sponsorship Packet</span>
+              <span>{activeToast.toastTitle}</span>
             </div>
             <p className="text-[#d3d3d3] text-sm leading-relaxed">
-              Contact{' '}
-              <a
-                href="mailto:radicubs@gmail.com"
-                className="text-white hover:text-[#5ddb27] underline transition-colors"
-              >
-                radicubs@gmail.com
-              </a>{' '}
-              to get the packet.
+              {(() => {
+                const text = activeToast.toastText || '';
+                const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
+                const parts = text.split(emailRegex);
+                return parts.map((part, i) => {
+                  if (part.match(emailRegex)) {
+                    return (
+                      <a
+                        key={i}
+                        href={`mailto:${part}`}
+                        className="text-white hover:text-[#5ddb27] underline transition-colors"
+                      >
+                        {part}
+                      </a>
+                    );
+                  }
+                  return <React.Fragment key={i}>{part}</React.Fragment>;
+                });
+              })()}
             </p>
           </div>
         </div>

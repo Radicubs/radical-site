@@ -63,11 +63,14 @@ export interface SharedSponsorsButton extends Struct.ComponentSchema {
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'link'>;
     DownloadFilename: Schema.Attribute.String;
+    File: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     HasGreenBorder: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
     Href: Schema.Attribute.String;
     Label: Schema.Attribute.String & Schema.Attribute.Required;
     OpenInNewTab: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    ToastText: Schema.Attribute.Text;
+    ToastTitle: Schema.Attribute.String;
     Variant: Schema.Attribute.Enumeration<['primary', 'outline', 'secondary']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'primary'>;

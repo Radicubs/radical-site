@@ -30,7 +30,7 @@ export async function fetchSponsorsPage({ signal } = {}) {
   const url = new URL('/api/sponsors-page', baseUrl);
   const params = new URLSearchParams();
 
-  params.set('populate[Buttons]', '*');
+  params.set('populate[Buttons][populate]', '*');
   params.set('populate[WaysCards][populate][ListItems]', '*');
   params.set('populate[BenefitsCards][populate][ListItems]', '*');
   params.set('populate[StatisticsCards][populate][ListItems]', '*');
@@ -62,6 +62,9 @@ export async function fetchSponsorsPage({ signal } = {}) {
         openInNewTab: Boolean(data?.OpenInNewTab),
         downloadFilename: typeof data?.DownloadFilename === 'string' ? data.DownloadFilename : '',
         hasGreenBorder: Boolean(data?.HasGreenBorder),
+        fileUrl: normalizeItem(data?.File)?.url ? new URL(normalizeItem(data?.File).url, baseUrl).toString() : null,
+        toastTitle: typeof data?.ToastTitle === 'string' ? data.ToastTitle : 'Sponsorship Packet',
+        toastText: typeof data?.ToastText === 'string' ? data.ToastText : 'Contact radicubs@gmail.com to get the packet.',
       };
     });
 
