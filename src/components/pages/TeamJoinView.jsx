@@ -5,55 +5,28 @@ import Button from '../ui/Button.jsx';
 import Card from '../ui/Card.jsx';
 import { fetchTeamPage } from '../../lib/strapiTeamPage.js';
 import { fetchRosters } from '../../lib/strapiRosters.js';
+import { useStrapiData } from '../../hooks/useStrapiData.js';
 
 const TeamJoinView = () => {
-  const [rosters, setRosters] = useState([]);
   const [selectedYear, setSelectedYear] = useState('');
 
-  const [applicationOpen, setApplicationOpen] = useState(true);
-  const [applicationLink, setApplicationLink] = useState(null);
-  const [teamPageDescription, setTeamPageDescription] = useState(
-    'Meet the students driving the future. No prior experience required. Just a willingness to learn, work hard, and be radical.'
-  );
+  const { data: rawRosters } = useStrapiData(fetchRosters, {}, []);
+  const { data: teamPage } = useStrapiData(fetchTeamPage, {}, null);
+
+  const rosters = Array.isArray(rawRosters) ? rawRosters : [];
+
+  useEffect(() => {
+    if (rosters.length > 0 && (!selectedYear || !rosters.some((r) => r.year === selectedYear))) {
+      setSelectedYear(rosters[0].year);
+    }
+  }, [rosters, selectedYear]);
+
+  const applicationOpen = teamPage?.applicationOpen ?? true;
+  const applicationLink = teamPage?.applicationLink?.trim() || null;
+  const teamPageDescription = teamPage?.description?.trim() || 'Meet the students driving the future. No prior experience required. Just a willingness to learn, work hard, and be radical.';
 
   const rosterYears = rosters.map((r) => r.year);
   const displayedMembers = rosters.find((r) => r.year === selectedYear)?.members ?? [];
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    (async () => {
-      const [teamPage, fetchedRosters] = await Promise.all([
-        fetchTeamPage({ signal: controller.signal }),
-        fetchRosters({ signal: controller.signal }),
-      ]);
-
-      if (Array.isArray(fetchedRosters) && fetchedRosters.length > 0) {
-        setRosters(fetchedRosters);
-
-        setSelectedYear((prev) => {
-          if (prev && fetchedRosters.some((r) => r.year === prev)) return prev;
-          return fetchedRosters[0].year;
-        });
-      }
-
-      if (!teamPage) return;
-
-      if (typeof teamPage.description === 'string' && teamPage.description.trim().length > 0) {
-        setTeamPageDescription(teamPage.description.trim());
-      }
-
-      if (typeof teamPage.applicationOpen === 'boolean') {
-        setApplicationOpen(teamPage.applicationOpen);
-      }
-
-      if (typeof teamPage.applicationLink === 'string' && teamPage.applicationLink.trim().length > 0) {
-        setApplicationLink(teamPage.applicationLink.trim());
-      }
-    })();
-
-    return () => controller.abort();
-  }, []);
 
   return (
     <div className="w-full pt-24 bg-[#101215] min-h-screen pb-24">

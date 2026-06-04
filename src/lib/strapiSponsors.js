@@ -1,76 +1,26 @@
-const getPublicStrapiUrl = () => {
-  const url = import.meta.env?.PUBLIC_STRAPI_URL;
-  if (typeof url !== 'string' || url.trim().length === 0) return null;
-  return url.trim().replace(/\/$/, '');
-};
-
-const absolutizeUrl = (maybeRelativeUrl, baseUrl) => {
-  if (typeof maybeRelativeUrl !== 'string' || maybeRelativeUrl.trim().length === 0) return null;
-  const url = maybeRelativeUrl.trim();
-
-  if (/^https?:\/\//i.test(url)) return url;
-  if (url.startsWith('//')) return `https:${url}`;
-  if (!baseUrl) return url;
-
-  if (url.startsWith('/')) return `${baseUrl}${url}`;
-  return `${baseUrl}/${url}`;
-};
-
-const pickLogoUrl = (logo) => {
-  if (!logo) return null;
-
-  // Common Strapi REST shapes
-  // - { data: { attributes: { url } } }
-  // - { data: { url } }
-  // - { url }
-  const nested = logo?.data?.attributes?.url ?? logo?.data?.url ?? logo?.url ?? null;
-  if (nested) return nested;
-
-  // Sometimes media is returned as an array even when multiple=false
-  const arrUrl = Array.isArray(logo?.data)
-    ? logo.data?.[0]?.attributes?.url ?? logo.data?.[0]?.url
-    : null;
-
-  return arrUrl ?? null;
-};
+import { getStrapiBaseUrl, resolveMediaUrl, strapiGet, attrs } from './strapiUtils.js';
 
 const mapSponsor = (item, baseUrl) => {
-  const attributes = item?.attributes ?? item;
+  const a = attrs(item);
 
-  const name = attributes?.Name ?? '';
-  const website = attributes?.Website ?? '';
-  const logoRaw = pickLogoUrl(attributes?.Logo);
-  const logoUrl = absolutizeUrl(logoRaw, baseUrl);
+  const name = a?.Name ?? '';
+  const website = a?.Website ?? '';
+  const logoUrl = resolveMediaUrl(a?.Logo, baseUrl);
 
   if (!logoUrl) return null;
 
-  return {
-    name,
-    website,
-    logoUrl,
-  };
+  return { name, website, logoUrl };
 };
 
-const fetchSponsorsPage = async ({ baseUrl, page, pageSize, signal } = {}) => {
-  const url = new URL('/api/sponsors', baseUrl);
+const fetchSponsorsPageRaw = async ({ baseUrl, page, pageSize, signal } = {}) => {
   const params = new URLSearchParams();
   params.set('populate', 'Logo');
   params.set('pagination[page]', String(page));
   params.set('pagination[pageSize]', String(pageSize));
   params.append('fields[0]', 'Name');
   params.append('fields[1]', 'Website');
-  url.search = params.toString();
 
-  const res = await fetch(url.toString(), {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-    },
-    signal,
-  });
-
-  if (!res.ok) return { data: [], meta: null };
-  const json = await res.json();
+  const json = await strapiGet('/api/sponsors', params, signal);
 
   return {
     data: Array.isArray(json?.data) ? json.data : [],
@@ -79,7 +29,7 @@ const fetchSponsorsPage = async ({ baseUrl, page, pageSize, signal } = {}) => {
 };
 
 export async function fetchSponsors({ signal, pageSize = 100 } = {}) {
-  const baseUrl = getPublicStrapiUrl();
+  const baseUrl = getStrapiBaseUrl();
   if (!baseUrl) return [];
 
   try {
@@ -87,7 +37,7 @@ export async function fetchSponsors({ signal, pageSize = 100 } = {}) {
     const maxPages = 50;
 
     for (let page = 1; page <= maxPages; page++) {
-      const { data, meta } = await fetchSponsorsPage({ baseUrl, page, pageSize, signal });
+      const { data, meta } = await fetchSponsorsPageRaw({ baseUrl, page, pageSize, signal });
       allRows.push(...data);
 
       const pagination = meta?.pagination;

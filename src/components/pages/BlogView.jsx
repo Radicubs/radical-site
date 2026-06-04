@@ -5,37 +5,13 @@ import Card from '../ui/Card.jsx';
 import SectionHeader from '../ui/SectionHeader.jsx';
 import { navigateTo } from '../../lib/navigation.js';
 import { fetchAllBlogPosts } from '../../lib/strapiBlogPosts.js';
+import { useStrapiData } from '../../hooks/useStrapiData.js';
+import { formatDate } from '../../utils/formatDate.js';
 
-const formatDate = (value) => {
-  if (!value) return '';
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return String(value);
-  return parsed.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
 
 const BlogView = () => {
   const navigate = navigateTo;
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    (async () => {
-      setLoading(true);
-      const rows = await fetchAllBlogPosts({ signal: controller.signal });
-      setPosts(rows);
-      setLoading(false);
-    })();
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
+  const { data: posts, loading } = useStrapiData(fetchAllBlogPosts, {}, []);
 
   return (
     <div className="w-full pt-32 px-6 md:px-16 lg:px-24 bg-[#101215] min-h-screen">

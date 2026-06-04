@@ -5,6 +5,7 @@ import Button from '../ui/Button.jsx';
 import Card from '../ui/Card.jsx';
 import { fetchSponsors } from '../../lib/strapiSponsors.js';
 import { fetchSponsorsPage } from '../../lib/strapiSponsorsPage.js';
+import { useStrapiData } from '../../hooks/useStrapiData.js';
 
 const isNonEmptyString = (value) => typeof value === 'string' && value.trim().length > 0;
 
@@ -36,129 +37,133 @@ const parseHighlightedTitleSegments = (value) => {
   return segments;
 };
 
+const defaultPage = {
+  title: 'Fuel The <Innovation>',
+  titleHighlightColor: '#5ddb27',
+  body:
+    "Radicubs is entirely funded by corporate sponsors, grants, and community donations. By partnering with us, you aren't just funding a robot—you are investing in the next generation of engineers, leaders, and innovators in North Texas.",
+  buttons: [
+    {
+      label: 'Download Sponsorship',
+      variant: 'primary',
+      action: 'toast',
+      href: '',
+      openInNewTab: false,
+      downloadFilename: '',
+      hasGreenBorder: false,
+    },
+    {
+      label: 'Contact Us Directly',
+      variant: 'outline',
+      action: 'link',
+      href: 'mailto:radicubs@gmail.com',
+      openInNewTab: false,
+      downloadFilename: '',
+      hasGreenBorder: false,
+    },
+    {
+      label: 'Donate',
+      variant: 'secondary',
+      action: 'link',
+      href: '',
+      openInNewTab: false,
+      downloadFilename: '',
+      hasGreenBorder: true,
+    },
+  ],
+  logosHeading: 'Trusted By Industry Leaders',
+  waysHeading: 'Ways to Support',
+  waysCards: [
+    {
+      title: 'Donation Matching',
+      body: 'Encourage companies to match employee donations',
+      listItems: [],
+    },
+    {
+      title: 'Sponsorship',
+      body: 'Financial support in exchange for visibility and partnership',
+      listItems: [],
+    },
+    {
+      title: 'Direct Donation',
+      body: 'One-time or recurring financial contributions',
+      listItems: [],
+    },
+    {
+      title: 'Workspace & Tools',
+      body: 'Providing workspace, tools, or equipment to support team operations',
+      listItems: [],
+    },
+  ],
+  benefitsHeading: 'Sponsorship Benefits',
+  benefitsCards: [
+    {
+      title: 'Brand Visibility',
+      body: '',
+      listItems: [
+        'Logo on our robot, team uniforms, and website',
+        'Recognition at competitions and community events',
+        'Mentions in press releases and social media',
+      ],
+    },
+    {
+      title: 'Community Impact',
+      body: '',
+      listItems: [
+        'Support STEM education in our community',
+        'Help develop future engineers and innovators',
+        'Contribute to workforce development',
+      ],
+    },
+    {
+      title: 'Team Engagement',
+      body: '',
+      listItems: [
+        'Opportunities for team demonstrations at your facility',
+        'Mentorship and internship connections',
+        'Invitations to team events and competitions',
+      ],
+    },
+    {
+      title: 'Tax Benefits',
+      body: '',
+      listItems: [
+        'Tax-deductible contributions',
+        'Documentation for corporate social responsibility initiatives',
+        'Annual impact reports for your records',
+      ],
+    },
+  ],
+  statisticsText: 'Statistics',
+  statisticsCards: [
+    {
+      value: '2,500+',
+      label: 'Annual Reach',
+      body: 'Your brand visible at massive community events, libraries, and schools.',
+      listItems: [],
+    },
+    {
+      value: '501(c)(3)',
+      label: 'Tax Deductible',
+      body: 'All sponsorships and donations are fully tax-deductible contributions.',
+      listItems: [],
+    },
+    {
+      value: '100%',
+      label: 'Student Impact',
+      body: 'Funds go directly to parts, competition fees, and community outreach.',
+      listItems: [],
+    },
+  ],
+};
+
 const SponsorsView = () => {
   const [activeToast, setActiveToast] = useState(null);
-  const [sponsors, setSponsors] = useState([]);
-  const [sponsorsLoading, setSponsorsLoading] = useState(true);
-  const [page, setPage] = useState({
-    title: 'Fuel The <Innovation>',
-    titleHighlightColor: '#5ddb27',
-    body:
-      "Radicubs is entirely funded by corporate sponsors, grants, and community donations. By partnering with us, you aren't just funding a robot—you are investing in the next generation of engineers, leaders, and innovators in North Texas.",
-    buttons: [
-      {
-        label: 'Download Sponsorship',
-        variant: 'primary',
-        action: 'toast',
-        href: '',
-        openInNewTab: false,
-        downloadFilename: '',
-        hasGreenBorder: false,
-      },
-      {
-        label: 'Contact Us Directly',
-        variant: 'outline',
-        action: 'link',
-        href: 'mailto:radicubs@gmail.com',
-        openInNewTab: false,
-        downloadFilename: '',
-        hasGreenBorder: false,
-      },
-      {
-        label: 'Donate',
-        variant: 'secondary',
-        action: 'link',
-        href: '',
-        openInNewTab: false,
-        downloadFilename: '',
-        hasGreenBorder: true,
-      },
-    ],
-    logosHeading: 'Trusted By Industry Leaders',
-    waysHeading: 'Ways to Support',
-    waysCards: [
-      {
-        title: 'Donation Matching',
-        body: 'Encourage companies to match employee donations',
-        listItems: [],
-      },
-      {
-        title: 'Sponsorship',
-        body: 'Financial support in exchange for visibility and partnership',
-        listItems: [],
-      },
-      {
-        title: 'Direct Donation',
-        body: 'One-time or recurring financial contributions',
-        listItems: [],
-      },
-      {
-        title: 'Workspace & Tools',
-        body: 'Providing workspace, tools, or equipment to support team operations',
-        listItems: [],
-      },
-    ],
-    benefitsHeading: 'Sponsorship Benefits',
-    benefitsCards: [
-      {
-        title: 'Brand Visibility',
-        body: '',
-        listItems: [
-          'Logo on our robot, team uniforms, and website',
-          'Recognition at competitions and community events',
-          'Mentions in press releases and social media',
-        ],
-      },
-      {
-        title: 'Community Impact',
-        body: '',
-        listItems: [
-          'Support STEM education in our community',
-          'Help develop future engineers and innovators',
-          'Contribute to workforce development',
-        ],
-      },
-      {
-        title: 'Team Engagement',
-        body: '',
-        listItems: [
-          'Opportunities for team demonstrations at your facility',
-          'Mentorship and internship connections',
-          'Invitations to team events and competitions',
-        ],
-      },
-      {
-        title: 'Tax Benefits',
-        body: '',
-        listItems: [
-          'Tax-deductible contributions',
-          'Documentation for corporate social responsibility initiatives',
-          'Annual impact reports for your records',
-        ],
-      },
-    ],
-    statisticsText: 'Statistics',
-    statisticsCards: [
-      {
-        value: '2,500+',
-        label: 'Annual Reach',
-        body: 'Your brand visible at massive community events, libraries, and schools.',
-        listItems: [],
-      },
-      {
-        value: '501(c)(3)',
-        label: 'Tax Deductible',
-        body: 'All sponsorships and donations are fully tax-deductible contributions.',
-        listItems: [],
-      },
-      {
-        value: '100%',
-        label: 'Student Impact',
-        body: 'Funds go directly to parts, competition fees, and community outreach.',
-        listItems: [],
-      },
-    ],
-  });
+  
+  const { data: sponsors, loading: sponsorsLoading } = useStrapiData(fetchSponsors, {}, []);
+  const { data: pageNext } = useStrapiData(fetchSponsorsPage, {}, null);
+  
+  const page = { ...defaultPage, ...(pageNext || {}) };
 
   useEffect(() => {
     if (activeToast) {
@@ -166,30 +171,6 @@ const SponsorsView = () => {
       return () => clearTimeout(timer);
     }
   }, [activeToast]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    (async () => {
-      setSponsorsLoading(true);
-      const rows = await fetchSponsors({ signal: controller.signal });
-      setSponsors(rows);
-      setSponsorsLoading(false);
-    })();
-
-    return () => controller.abort();
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    (async () => {
-      const next = await fetchSponsorsPage({ signal: controller.signal });
-      if (next) setPage((prev) => ({ ...prev, ...next }));
-    })();
-
-    return () => controller.abort();
-  }, []);
 
   const handleButtonAction = (btn) => {
     const action = typeof btn?.action === 'string' ? btn.action.trim().toLowerCase() : '';

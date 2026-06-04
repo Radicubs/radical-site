@@ -17,6 +17,8 @@ import { fetchSponsors } from '../../lib/strapiSponsors.js';
 import { fetchHomepage } from '../../lib/strapiHomepage.js';
 import { fetchProjects } from '../../lib/strapiProjects.js';
 import { fetchLatestBlogPosts } from '../../lib/strapiBlogPosts.js';
+import { useStrapiData } from '../../hooks/useStrapiData.js';
+import { formatDate } from '../../utils/formatDate.js';
 
 const pickProjectPreview = (rawDescription) => {
   if (typeof rawDescription !== 'string') return '';
@@ -28,16 +30,6 @@ const pickProjectPreview = (rawDescription) => {
   return firstParagraph || trimmed;
 };
 
-const formatDate = (value) => {
-  if (!value) return '';
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return String(value);
-  return parsed.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
 
 const HomeView = () => {
   const navigate = navigateTo;
@@ -45,120 +37,26 @@ const HomeView = () => {
   const currentYear = new Date().getFullYear();
   const fallbackSeasons = currentYear - 2019 + 1;
 
-  const [awards, setAwards] = useState([]);
-  const [awardsLoading, setAwardsLoading] = useState(true);
+  const { data: awards, loading: awardsLoading } = useStrapiData(fetchLatestAwards, { limit: 8 }, []);
+  const { data: blogPosts, loading: blogPostsLoading } = useStrapiData(fetchLatestBlogPosts, { limit: 4 }, []);
+  const { data: rawProjects, loading: projectsFetchLoading } = useStrapiData(fetchProjects, {}, []);
+  const { data: homepageData } = useStrapiData(fetchHomepage, {}, null);
+  const { data: sponsors, loading: sponsorsLoading } = useStrapiData(fetchSponsors, {}, []);
 
-  const [sponsors, setSponsors] = useState([]);
-  const [sponsorsLoading, setSponsorsLoading] = useState(true);
+  const ongoingProjects = (Array.isArray(rawProjects) ? rawProjects.filter((p) => p?.timeline === 'Present') : []).slice(0, 2);
+  const ongoingProjectsLoading = projectsFetchLoading;
 
-  const [teamPhotoUrl, setTeamPhotoUrl] = useState(null);
-  const [homepageDescription, setHomepageDescription] = useState(
-    'We are a student-led, 501(c)(3) nonprofit robotics organization redefining STEM access, innovation, and community impact across North Texas.'
-  );
+  const teamPhotoUrl = homepageData?.teamPhotoUrl ?? null;
+  const homepageDescription = (typeof homepageData?.description === 'string' && homepageData.description.trim().length > 0)
+    ? homepageData.description.trim()
+    : 'We are a student-led, 501(c)(3) nonprofit robotics organization redefining STEM access, innovation, and community impact across North Texas.';
 
-  const [ongoingProjects, setOngoingProjects] = useState([]);
-  const [ongoingProjectsLoading, setOngoingProjectsLoading] = useState(true);
-
-  const [blogPosts, setBlogPosts] = useState([]);
-  const [blogPostsLoading, setBlogPostsLoading] = useState(true);
-
-  const [homepageStats, setHomepageStats] = useState({
-    foundingYear: '2019',
-    teamNumber: '7503',
-    activeSeasons: fallbackSeasons,
-    totalAwards: '8+',
-  });
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    (async () => {
-      setAwardsLoading(true);
-      const latest = await fetchLatestAwards({ limit: 8, signal: controller.signal });
-      setAwards(latest);
-      setAwardsLoading(false);
-    })();
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    (async () => {
-      setBlogPostsLoading(true);
-      const rows = await fetchLatestBlogPosts({ limit: 4, signal: controller.signal });
-      setBlogPosts(rows);
-      setBlogPostsLoading(false);
-    })();
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    (async () => {
-      setOngoingProjectsLoading(true);
-      const rows = await fetchProjects({ signal: controller.signal });
-      const present = Array.isArray(rows) ? rows.filter((p) => p?.timeline === 'Present') : [];
-      setOngoingProjects(present.slice(0, 2));
-      setOngoingProjectsLoading(false);
-    })();
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    (async () => {
-      const homepage = await fetchHomepage({ signal: controller.signal });
-      if (!homepage) return;
-
-      setTeamPhotoUrl(homepage.teamPhotoUrl ?? null);
-
-      if (typeof homepage.description === 'string' && homepage.description.trim().length > 0) {
-        setHomepageDescription(homepage.description.trim());
-      }
-
-      setHomepageStats((prev) => ({
-        ...prev,
-        foundingYear:
-          homepage.foundingYear != null ? String(homepage.foundingYear) : prev.foundingYear,
-        teamNumber: homepage.teamNumber != null ? String(homepage.teamNumber) : prev.teamNumber,
-        activeSeasons:
-          homepage.activeSeasons != null ? homepage.activeSeasons : prev.activeSeasons,
-        totalAwards:
-          homepage.totalAwards != null ? String(homepage.totalAwards) : prev.totalAwards,
-      }));
-    })();
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    (async () => {
-      setSponsorsLoading(true);
-      const rows = await fetchSponsors({ signal: controller.signal });
-      setSponsors(rows);
-      setSponsorsLoading(false);
-    })();
-
-    return () => {
-      controller.abort();
-    };
-  }, []);
+  const homepageStats = {
+    foundingYear: homepageData?.foundingYear != null ? String(homepageData.foundingYear) : '2019',
+    teamNumber: homepageData?.teamNumber != null ? String(homepageData.teamNumber) : '7503',
+    activeSeasons: homepageData?.activeSeasons != null ? homepageData.activeSeasons : fallbackSeasons,
+    totalAwards: homepageData?.totalAwards != null ? String(homepageData.totalAwards) : '8+',
+  };
 
   return (
     <div className="w-full bg-[#101215]">

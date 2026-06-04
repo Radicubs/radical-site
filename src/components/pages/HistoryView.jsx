@@ -3,23 +3,11 @@ import { Cpu } from 'lucide-react';
 
 import SectionHeader from '../ui/SectionHeader.jsx';
 import { fetchHistories } from '../../lib/strapiHistories.js';
+import { useStrapiData } from '../../hooks/useStrapiData.js';
 
 const HistoryView = () => {
-  const [seasonsTimeline, setSeasonsTimeline] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    (async () => {
-      setIsLoading(true);
-      const rows = await fetchHistories({ signal: controller.signal });
-      setSeasonsTimeline(Array.isArray(rows) ? rows : []);
-      setIsLoading(false);
-    })();
-
-    return () => controller.abort();
-  }, []);
+  const { data: rawHistories, loading: isLoading } = useStrapiData(fetchHistories, {}, []);
+  const seasonsTimeline = Array.isArray(rawHistories) ? rawHistories : [];
 
   return (
     <div className="w-full pt-24 px-6 md:px-16 lg:px-24 bg-[#101215] min-h-screen pb-24 overflow-hidden">

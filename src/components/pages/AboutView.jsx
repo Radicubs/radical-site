@@ -6,14 +6,16 @@ import Card from '../ui/Card.jsx';
 import SectionHeader from '../ui/SectionHeader.jsx';
 import { navigateTo } from '../../lib/navigation.js';
 import { fetchAboutPage } from '../../lib/strapiAboutPage.js';
+import { useStrapiData } from '../../hooks/useStrapiData.js';
 
 const AboutView = () => {
   const navigate = navigateTo;
-  const [originHeading, setOriginHeading] = useState('Our Origin');
-  const [originSubheading, setOriginSubheading] = useState(
-    'From a restricted school club to a boundless community force.'
-  );
-  const [originBlocks, setOriginBlocks] = useState([
+
+  const { data: aboutPage } = useStrapiData(fetchAboutPage, {}, null);
+
+  const originHeading = aboutPage?.originHeading?.trim() || 'Our Origin';
+  const originSubheading = aboutPage?.originSubheading?.trim() || 'From a restricted school club to a boundless community force.';
+  const originBlocks = (Array.isArray(aboutPage?.originBlocks) && aboutPage.originBlocks.length > 0) ? aboutPage.originBlocks : [
     {
       type: 'paragraph',
       text: 'In 2019, high school students Caitlin Fukumoto and Sahil Jain recognized a critical gap in Frisco, Texas: a severe lack of accessible STEM opportunities. What started as an ambitious idea at Reedy High School quickly met administrative roadblocks.',
@@ -26,101 +28,40 @@ const AboutView = () => {
       type: 'paragraph',
       text: 'Instead of conceding, the founders pivoted. They broke away from the school district restrictions, establishing Radicubs as an independent 501(c)(3) nonprofit organization. Today, we stand as a multi-school, community-driven FRC team, empowering students across the entire region.',
     },
-  ]);
-  const [missionHeading, setMissionHeading] = useState('Our Mission');
-  const [missionStatement, setMissionStatement] = useState(
-    'To expand access to STEM and entrepreneurship through a rigorously student-led structure. We believe that true leadership is developed not just by writing code or machining parts, but by running an organization, mentoring peers, and giving back to the community.'
-  );
-  const [missionCards, setMissionCards] = useState([
+  ];
+
+  const missionHeading = aboutPage?.missionHeading?.trim() || 'Our Mission';
+  const missionStatement = aboutPage?.missionStatement?.trim() || 'To expand access to STEM and entrepreneurship through a rigorously student-led structure. We believe that true leadership is developed not just by writing code or machining parts, but by running an organization, mentoring peers, and giving back to the community.';
+  const missionCards = (Array.isArray(aboutPage?.missionCards) && aboutPage.missionCards.length > 0) ? aboutPage.missionCards : [
     { title: 'Student-Led', icon: 'Target' },
     { title: 'Community Focussed', icon: 'Globe' },
-  ]);
-  const [diversityHeading, setDiversityHeading] = useState('Diversity & Inclusion');
-  const [diversityCards, setDiversityCards] = useState([
+  ];
+
+  const diversityHeading = aboutPage?.diversityHeading?.trim() || 'Diversity & Inclusion';
+  const diversityCards = (Array.isArray(aboutPage?.diversityCards) && aboutPage.diversityCards.length > 0) ? aboutPage.diversityCards : [
     {
       title: '15+ Languages Spoken',
-      description:
-        'Our members represent a global perspective, with a majority being first or second-generation immigrants.',
+      description: 'Our members represent a global perspective, with a majority being first or second-generation immigrants.',
       icon: 'Globe',
     },
     {
       title: 'LGBTQIA+ Inclusive',
-      description:
-        'A safe, welcoming environment where authenticity is celebrated alongside engineering.',
+      description: 'A safe, welcoming environment where authenticity is celebrated alongside engineering.',
       icon: 'Heart',
     },
     {
       title: 'FIRST Ladies Certified',
-      description:
-        'Active partners in promoting and sustaining female participation in STEM fields.',
+      description: 'Active partners in promoting and sustaining female participation in STEM fields.',
       icon: 'Users',
     },
-  ]);
+  ];
 
-  const iconMap = useMemo(
-    () => ({
-      Target,
-      Globe,
-      Heart,
-      Users,
-    }),
-    []
-  );
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    (async () => {
-      const aboutPage = await fetchAboutPage({ signal: controller.signal });
-      if (!aboutPage) return;
-
-      if (typeof aboutPage.originHeading === 'string' && aboutPage.originHeading.trim().length > 0) {
-        setOriginHeading(aboutPage.originHeading.trim());
-      }
-
-      if (
-        typeof aboutPage.originSubheading === 'string' &&
-        aboutPage.originSubheading.trim().length > 0
-      ) {
-        setOriginSubheading(aboutPage.originSubheading.trim());
-      }
-
-      if (Array.isArray(aboutPage.originBlocks) && aboutPage.originBlocks.length > 0) {
-        setOriginBlocks(aboutPage.originBlocks);
-      }
-
-      if (
-        typeof aboutPage.missionHeading === 'string' &&
-        aboutPage.missionHeading.trim().length > 0
-      ) {
-        setMissionHeading(aboutPage.missionHeading.trim());
-      }
-
-      if (
-        typeof aboutPage.missionStatement === 'string' &&
-        aboutPage.missionStatement.trim().length > 0
-      ) {
-        setMissionStatement(aboutPage.missionStatement.trim());
-      }
-
-      if (Array.isArray(aboutPage.missionCards) && aboutPage.missionCards.length > 0) {
-        setMissionCards(aboutPage.missionCards);
-      }
-
-      if (
-        typeof aboutPage.diversityHeading === 'string' &&
-        aboutPage.diversityHeading.trim().length > 0
-      ) {
-        setDiversityHeading(aboutPage.diversityHeading.trim());
-      }
-
-      if (Array.isArray(aboutPage.diversityCards) && aboutPage.diversityCards.length > 0) {
-        setDiversityCards(aboutPage.diversityCards);
-      }
-    })();
-
-    return () => controller.abort();
-  }, []);
+  const iconMap = useMemo(() => ({
+    Target,
+    Globe,
+    Heart,
+    Users,
+  }), []);
 
   return (
     <div className="w-full pt-24 bg-[#101215] min-h-screen">

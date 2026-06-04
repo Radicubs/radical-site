@@ -5,46 +5,13 @@ import { BlocksRenderer } from '@strapi/blocks-react-renderer';
 import Card from '../ui/Card.jsx';
 import SectionHeader from '../ui/SectionHeader.jsx';
 import { fetchProjects } from '../../lib/strapiProjects.js';
+import { useStrapiData } from '../../hooks/useStrapiData.js';
+import { blocksRendererConfig } from '../../utils/blocksRendererConfig.jsx';
 
-const blocksRendererConfig = {
-  blocks: {
-    paragraph: ({ children }) => (
-      <p className="text-[#d3d3d3] whitespace-pre-line leading-relaxed">{children}</p>
-    ),
-    list: ({ children, format }) => {
-      if (format === 'ordered') {
-        return <ol className="list-decimal ml-6 space-y-2 text-[#d3d3d3]">{children}</ol>;
-      }
-      return <ul className="list-disc ml-6 space-y-2 text-[#d3d3d3]">{children}</ul>;
-    },
-  },
-  modifiers: {
-    bold: ({ children }) => <strong className="text-white">{children}</strong>,
-    link: ({ children, url }) => (
-      <a href={url} className="text-[#5ddb27] underline" target="_blank" rel="noreferrer">
-        {children}
-      </a>
-    ),
-    highlight: ({ children }) => <mark className="bg-transparent text-[#5ddb27]">{children}</mark>,
-  },
-};
 
 const ProjectsView = () => {
-  const [projects, setProjects] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    (async () => {
-      setIsLoading(true);
-      const rows = await fetchProjects({ signal: controller.signal });
-      setProjects(Array.isArray(rows) ? rows : []);
-      setIsLoading(false);
-    })();
-
-    return () => controller.abort();
-  }, []);
+  const { data: rawProjects, loading: isLoading } = useStrapiData(fetchProjects, {}, []);
+  const projects = Array.isArray(rawProjects) ? rawProjects : [];
 
   const { ongoingProjects, pastProjects } = useMemo(() => {
     const ongoing = [];
