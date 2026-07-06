@@ -5,9 +5,17 @@ import Link from "../components/Link.astro";
 import { getTeamMembers, getYears } from "../lib/team";
 import TeamMember from "../components/TeamMember.astro";
 import External from "../components/External.astro";
+import type { ApiHomeHome } from "../lib/contentTypes";
+import fetchApi from "../lib/strapi";
 
 const years = await getYears();
 const currentMembers = await getTeamMembers(years[0]);
+
+const home = await fetchApi<ApiHomeHome>({
+  endpoint: "home", // the content type to fetch
+  wrappedByKey: "data", // the key to unwrap the response
+  query: { populate: "*" }
+});
 ---
 
 <Layout title="Team">
@@ -23,8 +31,16 @@ const currentMembers = await getTeamMembers(years[0]);
           ))
         }
       </select>
-      <div class="view-mentors">
+      <div class="links">
         <Link href="/mentors">View mentors <External /></Link>
+        {
+          home.attributes.applicationUrl && (
+            <Link href={home.attributes.applicationUrl}>
+              Apply for the {home.attributes.applicationSeason}-{home.attributes.applicationSeason + 1} season{" "}
+              <External />
+            </Link>
+          )
+        }
       </div>
     </div>
     <div id="team-members" class="team-members">
@@ -42,11 +58,15 @@ const currentMembers = await getTeamMembers(years[0]);
 </Layout>
 
 <style>
-  .view-mentors {
+  .links {
     width: 100%;
     font-size: 20px;
     font-weight: bold;
     text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 32px;
   }
 
   .heading {

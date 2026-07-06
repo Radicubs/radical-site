@@ -96,14 +96,14 @@ const { date } = Astro.props;
 
 <script>
   for (const countdown of document.querySelectorAll<HTMLDivElement>(".countdown")) {
-    const to = new Date(countdown.getAttribute("data-to")).getTime();
+    const to = new Date(countdown.dataset.to!).getTime();
     const diff = to - new Date().getTime();
     if (diff < 0) continue;
 
-    const $days = countdown.querySelector(".days");
-    const $hours = countdown.querySelector(".hours");
-    const $minutes = countdown.querySelector(".minutes");
-    const $seconds = countdown.querySelector(".seconds");
+    const $days = countdown.querySelector(".days")!;
+    const $hours = countdown.querySelector(".hours")!;
+    const $minutes = countdown.querySelector(".minutes")!;
+    const $seconds = countdown.querySelector(".seconds")!;
 
     let interval: ReturnType<typeof setTimeout>;
 
@@ -125,6 +125,6 @@ const { date } = Astro.props;
     interval = setInterval(update, 1000);
     update();
 
-    countdown.parentElement.style.display = null;
+    countdown.parentElement!.style.removeProperty("display");
   }
 </script>

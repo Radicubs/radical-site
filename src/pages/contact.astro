@@ -46,8 +46,8 @@ const home = await fetchApi<ApiHomeHome>({
   const message = params.get("message");
 
   if (success && message) {
-    const $status = document.getElementById("status");
-    const $message = document.getElementById("status-message");
+    const $status = document.getElementById("status")!;
+    const $message = document.getElementById("status-message")!;
 
     if (success === "true") {
       $status.classList.add("success");

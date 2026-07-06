@@ -1,0 +1,97 @@
+---
+interface Props {
+  content: string;
+}
+
+const { content } = Astro.props;
+---
+
+<span class="glitch">{content}</span>
+
+<script>
+  import Splitting from "splitting";
+
+  const results = Splitting({ target: ".glitch", by: "chars" });
+  const glitches = "`¡™£¢∞§¶•ªº–≠åß∂ƒ©˙∆˚¬…æ≈ç√∫˜µ≤≥÷/?░▒▓<>/".split("");
+
+  for (const result of results) {
+    const chars = result.chars!;
+    for (const char of chars) {
+      char.style.setProperty("--count", `${Math.floor(Math.random() * 5 + 1)}`);
+      for (let g = 0; g < 10; g++)
+        char.style.setProperty(`--char-${g}`, `"${glitches[Math.floor(Math.random() * glitches.length)]}"`);
+    }
+  }
+</script>
+
+<style>
+  .glitch {
+    font-size: 60px;
+  }
+</style>
+
+<style is:global>
+  .word {
+    position: relative;
+    display: inline-flex;
+  }
+
+  [data-char] {
+    color: transparent;
+    position: relative;
+  }
+
+  [data-char]:after {
+    --txt: attr(data-char);
+    animation-name: glitch-switch;
+    animation-iteration-count: var(--count);
+    animation-duration: 0.2s;
+    animation-timing-function: steps(1);
+    animation-fill-mode: backwards;
+    content: var(--txt);
+    color: var(--accent);
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  [data-char="+"] {
+    font-size:;
+  }
+
+  @keyframes glitch-switch {
+    0% {
+      content: var(--char-0);
+    }
+    10% {
+      content: var(--char-1);
+    }
+    20% {
+      content: var(--char-2);
+    }
+    30% {
+      content: var(--char-3);
+    }
+    40% {
+      content: var(--char-4);
+    }
+    50% {
+      content: var(--char-5);
+    }
+    60% {
+      content: var(--char-6);
+    }
+    70% {
+      content: var(--char-7);
+    }
+    80% {
+      content: var(--char-8);
+    }
+    90% {
+      content: var(--char-9);
+    }
+    100% {
+      content: var(--char-0);
+    }
+  }
+</style>

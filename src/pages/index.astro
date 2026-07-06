@@ -1,4 +1,5 @@
 ---
+import Awards from "../components/Awards.astro";
 import BlogPosts from "../components/BlogPosts.astro";
 import CorporateSponsors from "../components/CorporateSponsors.astro";
 import Layout from "../layouts/Layout.astro";
@@ -8,6 +9,9 @@ import Image from "../components/Image.astro";
 import Countdown from "../components/Countdown.astro";
 import Application from "../components/Application.astro";
 import { Icon } from "astro-icon/components";
+import GlitchText from "../components/GlitchText.astro";
+import QuickLink from "../components/QuickLink.astro";
+import { getVideoId, slugify } from "../lib/blog";
 
 const home = await fetchApi<ApiHomeHome>({
   endpoint: "home", // the content type to fetch
@@ -20,23 +24,44 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
   wrappedByKey: "data", // the key to unwrap the response
   query: { populate: "*", sort: "date:desc", "pagination[limit]": "3" }
 });
+
+const latestPost = blogPosts[0];
+const latestPostVideoId = latestPost && getVideoId(latestPost.attributes.youtubeVideo);
+const latestPostHref = latestPostVideoId
+  ? `https://youtube.com/watch?v=${latestPostVideoId}`
+  : latestPost && `/blog/${slugify(latestPost.attributes.title)}`;
 ---
 
 <Layout title="Home">
   <header>
     <div class="darken"></div>
-    <div class="content">
-      <h1 class="heading" onclick="drive()">{home.attributes.name}</h1>
-      <div class="subheading">{home.attributes.description}</div>
-      <div class="socials">
-        <a href="https://instagram.com/theradicubs"><i class="fa-brands fa-instagram"></i></a>
-        <!-- <a href="https://twitter.com/theradicubs"><i class="fa-brands fa-twitter"></i></a> -->
-        <a href="https://www.tiktok.com/@theradicubs"><i class="fa-brands fa-tiktok"></i></a>
-        <a href="https://youtube.com/channel/UCNuzQPRdm0OBcJaWgX8z6eQ"><i class="fa-brands fa-youtube"></i></a>
-        <a href="https://www.linkedin.com/company/radicubs-robotics"><i class="fa-brands fa-linkedin"></i></a>
-        <a href="https://www.thebluealliance.com/team/7503"
-          ><Icon name="thebluealliance" height={30} style={{ marginTop: "4px" }} /></a
-        >
+    <div class="hero">
+      <div class="content">
+        <h1 class="heading" onclick="drive()"><GlitchText content={home.attributes.name} /></h1>
+        <div class="subheading">{home.attributes.description}</div>
+        <div class="socials">
+          <a href="https://instagram.com/theradicubs"><i class="fa-brands fa-instagram"></i></a>
+          <!-- <a href="https://twitter.com/theradicubs"><i class="fa-brands fa-twitter"></i></a> -->
+          <a href="https://www.tiktok.com/@theradicubs"><i class="fa-brands fa-tiktok"></i></a>
+          <a href="https://youtube.com/channel/UCNuzQPRdm0OBcJaWgX8z6eQ"><i class="fa-brands fa-youtube"></i></a>
+          <a href="https://www.linkedin.com/company/radicubs-robotics"><i class="fa-brands fa-linkedin"></i></a>
+          <a href="https://www.thebluealliance.com/team/7503"
+            ><Icon name="thebluealliance" height={30} style={{ marginTop: "4px" }} /></a
+          >
+        </div>
+        <div class="quick-links">
+          {
+            latestPost && (
+              <QuickLink
+                href={latestPostHref}
+                subject="Latest update"
+                description={latestPost.attributes.title}
+                prefetch={!latestPostVideoId}
+              />
+            )
+          }
+          <QuickLink href={import.meta.env.DONATE_URL} subject="Support us" description="Donate to the team" />
+        </div>
       </div>
     </div>
     <Countdown date={home.attributes.nextComp} />
@@ -52,6 +77,24 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
       <hr />
     </div>
     <CorporateSponsors />
+    <div class="section-heading">
+      <h2>Awards</h2>
+      <hr />
+    </div>
+    <div class="awards-row">
+      <div class="awards-container">
+        <div class="awards-scroll">
+          <Awards />
+        </div>
+      </div>
+      <Image
+        class="team-photo"
+        alt="team photo"
+        src={home.attributes.image.data.attributes.url}
+        width={home.attributes.image.data.attributes.width}
+        height={home.attributes.image.data.attributes.height}
+      />
+    </div>
     <div class="section-heading">
       <h2>Latest Updates</h2>
       <hr />
@@ -120,13 +163,21 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
     left: 0;
     height: 100%;
     width: 100%;
-    background-image: radial-gradient(black, transparent);
+    /* keep the dark bloom centered on .content: 50% on small screens,
+       pinned at 32px padding + 300px (half of .content) on mid-size,
+       and 50% - 300px once .hero hits its 1200px max width */
+    background-image: radial-gradient(ellipse at max(min(50%, 332px), 50% - 300px) 50%, black, transparent);
     z-index: 1;
+  }
+
+  .hero {
+    width: 100%;
+    max-width: 1200px;
+    z-index: 2;
   }
 
   .content {
     max-width: 600px;
-    z-index: 2;
   }
 
   .socials {
@@ -138,6 +189,61 @@ const blogPosts = await fetchApi<ApiBlogPostBlogPost[]>({
 
   .socials > a {
     color: var(--accent);
+  }
+
+  .quick-links {
+    margin-top: 32px;
+    display: flex;
+    gap: 24px;
+  }
+
+  .awards-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+    margin-top: 32px;
+  }
+
+  /* the photo's height drives the row; the timeline stretches to match
+     and scrolls inside an absolutely-positioned box so its own height
+     can't inflate the row */
+  .awards-container {
+    position: relative;
+    flex: 1;
+    align-self: stretch;
+    min-width: 0;
+  }
+
+  .awards-scroll {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    padding-right: 8px;
+  }
+
+  .team-photo {
+    width: 45%;
+    max-width: 520px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  @media screen and (max-width: 900px) {
+    .team-photo {
+      display: none;
+    }
+
+    .awards-container {
+      align-self: auto;
+    }
+
+    .awards-scroll {
+      position: static;
+      overflow-y: visible;
+      padding-right: 0;
+    }
   }
 
   footer {

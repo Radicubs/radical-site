@@ -8,37 +8,44 @@ const corporateSponsors = await fetchApi<ApiCorporateSponsorCorporateSponsor[]>(
   wrappedByKey: "data", // the key to unwrap the response
   query: { populate: "*" }
 });
+
+// cap the column count so every column gets at least two sponsors and the
+// grid fills the container evenly instead of leaving the right side empty
+const columnCount = Math.ceil(corporateSponsors.length / 2);
 ---
 
 <section class="corporate-sponsors">
   {
     corporateSponsors
       .sort((a, b) => a.attributes.logo.data.attributes.height - b.attributes.logo.data.attributes.height)
-      .map(sponsor => (
-        <div class="card">
-          <a href={sponsor.attributes.link} target="_blank" rel="noopener noreferrer" title={sponsor.attributes.name}>
-            <Image
-              src={sponsor.attributes.logo.data.attributes.url}
-              alt={sponsor.attributes.name + " Logo"}
-              width={280}
-              height={
-                sponsor.attributes.logo.data.attributes.height * (280 / sponsor.attributes.logo.data.attributes.width)
-              }
-            />
-          </a>
-        </div>
-      ))
+      .map(sponsor => {
+        const logo = sponsor.attributes.logo.data.attributes;
+        return (
+          <div class="card">
+            <a href={sponsor.attributes.link} target="_blank" rel="noopener noreferrer" title={sponsor.attributes.name}>
+              <Image
+                src={logo.url}
+                alt={sponsor.attributes.name + " Logo"}
+                width={200}
+                height={logo.height * (200 / logo.width)}
+              />
+            </a>
+          </div>
+        );
+      })
   }
 </section>
 
-<style>
+<style define:vars={{ columnCount }}>
   .corporate-sponsors {
-    columns: 280px;
-    gap: 20px;
+    column-width: 200px;
+    column-count: var(--columnCount);
+    gap: 14px;
+    margin-top: 24px;
   }
 
   .corporate-sponsors > * {
-    margin: 20px 0;
+    margin-bottom: 14px;
   }
 
   .corporate-sponsors img {

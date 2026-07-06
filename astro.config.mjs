@@ -6,5 +6,6 @@ import icon from "astro-icon";
 export default defineConfig({
   integrations: [react(), icon()],
   image: { domains: ["cms.radicubs.com"] },
-  prefetch: true
+  prefetch: true,
+  server: { port: 4322 }
 });

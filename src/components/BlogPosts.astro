@@ -1,11 +1,7 @@
 ---
-import { slugify } from "../lib/blog";
+import { getVideoId, slugify } from "../lib/blog";
 import type { ApiBlogPostBlogPost } from "../lib/contentTypes";
 import Image from "./Image.astro";
-
-const youtubeVideoRegex =
-  /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
-const getVideoId = url => url && youtubeVideoRegex.exec(url)?.[1];
 
 interface Props {
   posts: ApiBlogPostBlogPost[];

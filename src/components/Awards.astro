@@ -1,0 +1,148 @@
+---
+import { getAwardsByYear, getEventsByKey } from "../lib/tba";
+
+const [awardsByYear, eventsByKey] = await Promise.all([getAwardsByYear(), getEventsByKey()]);
+const years = Object.keys(awardsByYear)
+  .map(Number)
+  .sort((a, b) => b - a);
+
+const shortName = (name: string) => name.split(" sponsored by ")[0];
+const eventName = (key: string) => {
+  const event = eventsByKey[key];
+  return event ? (event.short_name ?? event.name) : key;
+};
+---
+
+<section class="timeline">
+  {
+    years.map(year => (
+      <div class="season">
+        <div class="year">{year}</div>
+        <div class="track">
+          <div class="node" />
+        </div>
+        <div class="awards">
+          {awardsByYear[year]!.map(award => (
+            <div class="award" title={award.name}>
+              <div class="name">{shortName(award.name)}</div>
+              <a
+                class="event"
+                href={`https://www.thebluealliance.com/event/${award.event_key}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {eventName(award.event_key)}
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))
+  }
+</section>
+
+<style>
+  .season {
+    display: grid;
+    grid-template-columns: 70px 24px 1fr;
+    gap: 16px;
+    padding-bottom: 32px;
+  }
+
+  .season:last-child {
+    padding-bottom: 0;
+  }
+
+  .year {
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--accent);
+    text-align: right;
+    line-height: 1;
+  }
+
+  .track {
+    position: relative;
+  }
+
+  .track::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    background-color: var(--tertiary);
+  }
+
+  .season:last-child .track::before {
+    bottom: auto;
+    height: 24px;
+  }
+
+  .node {
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    transform: translateX(-50%);
+    background-color: var(--accent);
+  }
+
+  .awards {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .award {
+    padding: 12px 16px;
+    background-color: var(--secondary);
+    border-radius: 10px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  .name {
+    color: white;
+  }
+
+  .event {
+    display: inline-block;
+    font-family: "Space Mono", monospace;
+    font-size: 12px;
+    color: darkgray;
+    margin-top: 4px;
+    text-decoration: none;
+  }
+
+  .event:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 600px) {
+    .season {
+      grid-template-columns: 24px 1fr;
+      gap: 12px;
+    }
+
+    .year {
+      grid-column: 1 / 3;
+      grid-row: 1;
+      text-align: left;
+      margin-bottom: 4px;
+    }
+
+    .track {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .awards {
+      grid-column: 2;
+      grid-row: 2;
+    }
+  }
+</style>

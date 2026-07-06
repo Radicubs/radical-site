@@ -1017,6 +1017,11 @@
   resolved "https://registry.yarnpkg.com/@types/scheduler/-/scheduler-0.16.8.tgz#ce5ace04cfeabe7ef87c0091e50752e36707deff"
   integrity sha512-WZLiwShhwLRmeV6zH+GkbOFT6Z6VklCItrDioxUnv+u4Ll+8vKeFySoFyK/0ctcRpOmwAicELfmys1sDc/Rw+A==
 
+"@types/splitting@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@types/splitting/-/splitting-1.0.6.tgz#05c5d1d46b714b05b7274b3545a285a0130b1243"
+  integrity sha512-sa2UEbnCEP4n9QHxyRDB5VgaSq2J5swWhePA38WRKIHg+yLKQLMWYSS4utEhv/qQ+5o9w6cS69/Y8oPolJxF+w==
+
 "@types/tar@^6.1.6":
   version "6.1.13"
   resolved "https://registry.yarnpkg.com/@types/tar/-/tar-6.1.13.tgz#9b5801c02175344101b4b91086ab2bbc8e93a9b6"
@@ -3627,6 +3632,11 @@ space-separated-tokens@^2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/space-separated-tokens/-/space-separated-tokens-2.0.2.tgz#1ecd9d2350a3844572c3f4a312bceb018348859f"
   integrity sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==
+
+splitting@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/splitting/-/splitting-1.1.0.tgz#e89102aa21f4f459d62e9fc027164dfb4fb8298d"
+  integrity sha512-6Tj+4mvlSti4DUu1yl0PnkHIIoLchFYJHqz2DnwYkvEehXbjrR2epa4ds/xdto6ZdZsC+NP5IOOehi9VGjNlMQ==
 
 sprintf-js@~1.0.2:
   version "1.0.3"
