@@ -9,14 +9,8 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@astrojs/react": "^4.3.0",
     "@astrojs/tailwind": "^6.0.2",
-    "@strapi/blocks-react-renderer": "^1.0.2",
-    "@strapi/client": "^1.6.1",
-    "astro": "^5.0.0",
-    "lucide-react": "^0.542.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "astro": "^5.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",

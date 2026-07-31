@@ -1,8 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import BlogView from '../../components/pages/BlogView.jsx';
+import BlogView from '../../components/pages/BlogView.astro';
+import { fetchAllBlogPosts } from '../../lib/strapiBlogPosts.js';
+
+const posts = await fetchAllBlogPosts();
 ---
 
 <BaseLayout title="Blog | Radicubs">
-  <BlogView client:load />
+  <BlogView posts={posts} />
 </BaseLayout>

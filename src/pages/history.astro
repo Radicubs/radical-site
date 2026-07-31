@@ -1,8 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import HistoryView from '../components/pages/HistoryView.jsx';
+import HistoryView from '../components/pages/HistoryView.astro';
+import { fetchHistories } from '../lib/strapiHistories.js';
+
+const seasonsTimeline = await fetchHistories();
 ---
 
 <BaseLayout title="History | Radicubs">
-  <HistoryView client:load />
+  <HistoryView seasonsTimeline={seasonsTimeline} />
 </BaseLayout>

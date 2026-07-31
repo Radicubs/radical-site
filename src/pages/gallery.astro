@@ -1,11 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import GalleryView from '../components/pages/GalleryView.jsx';
+import GalleryView from '../components/pages/GalleryView.astro';
 import { fetchAllAlbums } from '../lib/strapiAlbums.js';
 
 const albums = await fetchAllAlbums();
 ---
 
 <BaseLayout title="Gallery | Radicubs">
-  <GalleryView albums={albums} client:load />
+  <GalleryView albums={albums} />
 </BaseLayout>

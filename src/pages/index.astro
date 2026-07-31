@@ -1,8 +1,23 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import HomeView from '../components/pages/HomeView.jsx';
+import HomeView from '../components/pages/HomeView.astro';
+import { fetchLatestAwards } from '../lib/strapiAwards.js';
+import { fetchSponsors } from '../lib/strapiSponsors.js';
+import { fetchHomepage } from '../lib/strapiHomepage.js';
+import { fetchProjects } from '../lib/strapiProjects.js';
+import { fetchLatestBlogPosts } from '../lib/strapiBlogPosts.js';
+
+const [awards, sponsors, homepageData, rawProjects, blogPosts] = await Promise.all([
+  fetchLatestAwards({ limit: 8 }),
+  fetchSponsors(),
+  fetchHomepage(),
+  fetchProjects(),
+  fetchLatestBlogPosts({ limit: 4 }),
+]);
+
+const ongoingProjects = (Array.isArray(rawProjects) ? rawProjects.filter((p) => p?.timeline === 'Present') : []).slice(0, 2);
 ---
 
 <BaseLayout title="Radicubs">
-  <HomeView client:load />
+  <HomeView awards={awards} sponsors={sponsors} homepageData={homepageData} ongoingProjects={ongoingProjects} blogPosts={blogPosts} />
 </BaseLayout>

@@ -1,8 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ProjectsView from '../components/pages/ProjectsView.jsx';
+import ProjectsView from '../components/pages/ProjectsView.astro';
+import { fetchProjects } from '../lib/strapiProjects.js';
+
+const projects = await fetchProjects();
 ---
 
 <BaseLayout title="Impact | Radicubs">
-  <ProjectsView client:load />
+  <ProjectsView projects={projects} />
 </BaseLayout>

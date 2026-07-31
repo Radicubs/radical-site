@@ -1,8 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import AboutView from '../components/pages/AboutView.jsx';
+import AboutView from '../components/pages/AboutView.astro';
+import { fetchAboutPage } from '../lib/strapiAboutPage.js';
+
+const aboutPage = await fetchAboutPage();
 ---
 
 <BaseLayout title="About | Radicubs">
-  <AboutView client:load />
+  <AboutView aboutPage={aboutPage} />
 </BaseLayout>

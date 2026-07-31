@@ -1,0 +1,139 @@
+---
+import SectionHeader from '../ui/SectionHeader.astro';
+import Icon from '../Icon.astro';
+
+const { album } = Astro.props;
+const { title, year, photos = [] } = album;
+---
+
+<div class="w-full pt-32 px-6 md:px-16 lg:px-24 bg-[#101215] min-h-screen pb-24">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-12">
+      <a href="/gallery" class="text-[#a9a9a9] hover:text-[#5ddb27] font-mono text-sm mb-4 inline-block transition-colors">
+        ← Back to Gallery
+      </a>
+      <SectionHeader title={title} subtitle={`${year} Season`} />
+    </div>
+
+    {
+      photos.length > 0 ? (
+        <div class="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
+          {photos.map((photo, index) => (
+            <button
+              type="button"
+              data-open-lightbox={index}
+              class="group cursor-pointer rounded-lg overflow-hidden border border-[#2c303a] bg-[#1b1d23] relative shadow-lg break-inside-avoid block w-full text-left p-0"
+            >
+              <div class="relative overflow-hidden w-full h-full bg-[#2c303a]">
+                <img
+                  src={photo}
+                  alt={`${title} - Photo ${index + 1}`}
+                  class="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <span class="text-white font-mono bg-black/50 px-4 py-2 rounded shadow-lg text-sm">View</span>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div class="border border-dashed border-[#2c303a] rounded-lg py-16 text-center text-[#a9a9a9] font-mono w-full mt-12">
+          <Icon name="Image" size={48} class="mx-auto mb-4 text-[#2c303a]" />
+          <p>No photos available in this album.</p>
+        </div>
+      )
+    }
+  </div>
+
+  {
+    photos.length > 0 && (
+      <dialog id="lightbox" class="bg-transparent border-0 p-0 m-0 max-w-none max-h-none w-full h-full backdrop:bg-[#101215]/95">
+        <div class="fixed inset-0 flex items-center justify-center p-4 md:p-8">
+          <button
+            type="button"
+            id="lightbox-close"
+            class="absolute top-6 right-6 text-[#a9a9a9] hover:text-[#5ddb27] transition-colors z-50 p-2 bg-[#1b1d23]/80 rounded-full"
+            aria-label="Close lightbox"
+          >
+            <Icon name="X" size={24} />
+          </button>
+
+          {photos.length > 1 && (
+            <button
+              type="button"
+              id="lightbox-prev"
+              class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-[#a9a9a9] hover:text-[#5ddb27] transition-colors z-50 p-3 bg-[#1b1d23]/80 rounded-full"
+              aria-label="Previous image"
+            >
+              <Icon name="ChevronLeft" size={32} />
+            </button>
+          )}
+
+          <div class="relative w-full max-w-6xl max-h-[90vh] flex items-center justify-center">
+            <img id="lightbox-image" src={photos[0]} alt={`${title} - High Res`} class="max-w-full max-h-[90vh] object-contain rounded shadow-2xl" />
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 px-4 py-2 rounded-full backdrop-blur-sm pointer-events-none">
+              <span class="text-white font-mono text-sm">
+                <span id="lightbox-current">1</span> / {photos.length}
+              </span>
+            </div>
+          </div>
+
+          {photos.length > 1 && (
+            <button
+              type="button"
+              id="lightbox-next"
+              class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-[#a9a9a9] hover:text-[#5ddb27] transition-colors z-50 p-3 bg-[#1b1d23]/80 rounded-full"
+              aria-label="Next image"
+            >
+              <Icon name="ChevronRight" size={32} />
+            </button>
+          )}
+        </div>
+      </dialog>
+    )
+  }
+</div>
+
+<script define:vars={{ photos, title }}>
+  const dialog = document.getElementById('lightbox');
+
+  if (dialog) {
+    const image = document.getElementById('lightbox-image');
+    const counter = document.getElementById('lightbox-current');
+    let index = 0;
+
+    const show = (i) => {
+      index = (i + photos.length) % photos.length;
+      image.src = photos[index];
+      image.alt = `${title} - High Res ${index + 1}`;
+      if (counter) counter.textContent = String(index + 1);
+    };
+
+    document.querySelectorAll('[data-open-lightbox]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        show(Number(btn.dataset.openLightbox));
+        document.body.style.overflow = 'hidden';
+        dialog.showModal();
+      });
+    });
+
+    dialog.addEventListener('close', () => {
+      document.body.style.overflow = '';
+    });
+
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') show(index + 1);
+      if (e.key === 'ArrowLeft') show(index - 1);
+    });
+
+    document.getElementById('lightbox-close')?.addEventListener('click', () => dialog.close());
+    document.getElementById('lightbox-prev')?.addEventListener('click', () => show(index - 1));
+    document.getElementById('lightbox-next')?.addEventListener('click', () => show(index + 1));
+  }
+</script>

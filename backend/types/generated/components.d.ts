@@ -113,7 +113,7 @@ export interface SharedSponsorsSupportCard extends Struct.ComponentSchema {
 }
 
 declare module '@strapi/strapi' {
-  export module Public {
+  export namespace Public {
     export interface ComponentSchemas {
       'shared.diversity-card': SharedDiversityCard;
       'shared.mission-card': SharedMissionCard;

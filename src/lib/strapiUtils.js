@@ -100,6 +100,28 @@ export const resolveMediaUrl = (media, baseUrl) => {
 // ---------------------------------------------------------------------------
 
 /**
+ * Windows often resolves `localhost` to IPv6 `::1` first; if Strapi is only
+ * bound to IPv4, server-side fetch() can fail there while a browser still
+ * succeeds. Returns candidate base URLs to try in order.
+ *
+ * @param {string} baseUrl
+ * @returns {string[]}
+ */
+const candidateBaseUrls = (baseUrl) => {
+  const candidates = [baseUrl];
+  try {
+    const parsed = new URL(baseUrl);
+    if (parsed.hostname === 'localhost') {
+      parsed.hostname = '127.0.0.1';
+      candidates.push(parsed.toString().replace(/\/$/, ''));
+    }
+  } catch {
+    // Ignore invalid URLs; the fetch below will fail and return null.
+  }
+  return candidates;
+};
+
+/**
  * Fetches a Strapi REST endpoint and returns the parsed JSON.
  * Returns null on network failure or non-2xx status.
  *
@@ -112,23 +134,28 @@ export const strapiGet = async (endpoint, params = {}, signal) => {
   const baseUrl = getStrapiBaseUrl();
   if (!baseUrl) return null;
 
-  const url = new URL(endpoint, baseUrl);
   const searchParams =
     params instanceof URLSearchParams ? params : new URLSearchParams(params);
-  url.search = searchParams.toString();
 
-  try {
-    const res = await fetch(url.toString(), {
-      method: 'GET',
-      headers: { Accept: 'application/json' },
-      signal,
-    });
+  for (const candidate of candidateBaseUrls(baseUrl)) {
+    const url = new URL(endpoint, candidate);
+    url.search = searchParams.toString();
 
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
+    try {
+      const res = await fetch(url.toString(), {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        signal,
+      });
+
+      if (!res.ok) continue;
+      return await res.json();
+    } catch {
+      // Try the next candidate base URL.
+    }
   }
+
+  return null;
 };
 
 /**

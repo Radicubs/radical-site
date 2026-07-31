@@ -1,0 +1,16 @@
+---
+const { href, class: className = '' } = Astro.props;
+const classes = `bg-[#2c303a] border border-[#1b1d23] rounded-lg p-6 card-hover ${href ? 'cursor-pointer' : ''} ${className}`;
+---
+
+{
+  href ? (
+    <a href={href} class={classes}>
+      <slot />
+    </a>
+  ) : (
+    <div class={classes}>
+      <slot />
+    </div>
+  )
+}

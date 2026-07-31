@@ -1,0 +1,201 @@
+---
+import Icon from '../Icon.astro';
+import Button from '../ui/Button.astro';
+import Card from '../ui/Card.astro';
+
+const { rosters = [], teamPage = null } = Astro.props;
+
+const applicationOpen = teamPage?.applicationOpen ?? true;
+const applicationLink = teamPage?.applicationLink?.trim() || null;
+const teamPageDescription =
+  teamPage?.description?.trim() ||
+  'Meet the students driving the future. No prior experience required. Just a willingness to learn, work hard, and be radical.';
+
+const rosterYears = rosters.map((r) => r.year);
+const defaultYear = rosterYears[0] ?? '';
+---
+
+<div class="w-full pt-24 bg-[#101215] min-h-screen pb-24">
+  <section class="px-6 md:px-16 lg:px-24 mb-16 max-w-6xl mx-auto">
+    <div class="mb-12">
+      <h2 class="text-3xl md:text-5xl font-mono font-bold text-white mb-4">
+        <span class="text-[#5ddb27]">√</span> The Radicubs
+      </h2>
+      <p class="text-[#d3d3d3] text-lg leading-relaxed max-w-2xl">{teamPageDescription}</p>
+    </div>
+  </section>
+
+  <section class="px-6 md:px-16 lg:px-24 mb-24 max-w-6xl mx-auto">
+    <div class="flex flex-col lg:flex-row gap-16">
+      <div class:list={[applicationOpen ? 'lg:w-2/3' : 'w-full', 'flex flex-col justify-start text-left']}>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <Card class="text-center !p-8">
+            <Icon name="Cpu" class="text-[#5ddb27] mx-auto mb-4" size={32} />
+            <h4 class="text-white font-mono mb-2">Hands-on Experience</h4>
+          </Card>
+          <Card class="text-center !p-8">
+            <Icon name="Globe" class="text-[#5ddb27] mx-auto mb-4" size={32} />
+            <h4 class="text-white font-mono mb-2">Community Impact</h4>
+          </Card>
+          <Card class="text-center !p-8">
+            <Icon name="Heart" class="text-[#5ddb27] mx-auto mb-4" size={32} />
+            <h4 class="text-white font-mono mb-2">A Team That Feels Like Family</h4>
+          </Card>
+        </div>
+
+        {
+          applicationOpen && (
+            <div class="max-w-2xl">
+              <h3 class="text-2xl font-mono text-white mb-6 border-b border-[#2c303a] pb-4">Application Tips</h3>
+              <ul class="space-y-4">
+                <li class="flex items-start gap-4 text-[#d3d3d3] bg-[#101215] p-4 rounded border border-[#2c303a]">
+                  <Icon name="CheckCircle2" size={24} class="text-[#5ddb27] shrink-0" />
+                  <span class="leading-relaxed">Be authentic and show passion.</span>
+                </li>
+                <li class="flex items-start gap-4 text-[#d3d3d3] bg-[#101215] p-4 rounded border border-[#2c303a]">
+                  <Icon name="CheckCircle2" size={24} class="text-[#5ddb27] shrink-0" />
+                  <span class="leading-relaxed">Highlight teamwork and initiative.</span>
+                </li>
+                <li class="flex items-start gap-4 text-[#d3d3d3] bg-[#101215] p-4 rounded border border-[#2c303a]">
+                  <Icon name="CheckCircle2" size={24} class="text-[#5ddb27] shrink-0" />
+                  <span class="leading-relaxed">Demonstrate interest in STEM or learning.</span>
+                </li>
+              </ul>
+            </div>
+          )
+        }
+      </div>
+
+      {
+        applicationOpen && (
+          <div class="lg:w-1/3">
+            <div class="bg-[#1b1d23] border border-[#2c303a] rounded-lg p-8 relative h-full flex flex-col">
+              <h3 class="text-2xl font-mono text-white mb-8 border-b border-[#2c303a] pb-4">Application Timeline</h3>
+
+              <div class="space-y-8 flex-grow relative before:absolute before:inset-0 before:ml-[11px] before:w-0.5 before:bg-[#2c303a] z-10 mb-8">
+                <div class="flex items-start gap-6 relative z-10">
+                  <div class="w-6 h-6 rounded-full bg-[#5ddb27] border-4 border-[#1b1d23] shrink-0 mt-1" />
+                  <div>
+                    <h4 class="text-white font-mono font-bold text-lg">May 1st</h4>
+                    <p class="text-[#a9a9a9] text-sm mt-1">Applications Open</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-6 relative z-10">
+                  <div class="w-6 h-6 rounded-full bg-[#2c303a] border-4 border-[#1b1d23] shrink-0 mt-1" />
+                  <div>
+                    <h4 class="text-white font-mono font-bold text-lg">Interviews</h4>
+                    <p class="text-[#a9a9a9] text-sm mt-1">Chat regarding goals</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-6 relative z-10">
+                  <div class="w-6 h-6 rounded-full bg-[#2c303a] border-4 border-[#1b1d23] shrink-0 mt-1" />
+                  <div>
+                    <h4 class="text-white font-mono font-bold text-lg">Summer</h4>
+                    <p class="text-[#a9a9a9] text-sm mt-1">Team Onboarding</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-auto pt-6 border-t border-[#2c303a]">
+                <Button
+                  class="w-full"
+                  href={applicationLink || 'mailto:radicubs@gmail.com'}
+                  target={applicationLink ? '_blank' : undefined}
+                  rel={applicationLink ? 'noopener noreferrer' : undefined}
+                >
+                  Apply Now
+                </Button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="px-6 md:px-16 lg:px-24 max-w-6xl mx-auto">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-8 border-b border-[#2c303a] pb-6">
+      <h3 class="text-3xl font-mono text-white mb-4 sm:mb-0 text-center sm:text-left">Team Roster</h3>
+      <div class="relative">
+        <select
+          id="roster-year-select"
+          class="appearance-none bg-[#1b1d23] border border-[#5ddb27] text-white font-mono py-2 pl-4 pr-10 rounded outline-none focus:ring-2 focus:ring-[#5ddb27]/50 cursor-pointer"
+          disabled={rosterYears.length === 0}
+        >
+          {rosterYears.length === 0 && (
+            <option value="" disabled selected>
+              Select Season
+            </option>
+          )}
+          {
+            rosterYears.map((year) => (
+              <option value={year} selected={year === defaultYear}>
+                {year} Season
+              </option>
+            ))
+          }
+        </select>
+        <Icon
+          name="ChevronDown"
+          size={16}
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5ddb27] pointer-events-none"
+        />
+      </div>
+    </div>
+
+    <div class="w-full">
+      {
+        rosters.map((roster) => (
+          <div data-roster-panel={roster.year} class:list={['fade-in-up', roster.year === defaultYear ? '' : 'hidden']}>
+            {roster.members.length > 0 ? (
+              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {roster.members.map((member) => (
+                  <div class="bg-[#1b1d23] border border-[#2c303a] rounded p-4 text-center card-hover flex flex-col items-center">
+                    <div class="w-24 h-24 rounded-full bg-[#2c303a] mb-4 border-2 border-[#101215] overflow-hidden flex items-center justify-center text-[#a9a9a9] text-xs font-mono relative">
+                      {member.photoUrl ? (
+                        <img src={member.photoUrl} alt={member.name} class="w-full h-full object-cover" loading="lazy" />
+                      ) : (
+                        <Fragment>
+                          <Icon name="Users" size={32} class="opacity-20 absolute" />
+                          <span class="z-10 relative">NO PHOTO</span>
+                        </Fragment>
+                      )}
+                    </div>
+                    <h4 class="text-white font-mono font-bold text-sm mb-1">{member.name}</h4>
+                    <p class="text-[#5ddb27] text-xs font-mono">{member.role}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div class="border border-dashed border-[#2c303a] rounded-lg py-12 text-center text-[#a9a9a9] font-mono w-full">
+                <Icon name="Users" size={48} class="mx-auto mb-4 text-[#2c303a]" />
+                <p>Roster data for {roster.year} is syncing with radicubs.com.</p>
+              </div>
+            )}
+          </div>
+        ))
+      }
+
+      {
+        rosters.length === 0 && (
+          <div class="border border-dashed border-[#2c303a] rounded-lg py-12 text-center text-[#a9a9a9] font-mono w-full">
+            <Icon name="Users" size={48} class="mx-auto mb-4 text-[#2c303a]" />
+            <p>Roster data for this season is syncing with radicubs.com.</p>
+          </div>
+        )
+      }
+    </div>
+  </section>
+</div>
+
+<script>
+  const select = document.getElementById('roster-year-select');
+  if (select) {
+    select.addEventListener('change', () => {
+      const year = select.value;
+      document.querySelectorAll('[data-roster-panel]').forEach((panel) => {
+        panel.classList.toggle('hidden', panel.dataset.rosterPanel !== year);
+      });
+    });
+  }
+</script>

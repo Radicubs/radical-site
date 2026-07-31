@@ -1,8 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import SponsorsView from '../components/pages/SponsorsView.jsx';
+import SponsorsView from '../components/pages/SponsorsView.astro';
+import { fetchSponsors } from '../lib/strapiSponsors.js';
+import { fetchSponsorsPage } from '../lib/strapiSponsorsPage.js';
+
+const [sponsors, sponsorsPage] = await Promise.all([fetchSponsors(), fetchSponsorsPage()]);
 ---
 
 <BaseLayout title="Sponsors | Radicubs">
-  <SponsorsView client:load />
+  <SponsorsView sponsors={sponsors} sponsorsPage={sponsorsPage} />
 </BaseLayout>

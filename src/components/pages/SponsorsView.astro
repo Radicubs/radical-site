@@ -1,0 +1,327 @@
+---
+import Icon from '../Icon.astro';
+import Button from '../ui/Button.astro';
+import Card from '../ui/Card.astro';
+
+const { sponsors = [], sponsorsPage = null } = Astro.props;
+
+const isNonEmptyString = (value) => typeof value === 'string' && value.trim().length > 0;
+
+const parseHighlightedTitleSegments = (value) => {
+  const text = typeof value === 'string' ? value : '';
+  const segments = [];
+  const regex = /<([^>]+)>/g;
+  let lastIndex = 0;
+  let match = regex.exec(text);
+
+  while (match) {
+    if (match.index > lastIndex) {
+      segments.push({ text: text.slice(lastIndex, match.index), highlight: false });
+    }
+    segments.push({ text: match[1], highlight: true });
+    lastIndex = regex.lastIndex;
+    match = regex.exec(text);
+  }
+
+  if (lastIndex < text.length) segments.push({ text: text.slice(lastIndex), highlight: false });
+  if (segments.length === 0) return [{ text, highlight: false }];
+  return segments;
+};
+
+const EMAIL_SPLIT = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
+const EMAIL_TEST = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+$/i;
+
+const linkifyEmails = (value) => {
+  const text = typeof value === 'string' ? value : '';
+  return text.split(EMAIL_SPLIT).map((part) => ({ text: part, isEmail: EMAIL_TEST.test(part) }));
+};
+
+const defaultPage = {
+  title: 'Fuel The <Innovation>',
+  titleHighlightColor: '#5ddb27',
+  body:
+    "Radicubs is entirely funded by corporate sponsors, grants, and community donations. By partnering with us, you aren't just funding a robot—you are investing in the next generation of engineers, leaders, and innovators in North Texas.",
+  buttons: [
+    { label: 'Download Sponsorship', variant: 'primary', action: 'toast', href: '', openInNewTab: false, downloadFilename: '', hasGreenBorder: false },
+    { label: 'Contact Us Directly', variant: 'outline', action: 'link', href: 'mailto:radicubs@gmail.com', openInNewTab: false, downloadFilename: '', hasGreenBorder: false },
+    { label: 'Donate', variant: 'secondary', action: 'link', href: '', openInNewTab: false, downloadFilename: '', hasGreenBorder: true },
+  ],
+  logosHeading: 'Trusted By Industry Leaders',
+  waysHeading: 'Ways to Support',
+  waysCards: [
+    { title: 'Donation Matching', body: 'Encourage companies to match employee donations', listItems: [] },
+    { title: 'Sponsorship', body: 'Financial support in exchange for visibility and partnership', listItems: [] },
+    { title: 'Direct Donation', body: 'One-time or recurring financial contributions', listItems: [] },
+    { title: 'Workspace & Tools', body: 'Providing workspace, tools, or equipment to support team operations', listItems: [] },
+  ],
+  benefitsHeading: 'Sponsorship Benefits',
+  benefitsCards: [
+    { title: 'Brand Visibility', body: '', listItems: ['Logo on our robot, team uniforms, and website', 'Recognition at competitions and community events', 'Mentions in press releases and social media'] },
+    { title: 'Community Impact', body: '', listItems: ['Support STEM education in our community', 'Help develop future engineers and innovators', 'Contribute to workforce development'] },
+    { title: 'Team Engagement', body: '', listItems: ['Opportunities for team demonstrations at your facility', 'Mentorship and internship connections', 'Invitations to team events and competitions'] },
+    { title: 'Tax Benefits', body: '', listItems: ['Tax-deductible contributions', 'Documentation for corporate social responsibility initiatives', 'Annual impact reports for your records'] },
+  ],
+  statisticsText: 'Statistics',
+  statisticsCards: [
+    { value: '2,500+', label: 'Annual Reach', body: 'Your brand visible at massive community events, libraries, and schools.', listItems: [] },
+    { value: '501(c)(3)', label: 'Tax Deductible', body: 'All sponsorships and donations are fully tax-deductible contributions.', listItems: [] },
+    { value: '100%', label: 'Student Impact', body: 'Funds go directly to parts, competition fees, and community outreach.', listItems: [] },
+  ],
+};
+
+const page = { ...defaultPage, ...(sponsorsPage || {}) };
+
+const shouldRenderButton = (btn) => {
+  const action = typeof btn?.action === 'string' ? btn.action.trim().toLowerCase() : '';
+  if (action === 'toast') return true;
+  if (action === 'link') return isNonEmptyString(btn?.href);
+  if (action === 'download') {
+    return isNonEmptyString(btn?.fileUrl) || isNonEmptyString(btn?.href) || isNonEmptyString(btn?.downloadFilename);
+  }
+  return false;
+};
+
+const renderableButtons = page.buttons.filter(shouldRenderButton).map((btn, idx) => {
+  const action = typeof btn?.action === 'string' ? btn.action.trim().toLowerCase() : '';
+  const href = typeof btn?.href === 'string' ? btn.href.trim() : '';
+  const filename = typeof btn?.downloadFilename === 'string' ? btn.downloadFilename.trim() : '';
+  const btnClass = btn.hasGreenBorder ? 'border border-[#5ddb27] hover:border-[#5ddb27]' : '';
+
+  if (action === 'toast') {
+    return {
+      idx,
+      kind: 'toast',
+      label: btn.label,
+      variant: btn.variant,
+      class: btnClass,
+      toastTitle: btn.toastTitle || 'Sponsorship Packet',
+      toastText: btn.toastText || 'Contact radicubs@gmail.com to get the packet.',
+    };
+  }
+
+  if (action === 'download') {
+    const downloadHref = btn?.fileUrl || href || filename;
+    return {
+      idx,
+      kind: 'link',
+      label: btn.label,
+      variant: btn.variant,
+      class: btnClass,
+      href: downloadHref,
+      attrs: {
+        ...(filename ? { download: filename } : {}),
+        ...(btn.openInNewTab ? { target: '_blank', rel: 'noreferrer' } : {}),
+      },
+    };
+  }
+
+  return {
+    idx,
+    kind: 'link',
+    label: btn.label,
+    variant: btn.variant,
+    class: btnClass,
+    href,
+    attrs: btn.openInNewTab ? { target: '_blank', rel: 'noreferrer' } : {},
+  };
+});
+
+const toastButtons = renderableButtons.filter((btn) => btn.kind === 'toast');
+
+const titleSegments = parseHighlightedTitleSegments(page.title);
+const highlightColor = isNonEmptyString(page.titleHighlightColor) ? page.titleHighlightColor.trim() : '#5ddb27';
+---
+
+<div class="w-full pt-24 bg-[#101215] min-h-screen relative">
+  <section class="px-6 md:px-16 lg:px-24 max-w-5xl mx-auto text-center mb-16 fade-in-up">
+    <h2 class="text-4xl md:text-6xl font-mono font-bold text-white mb-6">
+      {
+        titleSegments.map((segment) =>
+          segment.highlight ? <span style={`color: ${highlightColor}`}>{segment.text}</span> : <span>{segment.text}</span>
+        )
+      }
+    </h2>
+    <p class="text-xl text-[#d3d3d3] leading-relaxed mb-10">{page.body}</p>
+
+    <div class="flex flex-col sm:flex-row justify-center gap-6">
+      {
+        renderableButtons.map((btn) =>
+          btn.kind === 'toast' ? (
+            <Button variant={btn.variant} class={btn.class} data-toast-trigger={`sponsor-toast-${btn.idx}`}>
+              {btn.label}
+            </Button>
+          ) : (
+            <Button variant={btn.variant} class={btn.class} href={btn.href} {...btn.attrs}>
+              {btn.label}
+            </Button>
+          )
+        )
+      }
+    </div>
+  </section>
+
+  <section class="py-16 bg-[#1b1d23] border-y border-[#2c303a] mb-24">
+    <div class="container mx-auto px-6">
+      <h3 class="text-center font-mono text-[#a9a9a9] uppercase tracking-widest mb-12">{page.logosHeading}</h3>
+
+      {
+        sponsors.length > 0 ? (
+          <div class="flex flex-wrap justify-center gap-10 transition-all duration-500 max-w-6xl mx-auto">
+            {sponsors.map((sponsor) => {
+              const wrapperClass = 'basis-1/2 md:basis-1/4 flex items-center justify-center';
+              return sponsor.website ? (
+                <a href={sponsor.website} target="_blank" rel="noreferrer" class={wrapperClass}>
+                  <img
+                    src={sponsor.logoUrl}
+                    alt={sponsor.name || 'Sponsor logo'}
+                    class="h-20 md:h-24 w-auto object-contain"
+                    loading="lazy"
+                  />
+                </a>
+              ) : (
+                <div class={wrapperClass}>
+                  <img
+                    src={sponsor.logoUrl}
+                    alt={sponsor.name || 'Sponsor logo'}
+                    class="h-20 md:h-24 w-auto object-contain"
+                    loading="lazy"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div class="text-center border border-dashed border-[#2c303a] rounded py-12 font-mono text-[#a9a9a9] text-sm">
+            Sponsor Logos Syncing...
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="px-6 md:px-16 lg:px-24 max-w-6xl mx-auto mb-24">
+    <div class="mb-24">
+      <h3 class="text-3xl font-mono text-white mb-10 text-center">{page.waysHeading}</h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {
+          page.waysCards.map((card) => (
+            <Card class="!bg-[#1b1d23] !border-[#2c303a] !p-8 text-left flex flex-col">
+              <h4 class="font-mono text-xl text-[#5ddb27] mb-4">{card.title}</h4>
+              {isNonEmptyString(card.body) && <p class="text-[#d3d3d3] text-sm leading-relaxed">{card.body}</p>}
+              {Array.isArray(card.listItems) && card.listItems.length > 0 && (
+                <ul class="space-y-2 text-[#d3d3d3] text-sm mt-4">
+                  {card.listItems.map((item) => (
+                    <li>• {item}</li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="mb-16">
+      <h3 class="text-3xl font-mono text-white mb-10 text-center">{page.benefitsHeading}</h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {
+          page.benefitsCards.map((card) => (
+            <div class="bg-[#1b1d23] border border-[#2c303a] p-8 rounded-lg">
+              <h4 class="font-mono text-xl text-[#5ddb27] mb-4">{card.title}</h4>
+              {isNonEmptyString(card.body) && <p class="text-[#d3d3d3] text-sm leading-relaxed mb-4">{card.body}</p>}
+              <ul class="space-y-2 text-[#d3d3d3] text-sm">
+                {(Array.isArray(card.listItems) ? card.listItems : []).map((item) => (
+                  <li>• {item}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="border-t border-[#2c303a] mb-10" />
+
+    <h3 class="text-3xl font-mono text-white mb-10 text-center">{page.statisticsText}</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+      {
+        page.statisticsCards.map((card) => (
+          <Card>
+            <div class="text-4xl font-mono text-white mb-2">{card.value}</div>
+            <div class="text-[#5ddb27] font-mono text-sm uppercase mb-4">{card.label}</div>
+            {isNonEmptyString(card.body) && <p class="text-[#a9a9a9] text-sm">{card.body}</p>}
+            {Array.isArray(card.listItems) && card.listItems.length > 0 && (
+              <ul class="space-y-2 text-[#a9a9a9] text-sm mt-4">
+                {card.listItems.map((item) => (
+                  <li>• {item}</li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        ))
+      }
+    </div>
+  </section>
+
+  {
+    toastButtons.map((btn) => (
+      <div id={`sponsor-toast-${btn.idx}`} class="hidden fixed bottom-8 right-8 z-50 fade-in-up" data-sponsor-toast>
+        <div class="bg-[#1b1d23] border border-[#2c303a] border-l-4 border-l-[#5ddb27] rounded-lg shadow-2xl p-6 max-w-sm flex flex-col gap-2 relative">
+          <button
+            type="button"
+            data-toast-close
+            class="absolute top-3 right-3 text-[#a9a9a9] hover:text-white transition-colors text-lg leading-none"
+            aria-label="Close pop-up"
+          >
+            ✕
+          </button>
+          <div class="flex items-center gap-2 text-[#5ddb27] font-mono font-bold mb-2">
+            <Icon name="FileText" size={18} />
+            <span>{btn.toastTitle}</span>
+          </div>
+          <p class="text-[#d3d3d3] text-sm leading-relaxed">
+            {linkifyEmails(btn.toastText).map((part) =>
+              part.isEmail ? (
+                <a href={`mailto:${part.text}`} class="text-white hover:text-[#5ddb27] underline transition-colors">
+                  {part.text}
+                </a>
+              ) : (
+                part.text
+              )
+            )}
+          </p>
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  document.querySelectorAll('[data-toast-trigger]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-toast-trigger');
+      document.querySelectorAll('[data-sponsor-toast]').forEach((panel) => {
+        panel.classList.add('hidden');
+        window.clearTimeout(panel.dataset.autoHideTimer);
+      });
+      const panel = targetId ? document.getElementById(targetId) : null;
+      if (!panel) return;
+      panel.classList.remove('hidden');
+      const timer = window.setTimeout(() => panel.classList.add('hidden'), 5000);
+      panel.dataset.autoHideTimer = String(timer);
+    });
+  });
+
+  document.querySelectorAll('[data-toast-close]').forEach((closeBtn) => {
+    closeBtn.addEventListener('click', () => {
+      const panel = closeBtn.closest('[data-sponsor-toast]');
+      if (panel) {
+        panel.classList.add('hidden');
+        window.clearTimeout(panel.dataset.autoHideTimer);
+      }
+    });
+  });
+</script>

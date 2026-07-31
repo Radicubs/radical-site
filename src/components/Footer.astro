@@ -1,0 +1,38 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="bg-[#101215] border-t border-[#2c303a] py-12">
+  <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+    <div class="col-span-1 md:col-span-2">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-[#5ddb27] font-mono text-xl font-bold">√</span>
+        <span class="text-white font-mono text-lg tracking-widest font-bold">RADICUBS 7503</span>
+      </div>
+      <p class="text-[#a9a9a9] text-sm max-w-sm mb-6">
+        A 501(c)(3) nonprofit robotics organization based in Frisco, Texas. Engineering the radical future.
+      </p>
+    </div>
+
+    <div>
+      <h4 class="text-white font-mono mb-4">Explore</h4>
+      <ul class="space-y-2 text-[#a9a9a9] text-sm">
+        <li><a href="/about" class="hover:text-[#5ddb27]">About Us</a></li>
+        <li><a href="/projects" class="hover:text-[#5ddb27]">Outreach</a></li>
+        <li><a href="/history" class="hover:text-[#5ddb27]">History</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h4 class="text-white font-mono mb-4">Connect</h4>
+      <ul class="space-y-2 text-[#a9a9a9] text-sm">
+        <li><a href="mailto:radicubs@gmail.com" class="hover:text-[#5ddb27]">radicubs@gmail.com</a></li>
+        <li><a href="/sponsors" class="hover:text-[#5ddb27]">Sponsor Us</a></li>
+        <li><a href="/team" class="hover:text-[#5ddb27]">Join the Team</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="container mx-auto px-6 mt-12 pt-8 border-t border-[#1b1d23] text-center text-[#a9a9a9] text-xs font-mono">
+    © {currentYear} Radicubs Robotics. All rights reserved.
+  </div>
+</footer>

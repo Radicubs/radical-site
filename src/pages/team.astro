@@ -1,8 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import TeamJoinView from '../components/pages/TeamJoinView.jsx';
+import TeamJoinView from '../components/pages/TeamJoinView.astro';
+import { fetchRosters } from '../lib/strapiRosters.js';
+import { fetchTeamPage } from '../lib/strapiTeamPage.js';
+
+const [rosters, teamPage] = await Promise.all([fetchRosters(), fetchTeamPage()]);
 ---
 
 <BaseLayout title="Team | Radicubs">
-  <TeamJoinView client:load />
+  <TeamJoinView rosters={rosters} teamPage={teamPage} />
 </BaseLayout>

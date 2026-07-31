@@ -1,0 +1,254 @@
+---
+import Icon from '../Icon.astro';
+import Button from '../ui/Button.astro';
+import Card from '../ui/Card.astro';
+import SectionHeader from '../ui/SectionHeader.astro';
+import { formatDate } from '../../utils/formatDate.js';
+
+const { awards = [], sponsors = [], homepageData = null, ongoingProjects = [], blogPosts = [] } = Astro.props;
+
+const currentYear = new Date().getFullYear();
+const fallbackSeasons = currentYear - 2019 + 1;
+
+const teamPhotoUrl = homepageData?.teamPhotoUrl ?? null;
+const homepageDescription =
+  typeof homepageData?.description === 'string' && homepageData.description.trim().length > 0
+    ? homepageData.description.trim()
+    : 'We are a student-led, 501(c)(3) nonprofit robotics organization redefining STEM access, innovation, and community impact across North Texas.';
+
+const homepageStats = {
+  foundingYear: homepageData?.foundingYear != null ? String(homepageData.foundingYear) : '2019',
+  teamNumber: homepageData?.teamNumber != null ? String(homepageData.teamNumber) : '7503',
+  activeSeasons: homepageData?.activeSeasons != null ? homepageData.activeSeasons : fallbackSeasons,
+  totalAwards: homepageData?.totalAwards != null ? String(homepageData.totalAwards) : '8+',
+};
+
+const statTiles = [
+  { label: 'Founded', value: homepageStats.foundingYear },
+  { label: 'Team Number', value: homepageStats.teamNumber },
+  { label: 'Active Seasons', value: homepageStats.activeSeasons },
+  { label: 'Awards Won', value: homepageStats.totalAwards },
+];
+
+const pickProjectPreview = (rawDescription) => {
+  if (typeof rawDescription !== 'string') return '';
+  const trimmed = rawDescription.trim();
+  if (!trimmed) return '';
+  // Use the first paragraph to keep homepage cards concise.
+  const firstParagraph = trimmed.split(/\n\s*\n/)[0]?.trim();
+  return firstParagraph || trimmed;
+};
+---
+
+<div class="w-full bg-[#101215]">
+  <section class="min-h-[85vh] flex flex-col justify-center px-6 md:px-16 lg:px-24 relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#1b1d23] to-transparent opacity-50 z-0 pointer-events-none">
+    </div>
+    <div class="relative z-10 max-w-4xl fade-in-up">
+      <div class="inline-block border border-[#5ddb27] text-[#5ddb27] font-mono px-3 py-1 text-sm mb-6 rounded-full">
+        FRC TEAM 7503 // FRISCO, TX
+      </div>
+      <h1 class="text-5xl md:text-7xl font-mono font-bold text-white mb-6 leading-tight uppercase">
+        RADICUBS <br /> <span class="text-[#5ddb27]">ROBOTICS</span>.
+      </h1>
+      <p class="text-xl text-[#d3d3d3] mb-10 max-w-2xl leading-relaxed">
+        {homepageDescription}
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <Button href="/team">Join The Team <Icon name="ArrowRight" size={18} /></Button>
+        <Button variant="outline" href="/sponsors">Partner With Us</Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-12 bg-[#1b1d23] border-y border-[#2c303a]">
+    <div class="container mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+      {
+        statTiles.map((stat, i) => (
+          <div class="text-center fade-in-up" style={`animation-delay: ${i * 0.1}s`}>
+            <div class="text-4xl md:text-5xl font-mono font-bold text-white mb-2">{stat.value}</div>
+            <div class="text-[#a9a9a9] text-sm uppercase tracking-wider font-mono">{stat.label}</div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="py-24 px-6 md:px-16 lg:px-24 bg-[#101215] border-b border-[#2c303a]">
+    <div class="max-w-7xl mx-auto text-center fade-in-up">
+      <h3 class="text-3xl font-mono font-bold text-white mb-12 uppercase tracking-wide">Powered By Our Sponsors</h3>
+
+      {
+        sponsors.length > 0 ? (
+          <div class="flex flex-wrap justify-center gap-8 transition-all duration-500 max-w-5xl mx-auto">
+            {sponsors.map((sponsor) => {
+              const wrapperClass = 'basis-1/2 md:basis-1/4 flex items-center justify-center';
+              return sponsor.website ? (
+                <a href={sponsor.website} target="_blank" rel="noreferrer" class={wrapperClass}>
+                  <img
+                    src={sponsor.logoUrl}
+                    alt={sponsor.name || 'Sponsor logo'}
+                    class="h-16 md:h-20 w-auto object-contain"
+                    loading="lazy"
+                  />
+                </a>
+              ) : (
+                <div class={wrapperClass}>
+                  <img
+                    src={sponsor.logoUrl}
+                    alt={sponsor.name || 'Sponsor logo'}
+                    class="h-16 md:h-20 w-auto object-contain"
+                    loading="lazy"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-8 opacity-50 max-w-5xl mx-auto">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(() => (
+              <div class="h-20 bg-[#1b1d23] border border-[#2c303a] rounded flex items-center justify-center text-[#d3d3d3] font-mono font-bold text-sm tracking-wider">
+                SPONSOR LOGO
+              </div>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="py-24 px-6 md:px-16 lg:px-24 bg-[#1b1d23]">
+    <SectionHeader title="Trophy Case" subtitle="A legacy of engineering excellence, spirit, and community outreach." />
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start max-w-7xl mx-auto">
+      <div class="space-y-4 overflow-y-auto lg:max-h-[420px] lg:pr-2">
+        {
+          awards.length === 0 ? (
+            <div class="text-[#a9a9a9] font-mono text-sm">No awards found yet. (Check Strapi publishing + permissions.)</div>
+          ) : (
+            awards.map((award) => (
+              <div class="flex items-start md:items-center gap-4 border-b border-[#2c303a] pb-4 text-left">
+                <span class="text-[#5ddb27] font-mono text-xl md:text-2xl font-bold w-16 shrink-0">{award.year}</span>
+                <span class="text-[#a9a9a9] font-mono text-sm uppercase tracking-wider w-32 shrink-0 hidden md:block">
+                  {award.event}
+                </span>
+                <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 text-white font-medium text-lg w-full">
+                  <span class="text-[#a9a9a9] font-mono text-xs uppercase tracking-wider md:hidden">{award.event}</span>
+                  <span class="flex items-center gap-2">
+                    <Icon name="Award" size={16} class="text-[#5ddb27] hidden md:block" />
+                    {award.name}
+                  </span>
+                </div>
+              </div>
+            ))
+          )
+        }
+      </div>
+
+      <div class="bg-[#101215] border border-[#2c303a] rounded-xl aspect-[4/3] lg:aspect-auto lg:h-full min-h-[400px] flex flex-col items-center justify-center relative overflow-hidden group">
+        {
+          teamPhotoUrl ? (
+            <Fragment>
+              <img src={teamPhotoUrl} alt="Team photo" class="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+              <div class="absolute inset-0 bg-gradient-to-tr from-[#1b1d23] to-transparent opacity-60 z-10" />
+            </Fragment>
+          ) : (
+            <Fragment>
+              <div class="absolute inset-0 bg-gradient-to-tr from-[#1b1d23] to-transparent opacity-60 z-10" />
+              <Icon
+                name="Image"
+                size={64}
+                class="text-[#2c303a] mb-4 z-20 group-hover:scale-110 transition-transform duration-500"
+              />
+              <span class="text-[#a9a9a9] font-mono font-bold z-20 tracking-widest text-sm bg-[#101215]/80 px-4 py-2 rounded">
+                TEAM AWARD PLACEHOLDER
+              </span>
+            </Fragment>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="py-24 px-6 md:px-16 lg:px-24 bg-[#101215] border-t border-[#2c303a]">
+    <div class="max-w-7xl mx-auto">
+      <SectionHeader
+        title="Ongoing Projects"
+        subtitle="Making a direct impact in our community through continuous outreach and initiatives."
+      />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        {
+          ongoingProjects.length === 0 ? (
+            <div class="text-[#a9a9a9] font-mono text-sm col-span-full">No ongoing projects yet.</div>
+          ) : (
+            ongoingProjects.map((project) => (
+              <Card class="flex flex-col text-left !p-0 overflow-hidden !bg-[#1b1d23]">
+                {project.imageUrl && (
+                  <div class="w-full h-44 bg-[#2c303a] relative flex items-center justify-center border-b border-[#101215]">
+                    <img src={project.imageUrl} alt={project.title} class="w-full h-full object-cover" loading="lazy" />
+                  </div>
+                )}
+                <div class="p-6 flex flex-col flex-grow">
+                  <h3 class="text-xl font-mono text-white mb-3">{project.title}</h3>
+                  <p class="text-[#a9a9a9] text-sm mb-4 flex-grow whitespace-pre-line">
+                    {pickProjectPreview(project.description)}
+                  </p>
+                </div>
+              </Card>
+            ))
+          )
+        }
+      </div>
+
+      <div class="text-center">
+        <Button href="/projects" class="mx-auto">See All Projects <Icon name="ArrowRight" size={18} /></Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-24 px-6 md:px-16 lg:px-24 bg-[#1b1d23] border-t border-[#2c303a]">
+    <div class="flex justify-between items-end mb-12 fade-in-up max-w-7xl mx-auto">
+      <SectionHeader title="Latest Updates" subtitle="Direct from the Radicubs blog." />
+      <a href="/blog" class="text-[#5ddb27] font-mono hover:underline mb-4 flex items-center gap-2 shrink-0">
+        View All Posts <Icon name="ArrowRight" size={16} />
+      </a>
+    </div>
+
+    <div class="max-w-7xl mx-auto">
+      {
+        blogPosts.length === 0 ? (
+          <div class="border border-dashed border-[#2c303a] rounded-lg p-12 text-center bg-[#101215]">
+            <Icon name="BookOpen" size={48} class="mx-auto text-[#2c303a] mb-4" />
+            <h3 class="text-xl font-mono text-white mb-2">Blog posts coming soon.</h3>
+            <p class="text-[#a9a9a9]">We are currently syncing our latest updates from radicubs.com.</p>
+          </div>
+        ) : (
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {blogPosts.slice(0, 4).map((post) => (
+              <Card href={`/blog/${post.slug}/`} class="flex flex-col h-full !p-0 overflow-hidden !bg-[#101215]">
+                <div class="w-full h-48 bg-[#2c303a] relative flex items-center justify-center border-b border-[#1b1d23]">
+                  {post.imageUrl ? (
+                    <img src={post.imageUrl} alt={post.title} class="w-full h-full object-cover" />
+                  ) : (
+                    <span class="text-[#1b1d23] font-mono font-bold tracking-widest text-xs">BLOG IMAGE</span>
+                  )}
+                </div>
+                <div class="p-6 flex flex-col flex-grow">
+                  <div class="flex items-center gap-2 text-[#a9a9a9] font-mono text-xs mb-3">
+                    <Icon name="Calendar" size={14} />
+                    {formatDate(post.date)}
+                  </div>
+                  <h3 class="text-xl font-mono font-bold text-white mb-3">{post.title}</h3>
+                  <p class="text-[#d3d3d3] text-sm mb-6 flex-grow">{post.description}</p>
+                  <div class="text-[#5ddb27] font-mono text-sm flex items-center gap-2 mt-auto">
+                    Read Article <Icon name="ChevronRight" size={16} />
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </section>
+</div>

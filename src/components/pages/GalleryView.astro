@@ -1,0 +1,106 @@
+---
+import Icon from '../Icon.astro';
+import SectionHeader from '../ui/SectionHeader.astro';
+
+const { albums = [] } = Astro.props;
+
+const galleryYears = Array.from(new Set(albums.map((a) => a.year).filter(Boolean))).sort(
+  (a, b) => parseInt(b, 10) - parseInt(a, 10)
+);
+const defaultYear = galleryYears[0] ?? '';
+---
+
+<div class="w-full pt-32 px-6 md:px-16 lg:px-24 bg-[#101215] min-h-screen pb-24">
+  <div class="max-w-7xl mx-auto">
+    <SectionHeader title="Photo Gallery" subtitle="A visual look into the heart of Radicubs Robotics." />
+
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-8 border-b border-[#2c303a] pb-6">
+      <h3 class="text-3xl font-mono text-white mb-4 sm:mb-0 text-center sm:text-left">Gallery Albums</h3>
+      {
+        galleryYears.length > 0 && (
+          <div class="relative">
+            <select
+              id="gallery-year-select"
+              class="appearance-none bg-[#1b1d23] border border-[#5ddb27] text-white font-mono py-2 pl-4 pr-10 rounded outline-none focus:ring-2 focus:ring-[#5ddb27]/50 cursor-pointer"
+            >
+              {galleryYears.map((year) => (
+                <option value={year} selected={year === defaultYear}>
+                  {year} Season
+                </option>
+              ))}
+            </select>
+            <Icon
+              name="ChevronDown"
+              size={16}
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5ddb27] pointer-events-none"
+            />
+          </div>
+        )
+      }
+    </div>
+
+    <div class="w-full">
+      {
+        galleryYears.length === 0 ? (
+          <div class="border border-dashed border-[#2c303a] rounded-lg py-16 text-center text-[#a9a9a9] font-mono w-full">
+            <Icon name="Image" size={48} class="mx-auto mb-4 text-[#2c303a]" />
+            <p>Gallery content coming soon.</p>
+          </div>
+        ) : (
+          galleryYears.map((year) => (
+            <div
+              data-year-panel={year}
+              class:list={[
+                'fade-in-up grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6',
+                year === defaultYear ? '' : 'hidden',
+              ]}
+            >
+              {albums
+                .filter((album) => album.year === year)
+                .map((album) => (
+                  <a
+                    href={`/gallery/${album.slug}`}
+                    class="group cursor-pointer rounded-lg overflow-hidden border border-[#2c303a] bg-[#1b1d23] relative aspect-square shadow-lg block"
+                  >
+                    <div class="absolute inset-0 bg-[#2c303a] flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                      {album.coverPhoto ? (
+                        <img src={album.coverPhoto} alt={album.title} class="w-full h-full object-cover" />
+                      ) : (
+                        <div class="flex flex-col items-center opacity-50">
+                          <Icon name="Image" size={48} class="text-[#101215] mb-2" />
+                          <span class="font-mono text-[#101215] text-xs font-bold tracking-widest text-center px-2">
+                            NO COVER
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#101215]/90 to-transparent p-4 opacity-100 transition-opacity duration-300">
+                      <p class="text-white font-mono font-bold text-lg line-clamp-2">{album.title}</p>
+                    </div>
+                  </a>
+                ))}
+            </div>
+          ))
+        )
+      }
+    </div>
+  </div>
+</div>
+
+<script>
+  const select = document.getElementById('gallery-year-select');
+  if (select) {
+    select.addEventListener('change', () => {
+      const year = select.value;
+      document.querySelectorAll('[data-year-panel]').forEach((panel) => {
+        const show = panel.dataset.yearPanel === year;
+        panel.classList.toggle('hidden', !show);
+        if (show) {
+          panel.classList.remove('fade-in-up');
+          void panel.offsetWidth;
+          panel.classList.add('fade-in-up');
+        }
+      });
+    });
+  }
+</script>

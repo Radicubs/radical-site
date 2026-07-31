@@ -1,0 +1,94 @@
+---
+import Icon from './Icon.astro';
+import Button from './ui/Button.astro';
+
+const { currentPath = '/' } = Astro.props;
+
+const navLinks = [
+  { id: 'home', label: 'Home', path: '/' },
+  { id: 'about', label: 'About', path: '/about' },
+  { id: 'history', label: 'History', path: '/history' },
+  { id: 'projects', label: 'Impact', path: '/projects' },
+  { id: 'team', label: 'Team', path: '/team' },
+  { id: 'gallery', label: 'Gallery', path: '/gallery' },
+  { id: 'blog', label: 'Blog', path: '/blog' },
+  { id: 'sponsors', label: 'Sponsors', path: '/sponsors' },
+];
+
+const isActive = (link) => {
+  if (link.id === 'home') return currentPath === '/';
+  if (link.id === 'blog') return currentPath === '/blog' || currentPath.startsWith('/blog/');
+  return currentPath === link.path;
+};
+---
+
+<nav id="site-nav" class="fixed w-full z-50 transition-all duration-300 bg-[#101215] border-b py-6 border-transparent">
+  <div class="container mx-auto px-6 flex justify-between items-center">
+    <a href="/" class="flex items-center gap-2 group">
+      <span class="text-[#5ddb27] font-mono text-2xl font-bold group-hover:scale-110 transition-transform">√</span>
+      <span class="text-white font-mono text-xl tracking-widest font-bold">RADICUBS</span>
+    </a>
+
+    <div class="hidden lg:flex items-center gap-6 xl:gap-8">
+      {navLinks.map((link) => (
+        <a
+          href={link.path}
+          class:list={[
+            'font-mono text-sm tracking-wider hover:text-[#5ddb27] transition-colors',
+            isActive(link) ? 'text-[#5ddb27]' : 'text-[#d3d3d3]',
+          ]}
+        >
+          {link.label}
+        </a>
+      ))}
+      <Button href="/team" class="!py-2 !px-4 text-sm">Join Us</Button>
+    </div>
+
+    <button id="mobile-menu-toggle" class="lg:hidden text-white" aria-label="Toggle menu" aria-expanded="false">
+      <Icon name="ChevronDown" id="mobile-menu-icon" class="transition-transform" />
+    </button>
+  </div>
+
+  <div id="mobile-menu" class="hidden lg:hidden absolute top-full left-0 w-full bg-[#1b1d23] border-b border-[#2c303a] flex-col p-4 shadow-xl">
+    {navLinks.map((link) => (
+      <a
+        href={link.path}
+        class:list={[
+          'py-3 font-mono text-left px-4 block',
+          isActive(link) ? 'text-[#5ddb27] bg-[#2c303a]/50' : 'text-[#d3d3d3]',
+        ]}
+      >
+        {link.label}
+      </a>
+    ))}
+    <div class="p-4">
+      <Button href="/team" class="w-full">Join Us</Button>
+    </div>
+  </div>
+</nav>
+
+<script>
+  const nav = document.getElementById('site-nav');
+  const toggle = document.getElementById('mobile-menu-toggle');
+  const icon = document.getElementById('mobile-menu-icon');
+  const menu = document.getElementById('mobile-menu');
+
+  const setScrolled = (scrolled) => {
+    nav.classList.remove('py-4', 'shadow-lg', 'border-[#2c303a]', 'py-6', 'border-transparent');
+    if (scrolled) {
+      nav.classList.add('py-4', 'shadow-lg', 'border-[#2c303a]');
+    } else {
+      nav.classList.add('py-6', 'border-transparent');
+    }
+  };
+
+  window.addEventListener('scroll', () => setScrolled(window.scrollY > 20));
+
+  toggle.addEventListener('click', () => {
+    const open = menu.classList.contains('hidden');
+    menu.classList.toggle('hidden', !open);
+    menu.classList.toggle('flex', open);
+    icon.classList.toggle('rotate-180', open);
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+</script>
