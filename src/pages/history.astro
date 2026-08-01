@@ -6,6 +6,9 @@ import { fetchHistories } from '../lib/strapiHistories.js';
 const seasonsTimeline = await fetchHistories();
 ---
 
-<BaseLayout title="History | Radicubs">
+<BaseLayout
+  title="History | Radicubs"
+  description="A season-by-season timeline of Radicubs' robots, competitions, and growth in the FIRST Robotics Competition."
+>
   <HistoryView seasonsTimeline={seasonsTimeline} />
 </BaseLayout>

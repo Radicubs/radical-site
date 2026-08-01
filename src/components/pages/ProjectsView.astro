@@ -21,14 +21,15 @@ const pastIcons = ['Cpu', 'BookOpen', 'Users', 'Zap'];
     <SectionHeader
       title="Projects & Impact"
       subtitle="Impacting 2,500+ people annually through outreach, mentorship, and advocacy."
+      level="h1"
     />
   </section>
 
   <section class="bg-[#1b1d23] py-20 px-6 md:px-16 lg:px-24 mb-16 border-y border-[#2c303a]">
     <div class="max-w-7xl mx-auto">
-      <h3 class="text-3xl font-mono text-white mb-10 border-b border-[#2c303a] pb-4 inline-flex items-center gap-3">
+      <h2 class="text-3xl font-mono text-white mb-10 border-b border-[#2c303a] pb-4 inline-flex items-center gap-3">
         <span class="w-3 h-3 rounded-full bg-[#5ddb27]" /> Ongoing Projects
-      </h3>
+      </h2>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {ongoingProjects.length === 0 && (
@@ -49,7 +50,7 @@ const pastIcons = ['Cpu', 'BookOpen', 'Users', 'Zap'];
                   </div>
                 )}
                 <div class="flex flex-col mb-6">
-                  <h4 class="text-2xl font-mono text-white mb-2">{project.title}</h4>
+                  <h3 class="text-2xl font-mono text-white mb-2">{project.title}</h3>
                 </div>
 
                 <div class="mb-6 space-y-4">
@@ -79,9 +80,9 @@ const pastIcons = ['Cpu', 'BookOpen', 'Users', 'Zap'];
   </section>
 
   <section class="px-6 md:px-16 lg:px-24 mb-24 max-w-7xl mx-auto">
-    <h3 class="text-3xl font-mono text-white mb-10 border-b border-[#2c303a] pb-4 inline-flex items-center gap-3">
+    <h2 class="text-3xl font-mono text-white mb-10 border-b border-[#2c303a] pb-4 inline-flex items-center gap-3">
       <span class="w-3 h-3 rounded-full bg-[#2c303a] border border-[#5ddb27]" /> Past Projects & Outreach
-    </h3>
+    </h2>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       {pastProjects.length === 0 && (
@@ -103,7 +104,7 @@ const pastIcons = ['Cpu', 'BookOpen', 'Users', 'Zap'];
               <div class="text-[#5ddb27] mb-4">
                 <Icon name={iconName} size={32} />
               </div>
-              <h4 class="text-xl font-mono text-white mb-3">{project.title}</h4>
+              <h3 class="text-xl font-mono text-white mb-3">{project.title}</h3>
               <div class="text-[#a9a9a9] mb-4 space-y-3">
                 {hasBlocks ? (
                   <Fragment set:html={renderBlocks(project.descriptionBlocks)} />

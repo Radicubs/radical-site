@@ -9,12 +9,12 @@
     "preview": "astro preview"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
     "@astrojs/tailwind": "^6.0.2",
     "astro": "^5.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
-    "husky": "^9.1.7",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17"
   }

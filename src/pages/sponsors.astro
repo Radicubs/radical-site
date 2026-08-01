@@ -7,6 +7,9 @@ import { fetchSponsorsPage } from '../lib/strapiSponsorsPage.js';
 const [sponsors, sponsorsPage] = await Promise.all([fetchSponsors(), fetchSponsorsPage()]);
 ---
 
-<BaseLayout title="Sponsors | Radicubs">
+<BaseLayout
+  title="Sponsors | Radicubs"
+  description="Partner with Radicubs Robotics. Learn about sponsorship benefits and ways to support our student-led STEM nonprofit."
+>
   <SponsorsView sponsors={sponsors} sponsorsPage={sponsorsPage} />
 </BaseLayout>

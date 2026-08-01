@@ -6,6 +6,9 @@ import { fetchProjects } from '../lib/strapiProjects.js';
 const projects = await fetchProjects();
 ---
 
-<BaseLayout title="Impact | Radicubs">
+<BaseLayout
+  title="Impact | Radicubs"
+  description="See how Radicubs drives STEM outreach, mentorship, and community impact through ongoing and past projects."
+>
   <ProjectsView projects={projects} />
 </BaseLayout>

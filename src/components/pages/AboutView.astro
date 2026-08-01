@@ -65,7 +65,7 @@ const diversityCards =
 <div class="w-full pt-24 bg-[#101215] min-h-screen">
   <section class="py-16 px-6 md:px-16 lg:px-24">
     <div class="max-w-4xl mx-auto">
-      <SectionHeader title={originHeading} subtitle={originSubheading} />
+      <SectionHeader title={originHeading} subtitle={originSubheading} level="h1" />
       <div class="space-y-6 text-lg text-[#d3d3d3] leading-relaxed">
         {
           originBlocks.map((block) =>
@@ -85,9 +85,9 @@ const diversityCards =
   <section class="py-16 px-6 md:px-16 lg:px-24">
     <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16">
       <div>
-        <h3 class="text-3xl font-mono text-white mb-6 flex items-center gap-2">
+        <h2 class="text-3xl font-mono text-white mb-6 flex items-center gap-2">
           <span class="text-[#5ddb27]">√</span> {missionHeading}
-        </h3>
+        </h2>
         <p class="text-[#d3d3d3] mb-8 leading-relaxed">{missionStatement}</p>
 
         <div class="grid grid-cols-2 gap-4 mb-8">
@@ -95,7 +95,7 @@ const diversityCards =
             missionCards.map((card) => (
               <Card class="!p-4 text-center border-[#2c303a] bg-[#1b1d23]">
                 <Icon name={card.icon || 'Target'} class="mx-auto text-[#5ddb27] mb-2" />
-                <h4 class="text-white font-mono text-sm">{card.title}</h4>
+                <h3 class="text-white font-mono text-sm">{card.title}</h3>
               </Card>
             ))
           }
@@ -105,16 +105,16 @@ const diversityCards =
       </div>
 
       <div>
-        <h3 class="text-3xl font-mono text-white mb-6 flex items-center gap-2">
+        <h2 class="text-3xl font-mono text-white mb-6 flex items-center gap-2">
           <span class="text-[#5ddb27]">√</span> {diversityHeading}
-        </h3>
+        </h2>
         <div class="space-y-4">
           {
             diversityCards.map((card) => (
               <Card class="flex items-center gap-4 border-[#2c303a] bg-[#1b1d23]">
                 <Icon name={card.icon || 'Globe'} class="text-[#5ddb27] shrink-0" size={32} />
                 <div>
-                  <h4 class="text-white font-mono font-bold">{card.title}</h4>
+                  <h3 class="text-white font-mono font-bold">{card.title}</h3>
                   <p class="text-[#a9a9a9] text-sm">{card.description}</p>
                 </div>
               </Card>

@@ -6,6 +6,9 @@ import { fetchAboutPage } from '../lib/strapiAboutPage.js';
 const aboutPage = await fetchAboutPage();
 ---
 
-<BaseLayout title="About | Radicubs">
+<BaseLayout
+  title="About | Radicubs"
+  description="Learn how Radicubs started as a school club and grew into an independent, student-led FRC robotics nonprofit serving North Texas."
+>
   <AboutView aboutPage={aboutPage} />
 </BaseLayout>

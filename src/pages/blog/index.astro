@@ -6,6 +6,6 @@ import { fetchAllBlogPosts } from '../../lib/strapiBlogPosts.js';
 const posts = await fetchAllBlogPosts();
 ---
 
-<BaseLayout title="Blog | Radicubs">
+<BaseLayout title="Blog | Radicubs" description="News, updates, and stories from Radicubs Robotics.">
   <BlogView posts={posts} />
 </BaseLayout>

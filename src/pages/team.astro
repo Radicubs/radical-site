@@ -7,6 +7,9 @@ import { fetchTeamPage } from '../lib/strapiTeamPage.js';
 const [rosters, teamPage] = await Promise.all([fetchRosters(), fetchTeamPage()]);
 ---
 
-<BaseLayout title="Team | Radicubs">
+<BaseLayout
+  title="Team | Radicubs"
+  description="Meet the students of Radicubs and learn how to join FRC Team 7503 — no prior experience required."
+>
   <TeamJoinView rosters={rosters} teamPage={teamPage} />
 </BaseLayout>

@@ -56,6 +56,14 @@ h6,
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .fade-in-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .card-hover {
   transition: all 0.3s ease;
 }

@@ -1,10 +1,11 @@
 ---
-const { title, subtitle } = Astro.props;
+const { title, subtitle, level = 'h2' } = Astro.props;
+const Heading = level;
 ---
 
 <div class="mb-12 fade-in-up">
-  <h2 class="text-3xl md:text-5xl font-mono font-bold text-white mb-4">
+  <Heading class="text-3xl md:text-5xl font-mono font-bold text-white mb-4">
     <span class="text-[#5ddb27]">√</span> {title}
-  </h2>
+  </Heading>
   {subtitle && <p class="text-[#a9a9a9] text-lg max-w-2xl">{subtitle}</p>}
 </div>

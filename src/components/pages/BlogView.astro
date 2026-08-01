@@ -8,14 +8,14 @@ const { posts = [] } = Astro.props;
 ---
 
 <div class="w-full pt-32 pb-24 px-6 md:px-16 lg:px-24 bg-[#101215]">
-  <SectionHeader title="Team Blog" subtitle="News, updates, and stories from the Radicubs." />
+  <SectionHeader title="Team Blog" subtitle="News, updates, and stories from the Radicubs." level="h1" />
 
   <div class="max-w-7xl mx-auto">
     {
       posts.length === 0 ? (
         <div class="border border-dashed border-[#2c303a] rounded-lg p-16 text-center">
           <Icon name="BookOpen" size={48} class="mx-auto text-[#2c303a] mb-4" />
-          <h3 class="text-xl font-mono text-white mb-2">Blog posts coming soon.</h3>
+          <h2 class="text-xl font-mono text-white mb-2">Blog posts coming soon.</h2>
           <p class="text-[#a9a9a9]">We are currently syncing our latest updates from radicubs.com.</p>
         </div>
       ) : (
@@ -34,7 +34,7 @@ const { posts = [] } = Astro.props;
                   <Icon name="Calendar" size={14} />
                   {formatDate(post.date)}
                 </div>
-                <h3 class="text-xl font-mono font-bold text-white mb-3">{post.title}</h3>
+                <h2 class="text-xl font-mono font-bold text-white mb-3">{post.title}</h2>
                 <p class="text-[#d3d3d3] text-sm mb-6 flex-grow">{post.description}</p>
                 <div class="text-[#5ddb27] font-mono text-sm flex items-center gap-2 mt-auto">
                   Read Article <Icon name="ChevronRight" size={16} />

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://radicubs.com/sitemap-index.xml
