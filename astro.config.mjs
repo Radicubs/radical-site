@@ -7,5 +7,5 @@ export default defineConfig({
   integrations: [react(), icon()],
   image: { domains: ["cms.radicubs.com"] },
   prefetch: true,
-  server: { port: 4322 }
+  server: { port: 7503 }
 });
