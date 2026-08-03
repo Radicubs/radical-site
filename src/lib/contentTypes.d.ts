@@ -800,6 +800,7 @@ export interface ApiHomeHome extends Schema.SingleType {
     nextComp: Attribute.DateTime;
     applicationUrl: Attribute.String;
     applicationSeason: Attribute.Integer;
+    sponsorshipPacket: Attribute.Media;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     publishedAt: Attribute.DateTime;

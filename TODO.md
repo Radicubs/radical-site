@@ -9,7 +9,7 @@ Based on reading the current codebase (`src/pages`, `src/components`, `src/lib/c
 - [x] Sponsors spot — `<CorporateSponsors />` already rendered under an "Sponsors" heading
 - [x] Trophy case — `Awards.astro` already pulls every award from The Blue Alliance (not Strapi) and renders it as a year-by-year vertical timeline next to the team photo. Content-wise this is "all awards we've won," but it's a scrolling timeline, not a case/grid. Decide if the timeline treatment is fine or if you want a literal trophy-case grid.
 - [ ] Impact spot — no Impact page or data model exists yet (see below). Need: query most-recent N impact events, card layout, "View Impact" button.
-- [!] Blog spot — latest 3 posts already shown via `<BlogPosts posts={blogPosts} />` under "Latest Updates," already in a card layout. Just missing a "View Blog" button linking to `/blog`. Put this below the 3 blog posts, steal the view mentors component from the team page
+- [x] Blog spot — added an "All blog posts" link (`Link` + `External`, same pattern as team.astro's "View mentors"), left-aligned below the 3 latest posts, linking to `/blog`
 - [x] Team photo — `home.attributes.image`, shown beside the awards timeline
 
 ## About page — new
@@ -53,9 +53,9 @@ Based on reading the current codebase (`src/pages`, `src/components`, `src/lib/c
 
 - [x] Corporate sponsor logos already shown via `<CorporateSponsors />`
 - [ ] Individual sponsors are currently a plain text list (just `name`) — add photos if you want them shown, needs a media field on `IndividualSponsor`
-- [!] "Download sponsorship packet" button on the sponsors page
-- [!] button that links directly to the email on the contact page
-- [!] "Ways to support" section (donations, sponsorships, etc.) — `DONATE_URL` env var already exists and is used on the homepage's quick links, but nothing on the Sponsors page currently surfaces it
+- [~] "Download sponsorship packet" button — code is in place (conditional `.cta-button` reading `home.attributes.sponsorshipPacket`), but the field doesn't exist on the live Strapi `Home` singleton yet, so the button won't appear until you add a `sponsorshipPacket` media field there and upload the PDF. Type stub added to `contentTypes.d.ts` in the meantime; regenerate it for real once the field exists.
+- [x] Button that links directly to the email — moved to the Contact page instead, as an alternate to the form (not on Sponsors): a `mailto:` link using a new `CONTACT_EMAIL` env var (set to `contact@radicubs.com`, documented in README)
+- [x] "Ways to support" section — added at the top of the Sponsors page with Donate (`DONATE_URL`) and Become a Sponsor cards
 - [ ] "Sponsorship benefits" section in card format — needs new content, likely a `SponsorshipBenefit` collection (title, description, icon/image) or could be hardcoded if benefits rarely change
 
 ## Strapi content-type summary
