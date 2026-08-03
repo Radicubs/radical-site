@@ -11,6 +11,8 @@ import Application from "../components/Application.astro";
 import { Icon } from "astro-icon/components";
 import GlitchText from "../components/GlitchText.astro";
 import QuickLink from "../components/QuickLink.astro";
+import Link from "../components/Link.astro";
+import External from "../components/External.astro";
 import { getVideoId, slugify } from "../lib/blog";
 
 const home = await fetchApi<ApiHomeHome>({
@@ -100,6 +102,9 @@ const latestPostHref = latestPostVideoId
       <hr />
     </div>
     <BlogPosts posts={blogPosts} />
+    <div class="view-blog">
+      <Link href="/blog">All blog posts <External /></Link>
+    </div>
     <footer>
       The Radicubs Robotics Team is recognized as a non-profit organization under a 501(c)(3).
       <br />
@@ -245,6 +250,13 @@ const latestPostHref = latestPostVideoId
       overflow-y: visible;
       padding-right: 0;
     }
+  }
+
+  .view-blog {
+    width: 100%;
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 24px;
   }
 
   footer {

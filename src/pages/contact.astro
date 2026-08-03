@@ -27,6 +27,10 @@ const home = await fetchApi<ApiHomeHome>({
       <div class="cf-turnstile" data-sitekey={import.meta.env.TURNSTILE_SITE_KEY}></div>
       <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     </form>
+    <div class="alt-contact">
+      <p>Prefer email?</p>
+      <a class="email" href={`mailto:${import.meta.env.CONTACT_EMAIL}`}>{import.meta.env.CONTACT_EMAIL}</a>
+    </div>
     {
       home.attributes.applicationUrl && (
         <div class="application">
@@ -141,12 +145,23 @@ const home = await fetchApi<ApiHomeHome>({
     background-color: green;
   }
 
+  .alt-contact {
+    margin-top: 32px;
+    text-align: center;
+    color: lightgray;
+  }
+
   .email {
     display: flex;
     justify-content: center;
     align-items: center;
     color: var(--accent);
     font-size: 32px;
+    text-decoration: none;
+  }
+
+  .email:hover {
+    text-decoration: underline;
   }
 
   .application {

@@ -9,6 +9,7 @@ Website built in Astro and deployed using GitHub Pages
 
 - `DONATE_URL` Just the link the button goes to
 - `CONTACT_API_URL` URL for the Cloudflare Worker form (contact.radicubs.workers.dev, contact.radicubs.com)
+- `CONTACT_EMAIL` Email address used for the "contact us directly" mailto buttons
 - `STRAPI_URL` URL for the Strapi instance
 - `STRAPI_API_TOKEN` Created in Strapi Dashboard > Settings > API Tokens
 - `TURNSTILE_SITE_KEY` Public key used in the Cloudflare Turnstile widget
