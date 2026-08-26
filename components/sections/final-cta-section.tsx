@@ -1,0 +1,3 @@
+import { AnimatedSection } from "@/components/ui/animated-section";
+import { site } from "@/data/site";
+export function FinalCtaSection(){return <section className="section"><div className="wrap"><AnimatedSection><div className="cta"><div className="cta-grid"><div><p className="eyebrow">Join or support Radicubs</p><h2>Help the next robot and the next generation get built.</h2><p>Applications for the 2026–2027 season are open. Donations to the team support a student-led 501(c)(3) nonprofit.</p></div><div className="actions"><a className="btn btn-green" href={site.applyUrl} target="_blank" rel="noreferrer">Apply now →</a><a className="btn btn-light" href={site.donateUrl} target="_blank" rel="noreferrer">Donate</a></div></div></div></AnimatedSection></div></section>}
