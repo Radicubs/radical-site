@@ -10,8 +10,11 @@ export const site = {
   email: "contact@radicubs.com",
   instagram: "https://www.instagram.com/theradicubs/",
   linkedin: "https://www.linkedin.com/company/radicubs-robotics",
+  tiktok: "https://www.tiktok.com/@theradicubs",
+  tba: "https://www.thebluealliance.com/team/7503",
   robotImage: "/radicubs-2026-hero.png",
   markImage: "/favicon.svg",
+  wordmarkImage: "/radicubs-wordmark-green.png",
   latestPost: "/blog/week-8-rebuilt-2026"
 } as const;
 

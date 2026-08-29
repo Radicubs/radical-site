@@ -1,4 +1,10 @@
-export type BlogSection = { heading: string; paragraphs: string[] };
+export type BlogImage = { src: string; alt: string };
+export type BlogBlock =
+  | { kind: "text"; text: string }
+  | { kind: "code"; code: string; lang?: string }
+  | { kind: "list"; ordered: boolean; items: string[] }
+  | { kind: "image"; src: string; alt: string };
+export type BlogSection = { heading: string; paragraphs: string[]; images?: BlogImage[]; blocks?: BlogBlock[] };
 export type BlogPost = {
   slug: string;
   date: string;

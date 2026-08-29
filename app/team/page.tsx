@@ -1,3 +1,14 @@
-import type { Metadata } from "next";import Link from "next/link";import { Navbar } from "@/components/sections/navbar";import { Footer } from "@/components/sections/footer";import { TeamCard } from "@/components/team/team-card";import { AnimatedSection } from "@/components/ui/animated-section";import { teamMembers } from "@/data/team";import { site } from "@/data/site";
-export const metadata:Metadata={title:"Team | Radicubs"};
-export default function TeamPage(){return <main><Navbar/><section className="page-hero"><div className="wrap"><AnimatedSection><p className="eyebrow">FRC Team 7503</p><h1>Meet the Team</h1><p className="section-copy">The current Radicubs roster spans captains, subteam leads, and student members across engineering, software, business, and media.</p><div className="actions"><Link className="btn btn-light" href="/mentors">View mentors →</Link><a className="btn btn-dark" href={site.applyUrl} target="_blank" rel="noreferrer">Apply for 2026–2027 →</a></div></AnimatedSection></div></section><section className="section"><div className="wrap"><div className="team-grid">{teamMembers.map((m,i)=><AnimatedSection key={m.name} delay={(i%10)*.025}><TeamCard member={m}/></AnimatedSection>)}</div></div></section><Footer/></main>}
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Navbar } from "@/components/sections/navbar";
+import { Footer } from "@/components/sections/footer";
+import { TeamRosters } from "@/components/team/team-rosters";
+import { AnimatedSection } from "@/components/ui/animated-section";
+import { getSiteSettings, getTeamRosters } from "@/lib/cms";
+
+export const metadata: Metadata = { title: "Team | Radicubs" };
+
+export default async function TeamPage() {
+  const [rosters, settings] = await Promise.all([getTeamRosters(), getSiteSettings()]);
+  return <main><Navbar settings={settings}/><section className="page-hero"><div className="wrap"><AnimatedSection><p className="eyebrow">FRC Team 7503</p><h1>Meet the Team</h1><p className="section-copy">The Radicubs roster spans captains, subteam leads, and student members across engineering, software, business, and media. Switch seasons to see past rosters.</p><div className="actions"><Link className="btn btn-light" href="/mentors">View mentors →</Link><a className="btn btn-dark" href={settings.applyUrl} target="_blank" rel="noreferrer">Apply for {settings.applicationSeason}–{settings.applicationSeason + 1} →</a></div></AnimatedSection></div></section><section className="section team-roster-section"><div className="wrap"><TeamRosters rosters={rosters}/></div></section><Footer/></main>;
+}

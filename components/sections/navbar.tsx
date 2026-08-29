@@ -4,8 +4,9 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { navigation, site } from "@/data/site";
+import type { SiteSettings } from "@/lib/cms";
 
-export function Navbar(){
+export function Navbar({settings}:{settings?:SiteSettings}){
   const [open,setOpen]=useState(false);
   const pathname=usePathname();
 
@@ -19,14 +20,14 @@ export function Navbar(){
     <div className="nav-shell">
       <Link className="brand" href="/">
         <span className="brand-mark"><img src={site.markImage} alt=""/></span>
-        <span className="brand-word">radicubs</span>
+        <img className="brand-wordmark" src={site.wordmarkImage} alt="Radicubs" />
         <span className="brand-meta">FRC Team 7503 · Frisco, TX</span>
       </Link>
       <nav className="desktop-nav">{navigation.map(n=>{
         const active=isActive(n.href);
         return <Link key={n.href} href={n.href} className={active?"nav-active":undefined} aria-current={active?"page":undefined}>{n.label}</Link>;
       })}</nav>
-      <div className="nav-ctas"><a className="btn btn-light" href={site.donateUrl} target="_blank" rel="noreferrer">Donate</a><a className="btn btn-dark" href={site.applyUrl} target="_blank" rel="noreferrer">Apply</a></div>
+      <div className="nav-ctas"><a className="btn btn-light" href={settings?.donateUrl ?? site.donateUrl} target="_blank" rel="noreferrer">Donate</a><a className="btn btn-dark" href={settings?.applyUrl ?? site.applyUrl} target="_blank" rel="noreferrer">Apply</a></div>
       <button className="menu-btn" onClick={()=>setOpen(!open)} aria-label="Toggle menu">{open?<X size={20}/>:<Menu size={20}/>}</button>
     </div>
     {open&&<div className="mobile-nav">{navigation.map(n=>{

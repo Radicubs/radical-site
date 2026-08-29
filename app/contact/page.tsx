@@ -4,6 +4,7 @@ import { AnimatedSection } from "@/components/ui/animated-section";
 import { Footer } from "@/components/sections/footer";
 import { Navbar } from "@/components/sections/navbar";
 import { site } from "@/data/site";
+import { getSiteSettings } from "@/lib/cms";
 
 type ContactPageProps = {
   searchParams?: Promise<{ success?: string; message?: string }>;
@@ -11,6 +12,7 @@ type ContactPageProps = {
 
 export default async function ContactPage({ searchParams }: ContactPageProps) {
   const params = await searchParams;
+  const settings = await getSiteSettings();
   const statusMessage = params?.message;
   const succeeded = params?.success === "true";
   const contactApiUrl = process.env.CONTACT_API_URL ?? "https://contact.radicubs.com";
@@ -18,7 +20,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
 
   return (
     <main>
-      <Navbar />
+      <Navbar settings={settings} />
       <section className="page-hero">
         <div className="wrap contact-grid">
           <AnimatedSection>
@@ -27,7 +29,7 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
             <p className="section-copy">Questions about joining, sponsorships, outreach, or the team? Send a note or reach us directly by email.</p>
             <div className="contact-list">
               <a className="contact-item" href={`mailto:${site.email}`}><Mail size={20} aria-hidden="true" />{site.email}</a>
-              <a className="contact-item" href={site.applyUrl} target="_blank" rel="noreferrer"><UserPlus size={20} aria-hidden="true" />Apply for the 2026–2027 season ↗</a>
+              <a className="contact-item" href={settings.applyUrl} target="_blank" rel="noreferrer"><UserPlus size={20} aria-hidden="true" />Apply for the {settings.applicationSeason}–{settings.applicationSeason + 1} season ↗</a>
             </div>
           </AnimatedSection>
 

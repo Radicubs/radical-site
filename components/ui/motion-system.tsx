@@ -59,6 +59,12 @@ function bindTiltCard(element: HTMLElement): () => void {
   };
 
   const onMove = (event: PointerEvent) => {
+    if (element.dataset.tiltSuspended === "true") {
+      targetX = 0;
+      targetY = 0;
+      startAnimation();
+      return;
+    }
     const rect = element.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / Math.max(rect.width, 1)) * 2 - 1;
     const y = ((event.clientY - rect.top) / Math.max(rect.height, 1)) * 2 - 1;

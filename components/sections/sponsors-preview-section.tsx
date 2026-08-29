@@ -1,4 +1,19 @@
 import Link from "next/link";
 import { AnimatedSection } from "@/components/ui/animated-section";
-import { corporateSponsors } from "@/data/sponsors";
-export function SponsorsPreviewSection(){return <section className="section"><div className="wrap"><div className="glass sponsor-panel"><AnimatedSection><div className="section-head-row"><div><p className="eyebrow">Sponsors</p><h2>Powered by partners who invest in student engineering.</h2><p className="section-copy">Corporate and individual sponsors make competition fees, tools, materials, travel, outreach, and workspace possible.</p></div><Link className="text-link" href="/sponsors">Meet our sponsors →</Link></div></AnimatedSection><div className="sponsor-mini-grid">{corporateSponsors.slice(0,8).map((s,i)=><AnimatedSection key={s.name} delay={i*.035}><a className="sponsor-mini" data-tilt-card href={s.href} target="_blank" rel="noreferrer" aria-label={s.name}><img src={s.logo} alt="" loading="lazy" decoding="async"/></a></AnimatedSection>)}</div></div></div></section>}
+import type { Sponsor } from "@/data/sponsors";
+import { LogoLoop } from "@/components/LogoLoop";
+
+export function SponsorsPreviewSection({sponsors}:{sponsors:Sponsor[]}){
+  const logos=sponsors.slice(0,8).map(s=>({
+    src:s.loopLogo ?? s.logo,
+    alt:s.name,
+    href:s.href,
+    title:s.name,
+    className:s.name.toLowerCase().includes("gene haas")
+      ? "sponsor-loop-logo-haas"
+      : s.name.toLowerCase().includes("texas workforce")
+        ? "sponsor-loop-logo-workforce"
+        : undefined
+  }));
+  return <section className="section"><div className="wrap"><div className="sponsor-panel"><AnimatedSection><div className="section-head-row"><div><p className="eyebrow">Sponsors</p><p className="section-copy">Corporate and individual sponsors make competition fees, tools, materials, travel, outreach, and workspace possible.</p></div><Link className="text-link" href="/sponsors">Meet our sponsors →</Link></div></AnimatedSection><div className="sponsor-loop"><LogoLoop logos={logos} speed={52} logoHeight={150} gap={112} pauseOnHover fadeOut fadeOutColor="#17191b" scaleOnHover ariaLabel="Radicubs corporate sponsors"/></div></div></div></section>
+}

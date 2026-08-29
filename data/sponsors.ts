@@ -1,4 +1,4 @@
-export type Sponsor = { name: string; href: string; logo: string; pageLogo?: string; note?: string };
+export type Sponsor = { name: string; href: string; logo: string; loopLogo?: string; pageLogo?: string; note?: string };
 
 // Corporate sponsors and logos are sourced from the original site's Strapi library.
 export const corporateSponsors: Sponsor[] = [
