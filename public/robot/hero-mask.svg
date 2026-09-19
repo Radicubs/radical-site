@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 1152" width="2048" height="1152">
+  <!-- The machine's silhouette, traced off public/radicubs-2026-hero.png and
+       feathered so the sharp subject falls off into the blurred plate behind it
+       the way real depth of field does, instead of ending on a cut line. -->
+  <filter id="feather" x="-10%" y="-10%" width="120%" height="120%">
+    <feGaussianBlur stdDeviation="16"/>
+  </filter>
+  <polygon filter="url(#feather)" fill="#fff"
+    points="636,368 860,354 1180,344 1442,322 1442,690 1490,696 1486,814 952,872 570,814 570,694 636,688"/>
+</svg>

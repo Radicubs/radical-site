@@ -1,0 +1,52 @@
+.cal-page{min-height:100vh;background:#080b09;color:#edf3ed;font-family:"IBM Plex Sans",Arial,sans-serif}
+.cal-header{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(16rem,27rem);gap:2rem;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid rgba(231,246,234,.13);background:#0b100d}
+.cal-header h1{margin:.15rem 0 0;font-size:clamp(1.2rem,2.2vw,2rem);line-height:1.05;letter-spacing:-.04em}
+.cal-kicker,.cal-status,.cal-upload span,.cal-fieldset legend,.cal-control span,.cal-stage-readout{font-family:"IBM Plex Mono",monospace;font-size:.65rem;letter-spacing:.09em;text-transform:uppercase}
+.cal-kicker{margin:0;color:#77ff66}
+.cal-status{margin:0;color:#aeb9b0;line-height:1.6;overflow-wrap:anywhere}
+.cal-back{color:#dce6dd;font-size:.88rem;text-decoration-thickness:1px;text-underline-offset:.28em}
+.cal-workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(21rem,27rem);min-height:calc(100vh - 97px)}
+.cal-stage{position:relative;isolation:isolate;overflow:hidden;min-height:680px;background:#0c120e}
+.cal-plate,.cal-canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.cal-plate{z-index:0}
+.cal-canvas{z-index:1}
+.cal-canvas canvas{display:block;width:100%!important;height:100%!important}
+.cal-empty-plate{position:absolute;inset:0;display:grid;place-items:center;color:#637367;background:radial-gradient(circle at center,rgba(102,255,85,.07),transparent 28%),repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 1px,transparent 1px 48px),repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 48px);font-size:clamp(1rem,2vw,1.5rem);letter-spacing:-.03em}
+.cal-stage-readout{position:absolute;z-index:2;bottom:1rem;left:1rem;right:1rem;display:flex;justify-content:space-between;gap:1rem;color:#d6e0d7;text-shadow:0 1px 8px #000}
+.cal-panel{overflow-y:auto;padding:1.25rem;border-left:1px solid rgba(231,246,234,.13);background:#0c120e}
+.cal-imports{display:grid;gap:.65rem}
+.cal-upload{display:grid;gap:.45rem;padding:.85rem .9rem;border:1px solid rgba(231,246,234,.16);background:#111a14;cursor:pointer}
+.cal-upload:hover{border-color:rgba(119,255,102,.58)}
+.cal-upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.cal-upload strong{font-size:.88rem;font-weight:500}
+.cal-upload span{color:#77ff66}
+.cal-section{padding:1.35rem 0;border-bottom:1px solid rgba(231,246,234,.12)}
+.cal-section h2{margin:0 0 1rem;font-size:1rem;font-weight:600;letter-spacing:-.02em}
+.cal-fieldset{border:0;margin:0 0 1.1rem;padding:0}
+.cal-fieldset legend{padding:0 0 .45rem;color:#91a093}
+.cal-control{display:grid;grid-template-columns:3.3rem minmax(0,1fr) 4.25rem;gap:.6rem;align-items:center;margin:.48rem 0}
+.cal-control span{color:#bbc8bd}
+.cal-control input[type=range]{width:100%;min-width:0;accent-color:#77ff66}
+.cal-value{width:100%;border:1px solid rgba(231,246,234,.18);background:#080b09;color:#edf3ed;padding:.3rem .35rem;font:500 .73rem/1 "IBM Plex Mono",monospace;text-align:right}
+.cal-toggle{display:flex;gap:.6rem;align-items:center;font-size:.85rem;color:#c6d1c7}
+.cal-toggle input{accent-color:#77ff66}
+.cal-actions{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;padding-top:1.25rem}
+.cal-actions button{min-height:2.65rem;border:1px solid #77ff66;background:#77ff66;color:#071007;font-weight:700;cursor:pointer}
+.cal-actions button:hover{background:#a3ff97}
+.cal-actions .cal-secondary{background:transparent;color:#dce8dd;border-color:rgba(231,246,234,.26)}
+.cal-actions .cal-tertiary{grid-column:span 2;background:transparent;color:#9aa89c;border-color:transparent;min-height:2rem;font-weight:500;text-decoration:underline;text-underline-offset:.25em}
+.cal-page :focus-visible{outline:2px solid #77ff66;outline-offset:3px}
+@media(max-width:980px){.cal-header{grid-template-columns:auto 1fr}
+.cal-status{grid-column:1/-1}
+.cal-workspace{grid-template-columns:1fr}
+.cal-stage{min-height:65svh}
+.cal-panel{border-left:0;border-top:1px solid rgba(231,246,234,.13)}
+}
+@media(max-width:600px){.cal-header{grid-template-columns:auto minmax(0,1fr);padding:1rem;gap:.65rem}
+.cal-header h1{font-size:1.25rem}
+.cal-workspace{min-height:0}
+.cal-stage{min-height:52svh}
+.cal-panel{padding:1rem}
+.cal-status{grid-column:1/-1}
+.cal-control{grid-template-columns:2.75rem minmax(0,1fr) 4rem;gap:.45rem}
+}

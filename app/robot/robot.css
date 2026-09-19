@@ -1,0 +1,868 @@
+/* ============================================================================
+   /robot — "Machine teardown"
+   Page-local styling only. The scroll-craft engine (public/robot/scrollcraft.js,
+   app/robot/scrollcraft.css) is copied verbatim and never edited: everything
+   bespoke here is driven off --sc-p and the page's own custom properties.
+   ========================================================================== */
+
+/* Registered so calc() can do arithmetic on them. The engine writes --sc-p as a
+   plain number string every frame; the rest are written by the page. */
+@property --sc-p { syntax: "<number>"; inherits: true; initial-value: 0; }
+@property --sep  { syntax: "<number>"; inherits: true; initial-value: 0; }
+@property --d    { syntax: "<number>"; inherits: true; initial-value: 0; }
+@property --n    { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --i    { syntax: "<number>"; inherits: false; initial-value: 0; }
+@property --at   { syntax: "<number>"; inherits: false; initial-value: 0; }
+
+/* ------------------------------------------------------------- the floor -- */
+:root {
+  --sc-canvas: #08090a;
+  --sc-surface: #101314;
+  --sc-ink: #f2f4f2;
+  --sc-ink-soft: #8b938c;
+  --sc-accent: #5ddb27;
+  --sc-accent-ink: #06110a;
+  /* One family carries the whole page. The mono is for instrument labels only,
+     which is what a mono is for. */
+  --sc-font-display: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --sc-font-text: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --sc-font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --sc-shadow-color: 150 12% 2%;
+}
+
+/* A dark page bands on real displays. Grain is the difference between "a dark
+   page" and "a lit room", and it costs one fixed layer. */
+.rb::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+}
+
+.rb {
+  --edge: color-mix(in oklab, var(--sc-ink) 11%, transparent);
+  --edge-strong: color-mix(in oklab, var(--sc-ink) 22%, transparent);
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --gutter: clamp(1.5rem, 6vw, 6rem);
+  position: relative;
+  background: var(--sc-canvas);
+  color: var(--sc-ink);
+  font-family: var(--sc-font-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.rb-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.rb-wrap {
+  width: 100%;
+  max-width: 78rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* ------------------------------------------------------------ typography -- */
+/* Sentence case, tight tracking, weight rather than width. Scale carries the
+   hierarchy, so nothing needs a rule, a box or an eyebrow to be read. */
+.rb-display {
+  font-family: var(--sc-font-display);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  margin: 0;
+  color: var(--sc-ink);
+}
+.rb-display--xl { font-size: clamp(2.9rem, 1rem + 6.2vw, 6.4rem); line-height: 0.98; }
+.rb-display--lg { font-size: clamp(2.3rem, 1rem + 4vw, 4.4rem); }
+.rb-display--md { font-size: clamp(1.85rem, 1.1rem + 2.2vw, 3rem); letter-spacing: -0.03em; }
+
+.rb-lede {
+  font-size: clamp(1.05rem, 0.98rem + 0.34vw, 1.32rem);
+  line-height: 1.5;
+  letter-spacing: -0.012em;
+  color: color-mix(in oklab, var(--sc-ink) 88%, transparent);
+  max-width: 36ch;
+  text-wrap: pretty;
+  margin: 1.15rem 0 0;
+  font-weight: 400;
+}
+.rb-lede--muted { color: var(--sc-ink-soft); }
+
+.rb-body {
+  font-size: 0.97rem;
+  line-height: 1.72;
+  color: var(--sc-ink-soft);
+  max-width: 44ch;
+  text-wrap: pretty;
+  margin: 1.5rem 0 0;
+}
+
+/* Instrument type. Small, wide, quiet: it labels, it never speaks. */
+.rb-kicker,
+.rb-note {
+  font-family: var(--sc-font-mono);
+  font-size: 0.63rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sc-ink-soft);
+  margin: 0;
+}
+.rb-note { margin-top: 2.25rem; line-height: 1.9; }
+.rb-note__caveat {
+  display: block;
+  color: color-mix(in oklab, var(--sc-ink-soft) 86%, transparent);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-family: var(--sc-font-text);
+  font-size: 0.74rem;
+  line-height: 1.55;
+  margin-top: 0.55rem;
+  max-width: 36ch;
+}
+.rb-kicker { margin-bottom: 1.75rem; color: color-mix(in oklab, var(--sc-accent) 78%, var(--sc-ink)); }
+
+.rb a { color: inherit; text-decoration-color: var(--edge-strong); text-underline-offset: 0.28em; }
+.rb a:hover { text-decoration-color: var(--sc-accent); }
+.rb :focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; border-radius: 2px; }
+
+/* ================================================== the separation ruler == */
+/* A readout, not a menu. It reports how far apart the machine currently is,
+   and it only exists while the machine is in pieces. */
+.rb-ruler {
+  position: fixed;
+  z-index: 6;
+  right: clamp(1rem, 2.2vw, 2.25rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.1rem;
+  pointer-events: none;
+  font-family: var(--sc-font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--sc-ink-soft) 52%, transparent);
+  opacity: 0;
+}
+/* Fades up with the first separation, so it never competes with the hero. */
+.rb[data-sc-ready] .rb-ruler { opacity: clamp(0, var(--sep) * 7, 1); }
+.rb-ruler__track {
+  position: relative;
+  width: 1px;
+  height: clamp(10rem, 22vh, 15rem);
+  background: var(--edge);
+}
+.rb-ruler__fill {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 1px;
+  height: 100%;
+  background: color-mix(in oklab, var(--sc-accent) 82%, transparent);
+  transform-origin: 50% 0;
+  transform: scaleY(var(--sep));
+}
+.rb-ruler__tick {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  white-space: nowrap;
+}
+.rb-ruler__tick i {
+  display: block;
+  width: calc(4px + var(--d) * 10px);
+  height: 1px;
+  background: color-mix(in oklab, var(--sc-accent) calc(var(--d) * 100%), var(--edge-strong));
+}
+.rb-ruler__tick b {
+  font-weight: 400;
+  color: color-mix(in oklab, var(--sc-ink) calc(20% + var(--d) * 66%), transparent);
+}
+.rb-ruler__tick[data-sys="intake"] { top: 10%; }
+.rb-ruler__tick[data-sys="hopper"] { top: 29%; }
+.rb-ruler__tick[data-sys="shooter"] { top: 48%; }
+.rb-ruler__tick[data-sys="drivetrain"] { top: 67%; }
+.rb-ruler__tick[data-sys="electronics"] { top: 86%; }
+
+/* ================================================== shared stage surfaces = */
+.rb-stage,
+.rb-hero__stage,
+.rb-bench {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: clip;
+  isolation: isolate;
+  background: var(--sc-canvas);
+}
+
+/* The environment every act shares: a near-black seamless with one soft key
+   above the subject and a floor that falls away. Nothing here is a background
+   photograph, so the machine is the only real thing in the room. */
+.rb-room {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(58% 42% at 50% 26%, rgba(190, 214, 192, 0.1) 0%, transparent 72%),
+    radial-gradient(80% 42% at 50% 92%, rgba(120, 142, 124, 0.05) 0%, transparent 70%),
+    linear-gradient(180deg, #0d1011 0%, #090b0c 46%, #060809 100%);
+}
+
+/* Main-page assembled state: the CMS field plate and the actual GLB share one
+   stage. The image is a stable physical reference; only the CAD canvas moves. */
+.rb-cms-hero { position:absolute; inset:0; z-index:2; overflow:hidden; }
+.rb-cms-hero > img, .rb-cms-hero__canvas { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; }
+.rb-cms-hero > img { z-index:0; }
+.rb-cms-hero__canvas { z-index:1; pointer-events:none; }
+.rb-cms-hero__canvas canvas { display:block; width:100%!important; height:100%!important; }
+
+/* The only thing over the film: a horizon fall-off. No full-frame overlay. */
+.rb-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(74% 62% at 50% 44%, transparent 34%, rgba(5, 7, 8, 0.42) 72%, rgba(5, 7, 8, 0.88) 100%),
+    linear-gradient(180deg, rgba(5, 7, 8, 0.6) 0%, transparent 22%),
+    linear-gradient(0deg, rgba(5, 7, 8, 0.74) 0%, transparent 26%);
+}
+
+.rb-scrim { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+/* Density only where the copy is: a floor band crossed with a left column, so
+   the corner the headline occupies is covered and the rest of the frame keeps
+   its full contrast. */
+.rb-scrim--corner {
+  background:
+    linear-gradient(to top, rgba(4, 6, 7, 0.9) 0%, rgba(4, 6, 7, 0.66) 22%, rgba(4, 6, 7, 0.18) 44%, transparent 62%),
+    linear-gradient(to right, rgba(4, 6, 7, 0.9) 0%, rgba(4, 6, 7, 0.64) 24%, rgba(4, 6, 7, 0.16) 46%, transparent 64%);
+}
+.rb-scrim--band {
+  background: linear-gradient(
+    to top,
+    rgba(4, 6, 7, 0.94) 0%,
+    rgba(4, 6, 7, 0.7) 20%,
+    rgba(4, 6, 7, 0.2) 40%,
+    transparent 58%
+  );
+}
+
+.rb-copy { position: absolute; z-index: 4; }
+.rb-copy--teardown {
+  left: var(--gutter);
+  bottom: clamp(3rem, 11vh, 7rem);
+  max-width: 24ch;
+}
+.rb-copy--close {
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: clamp(3.5rem, 13vh, 8rem);
+}
+.rb-copy--close .rb-display span {
+  display: block;
+  font-size: 0.3em;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--sc-ink-soft);
+  margin-top: 1.4rem;
+}
+
+/* ======================================================= ACT 1  presence == */
+/* The claim at the top with air around it, the machine below it at full scale,
+   lit from above, standing on its own shadow. */
+.rb-hero__stage { background: #07090a; }
+
+.rb-plane { position: absolute; inset: 0; will-change: transform; }
+.rb-plane--env { z-index: 0; opacity: 0.34; }
+.rb-plane--subject { z-index: 2; }
+.rb-plane--fore { z-index: 3; }
+
+/* A hand-built cover: the frame keeps the photograph's own aspect ratio at
+   every viewport, so a mask expressed in picture coordinates stays registered
+   to the machine instead of drifting with the crop. */
+/* The frame is sized so the MACHINE lands at a chosen size, and offset so the
+   machine's own centre lands at a chosen height. Everything is expressed in
+   picture coordinates, which is what keeps the mask registered to it. */
+.rb-frame {
+  position: absolute;
+  left: 50%;
+  top: 73%;
+  width: var(--frame-w, min(126vw, 176svh));
+  aspect-ratio: 2048 / 1152;
+  transform: translate(-50%, -52.8%);
+}
+.rb-frame--env {
+  --frame-w: max(150vw, 215svh);
+  top: 58%;
+}
+.rb-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+/* The machine, lifted out of the room it was photographed in and feathered so
+   it falls off into depth rather than ending on a cut line. */
+.rb-cutout {
+  -webkit-mask-image: url("/robot/hero-mask.svg");
+  mask-image: url("/robot/hero-mask.svg");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* Contact shadow: the machine has to be ON something. */
+.rb-hero__contact {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  translate: -50% 0;
+  bottom: 3%;
+  width: min(48vw, 40rem);
+  height: clamp(3rem, 8vh, 6rem);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(2, 4, 4, 0.92) 0%, rgba(2, 4, 4, 0.5) 46%, transparent 76%);
+  filter: blur(16px);
+  pointer-events: none;
+}
+
+/* The near plane: floor haze that passes in front of the machine's base. */
+.rb-plane--fore {
+  background: linear-gradient(0deg, rgba(6, 8, 9, 0.96) 0%, rgba(6, 8, 9, 0.55) 7%, transparent 19%);
+}
+
+.rb-copy--hero {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  translate: -50% 0;
+  top: clamp(6.5rem, 14vh, 10.5rem);
+  width: min(100% - var(--gutter) * 2, 46rem);
+  text-align: center;
+}
+.rb-copy--hero .rb-lede {
+  max-width: 40ch;
+  margin-inline: auto;
+  color: var(--sc-ink-soft);
+}
+.rb-copy--hero .rb-kicker { margin-bottom: 1.5rem; }
+
+/* ==================================================== ACT 2  the claim ==== */
+.rb-quiet {
+  position: relative;
+  z-index: 1;
+  background: var(--sc-canvas);
+  padding-block: clamp(9rem, 26vh, 18rem);
+  text-align: center;
+}
+.rb-quiet .rb-display { max-width: 20ch; margin-inline: auto; }
+.rb-quiet .rb-lede { margin: 1.6rem auto 0; max-width: 32ch; }
+
+/* ================================================== ACT 3  the teardown === */
+/* The stage holds the WHOLE 16:9 frame. Cover-cropping would throw the
+   outermost separated components off screen, which is the one thing the
+   teardown cannot afford. */
+.rb-teardown .rb-stage,
+.rb-rebuild .rb-stage {
+  background:
+    radial-gradient(56% 42% at 50% 34%, rgba(190, 214, 192, 0.07) 0%, transparent 72%),
+    linear-gradient(180deg, #0c0f10 0%, #08090a 52%, #060809 100%);
+}
+
+.rb-cinema {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(100%, 177.8svh);
+  aspect-ratio: 16 / 9;
+  z-index: 0;
+}
+.rb-cinema :is(video[data-sc-scrub], .sc-stage__poster, .rb-stage__still) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  /* The arena the clip was shot in is not the subject. Graded down so the room
+     falls into the page's ground and the machine is the only lit thing. */
+  filter: brightness(0.88) contrast(1.2) saturate(0.82);
+}
+.rb-stage__still { display: none; }
+
+.rb-leads {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.rb-leads line {
+  stroke: color-mix(in oklab, var(--sc-accent) 52%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--d));
+}
+
+/* The signature move: each label is written by its own separation. */
+.rb-tag {
+  position: absolute;
+  z-index: 4;
+  width: min(22ch, 26vw);
+  color: var(--sc-accent);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 16px rgba(3, 6, 4, 0.92));
+}
+.rb-tag__name { margin: 0; line-height: 0; }
+.rb-tag__art {
+  width: 100%;
+  height: auto;
+  max-width: min(15rem, 21vw);
+  overflow: visible;
+}
+.rb-tag__art line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - clamp(0, (var(--d) * (var(--n) + 2.5) - var(--i)) / 2.5, 1));
+}
+.rb-tag__note {
+  margin: 1rem 0 0;
+  font-family: var(--sc-font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1.85;
+  color: color-mix(in oklab, var(--sc-ink) 76%, transparent);
+  /* Arrives once the name is written, never with it. */
+  opacity: clamp(0, (var(--d) - 0.74) * 4, 1);
+  text-shadow: 0 1px 12px rgba(3, 6, 4, 0.95);
+}
+.rb-tag[data-sys="hopper"],
+.rb-tag[data-sys="electronics"] { text-align: right; }
+.rb-tag[data-sys="hopper"] .rb-tag__art,
+.rb-tag[data-sys="electronics"] .rb-tag__art { margin-left: auto; }
+
+/* ============================================ ACTS 4, 5, 8  the bench ===== */
+/* The stage is always full bleed, because the room is painted on it. Content
+   width lives on the inner grid, never on the stage. */
+.rb-bench {
+  display: grid;
+  align-content: center;
+  justify-items: stretch;
+  /* The floating site nav owns the top of every stage and the separation
+     ruler owns the right edge, so content is inset clear of both. */
+  padding-inline: var(--gutter) max(var(--gutter), 8rem);
+  padding-block: clamp(6rem, 13vh, 8.5rem) clamp(2.5rem, 6vh, 4rem);
+}
+.rb-bench__in { position: relative; z-index: 1; width: 100%; display: grid; }
+
+.rb-plate { position: relative; z-index: 1; margin: 0; }
+.rb-plate img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 3px;
+}
+
+/* ACT 4: one large centred product frame with the claim above it, and nothing
+   else on screen. */
+.rb-focus--intake .rb-bench__in {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  text-align: center;
+  max-width: 60rem;
+  margin-inline: auto;
+  gap: clamp(1.75rem, 4vh, 3rem);
+}
+.rb-focus--intake .rb-copy--focus { position: relative; z-index: 2; order: 0; }
+.rb-focus--intake .rb-lede { margin-inline: auto; }
+.rb-focus--intake .rb-plate { order: 1; width: 100%; max-width: 44rem; }
+.rb-focus--intake .rb-plate img {
+  max-height: min(50svh, 30rem);
+  width: auto;
+  max-width: 100%;
+  margin-inline: auto;
+  object-fit: cover;
+}
+.rb-focus--intake .rb-body { max-width: 66ch; font-size: 0.9rem; margin-top: 0; }
+.rb-focus--intake .rb-plate { max-width: 48rem; }
+.rb-focus--intake .rb-note { margin-top: 1.75rem; }
+.rb-focus--intake .rb-note__caveat { margin-inline: auto; }
+
+/* ===================================================== ACT 5  the route === */
+.rb-route .rb-bench__in {
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.8fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 5rem);
+  max-width: 84rem;
+  margin-inline: auto;
+}
+.rb-route .rb-bench__in > * { width: 100%; }
+.rb-plate--route { max-width: 56rem; }
+.rb-route__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.rb-route__path,
+.rb-route__halo {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - clamp(0, (var(--sc-p) - 0.14) / 0.52, 1));
+}
+/* The route is a diagram over a photograph, so it carries its own dark backing
+   rather than a glow: the machine underneath is the thing being read. */
+.rb-route__halo { stroke: rgba(3, 5, 4, 0.7); stroke-width: 5; }
+.rb-route__path { stroke: var(--sc-accent); stroke-width: 1.3; }
+.rb-route__stations circle { fill: var(--sc-accent); }
+.rb-route__stations text {
+  font-family: var(--sc-font-mono);
+  font-size: 2.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  fill: var(--sc-ink);
+  paint-order: stroke;
+  stroke: rgba(3, 5, 4, 0.86);
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+}
+.rb-route__stations :is(circle, text) {
+  opacity: clamp(0, (clamp(0, (var(--sc-p) - 0.14) / 0.52, 1) - var(--at)) * 8, 1);
+}
+.rb-copy--route { position: relative; z-index: 2; }
+
+/* =================================================== ACT 6  the shooter === */
+/* Everything so far travelled vertically, so sideways reads as speed. */
+.rb-shooter .rb-bench { align-content: stretch; padding-inline: 0; padding-block: 0; }
+.rb-rail {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: clamp(3rem, 8vw, 8rem);
+  height: 100%;
+  padding-inline: var(--gutter) calc(var(--gutter) + 7rem);
+  width: max-content;
+  will-change: transform;
+}
+.rb-rail__item { flex: 0 0 auto; }
+.rb-rail__item--head { width: min(28rem, 76vw); }
+.rb-rail__item--note { width: min(26rem, 76vw); }
+.rb-rail__item--plate { margin: 0; }
+.rb-rail__item--plate img {
+  height: min(66svh, 44rem);
+  width: auto;
+  max-width: none;
+  border-radius: 3px;
+}
+/* Items arrive in sequence, so lateral travel reads as a drawer being pulled
+   rather than as a slideshow. The first item is exempt. */
+@media (prefers-reduced-motion: no-preference) {
+  .rb-rail__item + .rb-rail__item {
+    opacity: clamp(0.55, (var(--sc-p) - 0.05) * 4, 1);
+    transition: opacity 220ms linear;
+  }
+  .rb-rail__item--note { opacity: clamp(0.55, (var(--sc-p) - 0.34) * 4, 1); }
+}
+
+/* ================================================ ACT 7  the drivetrain === */
+.rb-drivetrain {
+  position: relative;
+  z-index: 1;
+  background: radial-gradient(70% 60% at 50% 0%, #0e1213 0%, #08090a 68%);
+  padding-block: clamp(6rem, 16vh, 11rem);
+  border-top: 1px solid var(--edge);
+  text-align: center;
+}
+.rb-drivetrain .rb-wrap { max-width: 84rem; }
+.rb-drivetrain__copy { max-width: 44rem; margin-inline: auto; }
+.rb-drivetrain__copy .rb-lede,
+.rb-drivetrain__copy .rb-body { margin-inline: auto; }
+.rb-drivetrain .rb-plate--drive { margin-top: clamp(2.5rem, 6vh, 4.5rem); }
+.rb-azimuth {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.rb-azimuth__mod circle {
+  fill: none;
+  stroke: color-mix(in oklab, var(--sc-accent) 40%, transparent);
+  stroke-width: 1;
+}
+.rb-azimuth__needle {
+  stroke: var(--sc-accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .rb-azimuth__mod {
+    transform-box: view-box;
+    transform-origin: calc(var(--x) * 1px) calc(var(--y) * 1px);
+    /* Bounded to the range a real module turns. Nothing here rotates the
+       photographed wheel; the needle reports heading over it. */
+    rotate: calc((var(--sc-mx, 0.5) - 0.5) * 60deg);
+    transition: rotate 300ms var(--ease);
+  }
+}
+.rb-note--under { margin: 1.75rem auto 0; max-width: 46ch; }
+
+/* ================================================ ACT 8  the electronics == */
+.rb-focus--elec .rb-bench__in {
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: clamp(2rem, 6vw, 6rem);
+  max-width: 82rem;
+  margin-inline: auto;
+}
+.rb-focus--elec .rb-bench__in > * { width: 100%; }
+.rb-copy--trail { order: 1; position: relative; z-index: 2; }
+.rb-focus--elec .rb-plate { order: 2; }
+
+/* ============================================== the specification plate === */
+.rb-plateout {
+  position: relative;
+  z-index: 1;
+  background: var(--sc-canvas);
+  border-top: 1px solid var(--edge);
+  padding-block: clamp(4.5rem, 12vh, 8rem) clamp(5rem, 14vh, 9rem);
+}
+.rb-plateout__title {
+  font-family: var(--sc-font-mono);
+  font-size: 0.63rem;
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--sc-accent) 76%, var(--sc-ink));
+  margin: 0 0 3rem;
+}
+.rb-spec {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 2.25rem clamp(1.5rem, 3vw, 3rem);
+  margin: 0;
+  padding-top: 2.25rem;
+  border-top: 1px solid var(--edge);
+}
+.rb-spec dt {
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--sc-ink);
+}
+.rb-spec dd {
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--sc-ink-soft);
+}
+.rb-spec__src {
+  font-family: var(--sc-font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.rb-plateout__foot {
+  margin: 3.25rem 0 0;
+  font-size: 0.86rem;
+  line-height: 1.75;
+  max-width: 56ch;
+  color: var(--sc-ink-soft);
+}
+
+/* ==================================================== a separate phone ==== */
+/* Not the desktop scene made small. The separation throws components to both
+   edges of a 16:9 frame, so the phone holds the WHOLE frame and stacks the
+   labels beneath it instead of over it. */
+@media (max-width: 860px) {
+  .rb { --gutter: 1.4rem; }
+  .rb-bench { padding-inline: var(--gutter); }
+  .rb-copy--teardown,
+  .rb-copy--close { left: var(--gutter); right: var(--gutter); max-width: none; }
+  .rb-lede { max-width: 32ch; }
+  .rb-display--xl { font-size: clamp(2.5rem, 10vw, 3.4rem); }
+
+  .rb-copy--hero { top: 6.5rem; }
+  .rb-frame { --frame-w: min(178vw, 116svh); top: 68%; }
+  .rb-frame--env { --frame-w: max(230vw, 150svh); top: 58%; }
+  .rb-hero__contact { bottom: 10%; width: 78vw; }
+
+  /* Teardown on a phone: the frame sits in the upper band and starts pushed in,
+     so the assembled machine is large, then pulls back to full width as the
+     components separate and every one of them stays on screen. */
+  .rb-cinema {
+    top: 27%;
+    width: 100%;
+    scale: calc(1.6 - var(--sep) * 0.6);
+  }
+  .rb-leads { display: none; }
+  .rb-teardown .rb-scrim--corner { display: none; }
+  .rb-copy--teardown { bottom: auto; top: 50%; }
+  .rb-teardown .rb-copy--teardown .rb-lede { display: none; }
+
+  .rb-tag { width: 44%; filter: none; }
+  .rb-tag__art { max-width: 6.5rem; }
+  .rb-tag__note { font-size: 0.48rem; margin-top: 0.5rem; letter-spacing: 0.1em; }
+  .rb-tag[data-sys="intake"] { left: 5% !important; top: 56% !important; }
+  .rb-tag[data-sys="hopper"] { left: 53% !important; top: 56% !important; }
+  .rb-tag[data-sys="shooter"] { left: 5% !important; top: 68% !important; }
+  .rb-tag[data-sys="drivetrain"] { left: 53% !important; top: 68% !important; }
+  .rb-tag[data-sys="electronics"] { left: 5% !important; top: 80% !important; }
+  .rb-tag[data-sys="hopper"],
+  .rb-tag[data-sys="electronics"] { text-align: left; }
+  .rb-tag[data-sys="hopper"] .rb-tag__art,
+  .rb-tag[data-sys="electronics"] .rb-tag__art { margin-left: 0; }
+
+  /* The ruler becomes a bottom strip, out of the thumb's way. */
+  .rb-ruler {
+    right: 0;
+    left: 0;
+    top: auto;
+    bottom: 0;
+    transform: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 1rem calc(0.55rem + env(safe-area-inset-bottom));
+    background: linear-gradient(0deg, rgba(5, 7, 8, 0.95), rgba(5, 7, 8, 0.55));
+  }
+  .rb-ruler__cap { font-size: 0.44rem; flex: 0 0 auto; }
+  .rb-ruler__track { width: 100%; height: 1px; flex: 1 1 auto; }
+  .rb-ruler__fill { width: 100%; height: 1px; transform-origin: 0 50%; transform: scaleX(var(--sep)); }
+  .rb-ruler__tick { right: auto; top: -3px !important; flex-direction: column; gap: 0; }
+  .rb-ruler__tick b { display: none; }
+  .rb-ruler__tick i { width: 1px; height: calc(3px + var(--d) * 7px); }
+  .rb-ruler__tick[data-sys="intake"] { left: 10%; }
+  .rb-ruler__tick[data-sys="hopper"] { left: 29%; }
+  .rb-ruler__tick[data-sys="shooter"] { left: 48%; }
+  .rb-ruler__tick[data-sys="drivetrain"] { left: 67%; }
+  .rb-ruler__tick[data-sys="electronics"] { left: 86%; }
+
+  /* Focus acts stack: image and copy both full width, both fully legible. */
+  .rb-focus--intake .rb-bench__in,
+  .rb-route .rb-bench__in,
+  .rb-focus--elec .rb-bench__in {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.75rem;
+    text-align: left;
+  }
+  .rb-focus--intake .rb-bench__in { text-align: center; }
+  .rb-copy--trail { order: 2; }
+  .rb-focus--elec .rb-plate { order: 1; }
+  .rb-plate--route { max-width: none; }
+  .rb-body { font-size: 0.9rem; margin-top: 1.1rem; }
+  .rb-note { margin-top: 1.5rem; }
+  .rb-rail__item--plate img { height: min(40svh, 21rem); }
+  .rb-rail__item--head,
+  .rb-rail__item--note { width: min(17rem, 74vw); }
+  .rb-rail { gap: 2rem; padding-inline: var(--gutter) calc(var(--gutter) + 1rem); }
+  .rb-drivetrain { padding-block: clamp(4rem, 10vh, 6rem); }
+}
+
+/* ======================================================= reduced motion === */
+/* The story survives without motion: assembled, separated with every label
+   placed, the five systems, assembled again. Nothing is pinned and nothing is
+   hidden behind scroll. */
+@media (prefers-reduced-motion: reduce) {
+  .rb [data-sc-act] { height: auto !important; }
+  .rb :is(.rb-stage, .rb-hero__stage, .rb-bench) {
+    position: relative;
+    top: auto;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .rb-hero__stage { height: 86svh; overflow: clip; }
+  .rb-plane, .rb-hero__contact { transform: none !important; }
+
+  .rb-stage { padding-block: clamp(3rem, 7vh, 5rem); }
+  .rb-cinema {
+    position: relative;
+    inset: auto;
+    transform: none;
+    width: 100%;
+    max-width: 64rem;
+    margin-inline: auto;
+  }
+  .rb-cinema :is(video[data-sc-scrub], .sc-stage__poster) { display: none; }
+  .rb-stage__still {
+    display: block;
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+  .rb-vignette { display: none; }
+  .rb-teardown .rb-scrim, .rb-rebuild .rb-scrim { display: none; }
+
+  /* Every label placed and fully drawn, in flow beneath the separated frame. */
+  .rb-leads { display: none; }
+  .rb-teardown .rb-tag {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    width: auto;
+    --d: 1;
+    text-align: left !important;
+  }
+  .rb-teardown .rb-tag__art { max-width: 8rem; margin-left: 0 !important; }
+  .rb-teardown [data-sc-stage] {
+    display: grid;
+    gap: 2rem clamp(1rem, 3vw, 2.5rem);
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    padding-inline: var(--gutter);
+  }
+  .rb-teardown .rb-cinema,
+  .rb-teardown .rb-copy--teardown { grid-column: 1 / -1; }
+
+  .rb-copy {
+    position: relative;
+    inset: auto;
+    translate: none;
+    opacity: 1 !important;
+    max-width: 46ch;
+    margin: 2.5rem auto 0;
+    padding-inline: var(--gutter);
+  }
+  .rb-copy--hero { position: absolute; }
+  .rb-rebuild [data-sc-stage] { display: block; }
+
+  .rb-focus--intake .rb-bench__in,
+  .rb-route .rb-bench__in,
+  .rb-focus--elec .rb-bench__in {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+  .rb-bench { padding-block: clamp(3.5rem, 9vh, 6rem); }
+  .rb-room { display: none; }
+  .rb-copy--focus, .rb-copy--route, .rb-copy--trail { padding-inline: 0; margin: 0; }
+  .rb-route__path, .rb-route__halo { stroke-dashoffset: 0; }
+  .rb-route__stations :is(circle, text) { opacity: 1; }
+
+  .rb-shooter .rb-bench { padding-block: clamp(3.5rem, 9vh, 6rem); }
+  .rb-rail { width: auto; flex-direction: column; align-items: flex-start; gap: 2rem; }
+  .rb-rail__item { width: 100% !important; }
+  .rb-rail__item--plate img { height: auto; width: 100%; }
+
+  .rb-ruler { display: none; }
+}

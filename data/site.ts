@@ -20,6 +20,7 @@ export const site = {
 
 export const navigation = [
   { label: "Home", href: "/" },
+  { label: "Robot", href: "/robot" },
   { label: "Team", href: "/team" },
   { label: "Journey", href: "/journey" },
   { label: "Sponsors", href: "/sponsors" },

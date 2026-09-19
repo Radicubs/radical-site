@@ -1,0 +1,16 @@
+Robot page assets that are still served locally
+
+poster-assembled.webp
+  Current loading poster shown before the approach video paints.
+
+robot-approach-48fps.mp4
+  Scroll-scrubbed opening film, 1280x720 at 48 fps.
+
+morph-source-final.jpg
+  Exact final film frame used as ReactBits Morph Slider image 1.
+
+morph-environment-plate-1280.jpg
+  Robot-free final environment used as ReactBits Morph Slider image 2.
+
+Already in Strapi and intentionally excluded:
+  2026-robot-hierarchical.glb

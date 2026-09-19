@@ -1,11 +1,6 @@
 {
   "version": "0.0.1",
   "configurations": [
-    {
-      "name": "dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "port": 3000
-    }
+    { "name": "radicubs", "runtimeExecutable": "npx", "runtimeArgs": ["next", "dev", "-p", "3210"], "port": 3210 }
   ]
 }

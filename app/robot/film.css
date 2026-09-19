@@ -1,0 +1,172 @@
+.robot-film {
+  --film-ink: #f4f6f3;
+  --film-green: #66ff55;
+  /* The site nav is in normal document flow above this pinned scene. Size the
+     film to the remaining viewport so its lower cue never falls below screen. */
+  --robot-nav-clearance: 6.75rem;
+  background: #070a08;
+  color: var(--film-ink);
+}
+
+.robot-film__act { position: relative; height: 430vh; background: #070a08; }
+
+.robot-film__stage {
+  /* ScrollCraft pins this frame while the scrubbed clip reaches its last frame.
+     Keeping this sticky is essential: a relative stage lets the document scroll
+     away before the video has completed. */
+  position: sticky;
+  top: var(--robot-nav-clearance);
+  height: calc(100svh - var(--robot-nav-clearance));
+  overflow: hidden;
+  isolation: isolate;
+  contain: layout paint;
+  background: #070a08;
+}
+
+.robot-film__stage :is(video, .sc-stage__poster) {
+  /* Bias toward the floor so the bumper stays in-frame when wide screens crop
+     the top and bottom of the 16:9 source. */
+  object-position: center 68%;
+  filter: saturate(0.98) contrast(1.04);
+}
+
+.robot-film__stage > :is(video, .sc-stage__poster) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+}
+
+.robot-film__stage > .sc-stage__poster { z-index: 0; }
+.robot-film__stage > video { z-index: 1; }
+
+.robot-film__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(3, 6, 4, 0.62) 0%, rgba(3, 6, 4, 0.22) 35%, transparent 62%),
+    linear-gradient(0deg, rgba(3, 6, 4, 0.46) 0%, transparent 30%),
+    radial-gradient(120% 90% at 50% 50%, transparent 44%, rgba(2, 4, 3, 0.48) 100%);
+}
+
+.robot-film__intro {
+  position: absolute;
+  z-index: 5;
+  left: clamp(1.5rem, 7vw, 7rem);
+  top: clamp(3.5rem, 9vh, 6rem);
+  max-width: min(37rem, 66vw);
+  opacity: clamp(0, calc(1 - var(--video-p, 0) * 4), 1);
+  transform: translateY(calc(var(--video-p, 0) * -1.5rem));
+}
+
+.robot-film__intro p {
+  display: block;
+  margin: 0;
+  color: rgba(244, 246, 243, 0.78);
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: clamp(1rem, 0.92rem + 0.28vw, 1.28rem);
+  letter-spacing: -0.015em;
+}
+
+.robot-film__intro h1 {
+  margin: 0 0 1rem;
+  color: var(--film-ink);
+  font-family: "Barlow Condensed", "IBM Plex Sans", sans-serif;
+  font-size: clamp(5.2rem, 8vw + 1rem, 10rem);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 0.76;
+}
+
+.robot-film__intro h1 span,
+.robot-film__intro h1 strong { display: block; font: inherit; }
+.robot-film__intro h1 strong { color: var(--film-green); }
+
+.robot-film__scroll-cue-anchor {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: clamp(1.8rem, 5vh, 3.5rem);
+  transform: translateX(-50%);
+  opacity: clamp(0, calc(1 - var(--video-p, 0) * 4), 1);
+}
+
+.robot-film__scroll-cue {
+  display: grid;
+  gap: 0.75rem;
+  place-items: center;
+  color: rgba(244, 246, 243, 0.86);
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.robot-film__scroll-cue::after {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(244, 246, 243, 0.72);
+  border-radius: 50%;
+  content: "↓";
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.robot-film__progress {
+  position: absolute;
+  z-index: 5;
+  right: clamp(1.5rem, 3vw, 3rem);
+  bottom: clamp(1.8rem, 4vw, 3rem);
+  width: 3.5rem;
+  height: 2px;
+  overflow: hidden;
+  background: rgba(244, 246, 243, 0.28);
+}
+
+.robot-film__progress i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--film-green);
+  transform: scaleX(var(--story-p, 0));
+  transform-origin: left center;
+}
+
+@media (max-width: 700px) {
+  .robot-film { --robot-nav-clearance: 5.6rem; }
+  .robot-film__intro { top: 2.8rem; max-width: calc(100vw - 3rem); }
+  .robot-film__intro h1 { font-size: clamp(4.7rem, 20vw, 6.5rem); }
+  .robot-film__vignette { background: linear-gradient(0deg, rgba(3, 6, 4, 0.72) 0%, rgba(3, 6, 4, 0.16) 56%, transparent 78%); }
+  .robot-film__scroll-cue-anchor { bottom: 1.3rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .robot-film__intro { opacity: 1 !important; transform: none !important; }
+}
+
+.robot-morph-overlay,
+.robot-morph-overlay__shader,
+.robot-morph-overlay__live {
+  position: absolute;
+  inset: 0;
+}
+
+.robot-morph-overlay {
+  z-index: 3;
+  opacity: clamp(0, calc(var(--morph-p, 0) * 24), 1);
+  pointer-events: none;
+}
+
+.robot-morph-overlay__shader { z-index: 1; }
+.robot-morph-overlay__live { z-index: 2; }
+.robot-morph-overlay canvas { width: 100% !important; height: 100% !important; max-width: none; display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .robot-film__act { height: 200svh; }
+}

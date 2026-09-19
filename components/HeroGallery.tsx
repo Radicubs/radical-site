@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { MorphEngine } from "@/components/morph-engine";
 import type { GalleryAlbum } from "@/lib/cms";
 import "./HeroGallery.css";
 
@@ -13,14 +14,48 @@ export function HeroGallery({ album }: { album: GalleryAlbum }) {
   const [index, setIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const stageHostRef = useRef<HTMLDivElement>(null);
+  const engineRef = useRef<MorphEngine | null>(null);
   const openButtonRef = useRef<HTMLButtonElement>(null);
   const suppressClick = useRef(false);
   const pointerStartX = useRef<number | null>(null);
   const photos = album.photos;
 
   const move = useCallback((step: number) => {
-    setIndex((current) => (current + step + photos.length) % photos.length);
-  }, [photos.length]);
+    engineRef.current?.goTo(step);
+  }, []);
+
+  useEffect(() => {
+    const host = stageHostRef.current;
+    if (!host || photos.length < 1) return undefined;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const engine = new MorphEngine(host, {
+      images: photos.map((photo) => photo.src),
+      startIndex: 0,
+      reducedMotion,
+      dprCap: 2,
+      getOptions: () => ({
+        transition: "melt",
+        duration: 0.9,
+        ease: "power2.inOut",
+        intensity: 0.5,
+        scale: 2.2,
+        aberration: 0.3,
+        drift: 0.35,
+        overlayColor: "#090d0a",
+        loop: true,
+      }),
+      onIndexChange: setIndex,
+    });
+    engineRef.current = engine;
+    setIndex(0);
+
+    return () => {
+      engine.destroy();
+      engineRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [photos]);
 
   const setTiltSuspended = (suspended: boolean) => {
     if (!panelRef.current) return;
@@ -58,16 +93,6 @@ export function HeroGallery({ album }: { album: GalleryAlbum }) {
   }, []);
 
   useEffect(() => {
-    if (photos.length < 2) return;
-    const next = photos[(index + 1) % photos.length];
-    const previous = photos[(index - 1 + photos.length) % photos.length];
-    [next, previous].forEach((photo) => {
-      const image = new Image();
-      image.src = photo.src;
-    });
-  }, [index, photos]);
-
-  useEffect(() => {
     if (!lightboxOpen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -95,27 +120,13 @@ export function HeroGallery({ album }: { album: GalleryAlbum }) {
     <>
       <div className="robot-card gallery-card" data-tilt-card ref={panelRef}>
         <div className="gallery-stage">
-          <AnimatePresence initial={false} mode="sync">
-            <motion.img
-              key={active.id}
-              className="gallery-image"
-              src={active.src}
-              alt={active.alt}
-              variants={variants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: .38, ease: [0.22, 1, 0.36, 1] }}
-              drag={photos.length > 1 ? "x" : false}
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={.16}
-              onPointerDown={(event) => startPointerSwipe(event.clientX)}
-              onPointerUp={(event) => finishPointerSwipe(event.clientX)}
-              onPointerCancel={() => { pointerStartX.current = null; setTiltSuspended(false); }}
-              onDragEnd={() => setTiltSuspended(false)}
-              decoding="async"
-            />
-          </AnimatePresence>
+          <div
+            ref={stageHostRef}
+            className="gallery-canvas-host"
+            onPointerDown={(event) => startPointerSwipe(event.clientX)}
+            onPointerUp={(event) => finishPointerSwipe(event.clientX)}
+            onPointerCancel={() => { pointerStartX.current = null; setTiltSuspended(false); }}
+          />
 
           <button ref={openButtonRef} className="gallery-open" type="button" onClick={openLightbox} aria-label={`Open ${active.alt} in full screen`}>
             <Expand size={17} aria-hidden="true" />

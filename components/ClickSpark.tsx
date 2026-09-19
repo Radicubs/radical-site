@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface ClickSparkProps {
   sparkColor?: string;
@@ -30,11 +31,13 @@ const ClickSpark: React.FC<ClickSparkProps> = ({
   extraScale = 1.0,
   children
 }) => {
+  const disabled = usePathname() === '/robot';
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sparksRef = useRef<Spark[]>([]);
   const startTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (disabled) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -65,7 +68,7 @@ const ClickSpark: React.FC<ClickSparkProps> = ({
       ro.disconnect();
       clearTimeout(resizeTimeout);
     };
-  }, []);
+  }, [disabled]);
 
   const easeFunc = useCallback(
     (t: number) => {
@@ -84,6 +87,7 @@ const ClickSpark: React.FC<ClickSparkProps> = ({
   );
 
   useEffect(() => {
+    if (disabled) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -132,7 +136,7 @@ const ClickSpark: React.FC<ClickSparkProps> = ({
     return () => {
       cancelAnimationFrame(animationId);
     };
-  }, [sparkColor, sparkSize, sparkRadius, sparkCount, duration, easeFunc, extraScale]);
+  }, [disabled, sparkColor, sparkSize, sparkRadius, sparkCount, duration, easeFunc, extraScale]);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>): void => {
     const canvas = canvasRef.current;
@@ -161,14 +165,14 @@ const ClickSpark: React.FC<ClickSparkProps> = ({
       }}
       onClick={handleClick}
     >
-      <canvas
+      {!disabled && <canvas
         ref={canvasRef}
         style={{
           position: 'absolute',
           inset: 0,
           pointerEvents: 'none'
         }}
-      />
+      />}
       {children}
     </div>
   );
