@@ -8,7 +8,7 @@
   color: var(--film-ink);
 }
 
-.robot-film__act { position: relative; height: 430vh; background: #070a08; }
+.robot-film__act { position: relative; height: 1000vh; background: #070a08; }
 
 .robot-film__stage {
   /* ScrollCraft pins this frame while the scrubbed clip reaches its last frame.
@@ -23,14 +23,14 @@
   background: #070a08;
 }
 
-.robot-film__stage :is(video, .sc-stage__poster) {
+.robot-film__stage video {
   /* Bias toward the floor so the bumper stays in-frame when wide screens crop
      the top and bottom of the 16:9 source. */
   object-position: center 68%;
   filter: saturate(0.98) contrast(1.04);
 }
 
-.robot-film__stage > :is(video, .sc-stage__poster) {
+.robot-film__stage > video {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -39,7 +39,6 @@
   object-fit: cover;
 }
 
-.robot-film__stage > .sc-stage__poster { z-index: 0; }
 .robot-film__stage > video { z-index: 1; }
 
 .robot-film__vignette {
@@ -149,23 +148,6 @@
 @media (prefers-reduced-motion: reduce) {
   .robot-film__intro { opacity: 1 !important; transform: none !important; }
 }
-
-.robot-morph-overlay,
-.robot-morph-overlay__shader,
-.robot-morph-overlay__live {
-  position: absolute;
-  inset: 0;
-}
-
-.robot-morph-overlay {
-  z-index: 3;
-  opacity: clamp(0, calc(var(--morph-p, 0) * 24), 1);
-  pointer-events: none;
-}
-
-.robot-morph-overlay__shader { z-index: 1; }
-.robot-morph-overlay__live { z-index: 2; }
-.robot-morph-overlay canvas { width: 100% !important; height: 100% !important; max-width: none; display: block; }
 
 @media (prefers-reduced-motion: reduce) {
   .robot-film__act { height: 200svh; }

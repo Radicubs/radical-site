@@ -11,61 +11,6 @@ const CMS_MODEL = "/api/robot-assets/model";
 
 type Disposable = { dispose: () => void };
 
-function styleRobotMeshes(robot: THREE.Object3D, resources: Disposable[]) {
-  robot.updateMatrixWorld(true);
-  robot.traverse((child) => {
-    const mesh = child as THREE.Mesh;
-    if (!mesh.isMesh) return;
-    mesh.geometry.computeBoundingBox();
-    const worldSize = new THREE.Box3().setFromObject(mesh).getSize(new THREE.Vector3());
-    const dimensions = [worldSize.x, worldSize.y, worldSize.z].sort((a, b) => a - b);
-    const ancestry: string[] = [];
-    let cursor: THREE.Object3D | null = mesh;
-    while (cursor && cursor !== robot) { ancestry.push(cursor.name); cursor = cursor.parent; }
-    const partName = ancestry.join(" ").toLowerCase();
-    const isLargeVerticalSheet = worldSize.z > 10 && Math.max(worldSize.x, worldSize.y) > 9 && dimensions[0] < 1.1;
-    const originals = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-    const styled = originals.map((original) => {
-      const material = (original as THREE.MeshStandardMaterial).clone();
-      if (!material.isMeshStandardMaterial) return original;
-      if (isLargeVerticalSheet) {
-        material.metalness = 0.02;
-        material.roughness = 0.2;
-        material.transparent = true;
-        material.opacity = 0.3;
-        material.depthWrite = false;
-        material.side = THREE.DoubleSide;
-        material.envMapIntensity = 1.15;
-        material.color.multiplyScalar(0.24);
-      } else if (/bumper/.test(partName)) {
-        material.metalness = 0;
-        material.roughness = 0.94;
-        material.envMapIntensity = 0.28;
-      } else if (/wheel|roller|tread|belt|nitrile/.test(partName)) {
-        material.metalness = 0.02;
-        material.roughness = 0.74;
-        material.envMapIntensity = 0.55;
-      } else if (/motor|gear|bearing|shaft|screw/.test(partName)) {
-        material.metalness = 0.48;
-        material.roughness = 0.34;
-        material.envMapIntensity = 1.3;
-      } else if (/tube|plate|support|bracket|frame/.test(partName)) {
-        material.metalness = 0.72;
-        material.roughness = 0.26;
-        material.envMapIntensity = 1.5;
-      } else {
-        material.metalness = 0.04;
-        material.roughness = 0.48;
-        material.envMapIntensity = 0.75;
-      }
-      material.needsUpdate = true;
-      resources.push(material);
-      return material;
-    });
-    mesh.material = Array.isArray(mesh.material) ? styled : styled[0];
-  });
-}
-
 function makeDecalTexture(label: string, arrow: boolean, resources: Disposable[]) {
   const canvas = document.createElement("canvas");
   canvas.width = 1024;
@@ -201,7 +146,6 @@ function LiveStrapiRobot({ progress }: { progress: MutableRefObject<number> }) {
       const shooter = robot.getObjectByName("Shooter_v3_v42_1") ?? robot.getObjectByName("Shooter v3 v42_1") ?? robot.getObjectByName("Shooter_v3_v42") ?? robot.getObjectByName("Shooter v3 v42");
       const direction = shooter ? new THREE.Box3().setFromObject(shooter).getCenter(new THREE.Vector3()) : new THREE.Vector3(-1, 1, 0);
       rig.rotation.z = shooter ? -Math.PI / 2 - Math.atan2(direction.y, direction.x) : THREE.MathUtils.degToRad(125.25);
-      styleRobotMeshes(robot, resources);
       rig.add(robot);
       addRobotSurfaceDetails(rig, robot, direction, resources);
       element.dataset.loaded = "true";
