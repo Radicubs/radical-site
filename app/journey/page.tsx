@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ArrowUpRight } from "lucide-react";
 import { Navbar } from "@/components/sections/navbar";
 import { Footer } from "@/components/sections/footer";
+import RippleDistortion from "@/components/RippleDistortion";
 import { AnimatedSection } from "@/components/ui/animated-section";
 import { journeySeasons } from "@/data/journey";
 import { getJourneyImages } from "@/lib/cms";
@@ -52,7 +53,7 @@ export default async function JourneyPage() {
                     </div>
                     <div className={`journey-media${image ? " journey-media-photo" : ""}`}>
                       {image ? (
-                        <img src={image} alt={`Radicubs FRC Team 7503 robot, ${season.year} season`} loading="lazy" decoding="async" />
+                        <RippleDistortion src={image} quality="medium" grayscale={false} />
                       ) : (
                         <div className="journey-no-media"><div><strong>No TBA robot photo available</strong><span>{season.imageNote}</span></div></div>
                       )}

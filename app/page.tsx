@@ -1,4 +1,6 @@
-import { FeatureSection } from "@/components/sections/feature-section";
+// Old flowing-menu version kept at components/sections/feature-section.tsx —
+// swap this import back to FeatureSection to restore it.
+import { DisciplineCardsSection } from "@/components/sections/discipline-cards-section";
 import { FinalCtaSection } from "@/components/sections/final-cta-section";
 import { Footer } from "@/components/sections/footer";
 import { HeroSection } from "@/components/sections/hero-section";
@@ -18,5 +20,5 @@ export default async function Home() {
     getAwards(),
     getDisciplineImages()
   ]);
-  return <main className="relative overflow-hidden"><Navbar settings={settings} /><HeroSection settings={settings} gallery={gallery} /><FeatureSection images={disciplineImages} /><ShowcaseSection posts={posts} /><HowItWorksSection awards={awards} /><SponsorsPreviewSection sponsors={sponsors.corporate} /><FinalCtaSection settings={settings} /><Footer /></main>;
+  return <main className="relative overflow-hidden"><Navbar settings={settings} /><HeroSection settings={settings} gallery={gallery} /><DisciplineCardsSection images={disciplineImages} /><ShowcaseSection posts={posts} /><HowItWorksSection awards={awards} /><SponsorsPreviewSection sponsors={sponsors.corporate} /><FinalCtaSection settings={settings} /><Footer /></main>;
 }

@@ -34,10 +34,16 @@ uniform float uTime;
 uniform float uReduce;
 uniform vec2 uPointer;
 uniform vec3 uOverlay;
+uniform vec2 uWaveCenters[8];
+uniform float uWaveStarts[8];
+uniform float uWaveCount;
 
 varying vec2 vUv;
 
 const float PI = 3.14159265359;
+const int MAX_WAVES = 8;
+const float WAVE_LIFE = 1.3;
+const float WAVE_SPEED = 0.5;
 
 float hash11(float p) {
   p = fract(p * 0.1031);
@@ -143,6 +149,34 @@ void main() {
     }
   }
 
+  // Cursor ripple: a pool of expanding, fading ring waves spawned as the
+  // pointer moves, adapted from react-bits' Ripple Distortion
+  // (https://reactbits.dev/animations/ripple-distortion) into this shader so
+  // it composites with the morph transition instead of a second stacked
+  // WebGL canvas. Same wave-pool idea as the standalone component, just a
+  // ring band around a growing radius instead of instanced brush quads.
+  if (uReduce < 0.5) {
+    vec2 aspect = vec2(uResolution.x / max(uResolution.y, 1.0), 1.0);
+    vec2 push = vec2(0.0);
+    for (int i = 0; i < MAX_WAVES; i++) {
+      if (float(i) >= uWaveCount) break;
+      float age = uTime - uWaveStarts[i];
+      if (age < 0.0 || age > WAVE_LIFE) continue;
+      float lifeT = age / WAVE_LIFE;
+      float radius = lifeT * WAVE_SPEED;
+      vec2 rp = (uv - uWaveCenters[i]) * aspect;
+      float d = length(rp);
+      float band = exp(-pow((d - radius) * 11.0, 2.0));
+      float fade = 1.0 - lifeT;
+      vec2 dir = d > 0.0001 ? rp / d : vec2(0.0);
+      float swirl = band * 1.6;
+      vec2 sDir = vec2(dir.x * cos(swirl) - dir.y * sin(swirl), dir.x * sin(swirl) + dir.y * cos(swirl));
+      push += sDir * band * fade * fade * 0.11;
+    }
+    uvC += push;
+    uvN += push;
+  }
+
   vec2 sC = coverUV(uvC, uResolution, uCurrentSize);
   vec2 sN = coverUV(uvN, uResolution, uNextSize);
 
@@ -204,9 +238,12 @@ export class MorphEngine {
   images: string[];
   getOptions: () => MorphOptions;
   onIndexChange?: (index: number) => void;
+  onTransitionStart?: () => void;
+  onTransitionEnd?: (index: number) => void;
   reducedMotion: boolean;
   current: number;
   animating = false;
+  paused = false;
   dragging = false;
   dragDir = 0;
   shownIndex: number;
@@ -221,6 +258,11 @@ export class MorphEngine {
   mesh: Mesh;
   resizeObserver: ResizeObserver;
   raf = 0;
+  private waveCenters: [number, number][] = Array.from({ length: 8 }, () => [0.5, 0.5]);
+  private waveStarts: number[] = Array.from({ length: 8 }, () => -9999);
+  private waveCount = 0;
+  private waveCursor = 0;
+  private lastWavePoint: [number, number] | null = null;
   private boundContextLost: (event: Event) => void;
   private boundLoop: (time: number) => void;
 
@@ -232,6 +274,8 @@ export class MorphEngine {
       reducedMotion: boolean;
       getOptions: () => MorphOptions;
       onIndexChange?: (index: number) => void;
+      onTransitionStart?: () => void;
+      onTransitionEnd?: (index: number) => void;
       dprCap: number;
     },
   ) {
@@ -239,17 +283,19 @@ export class MorphEngine {
     this.images = opts.images;
     this.getOptions = opts.getOptions;
     this.onIndexChange = opts.onIndexChange;
+    this.onTransitionStart = opts.onTransitionStart;
+    this.onTransitionEnd = opts.onTransitionEnd;
     this.reducedMotion = opts.reducedMotion;
     this.current = opts.startIndex;
     this.shownIndex = opts.startIndex;
 
     this.renderer = new Renderer({
-      alpha: true,
+      alpha: false,
       antialias: true,
       dpr: Math.min(window.devicePixelRatio || 1, opts.dprCap),
     });
     this.gl = this.renderer.gl;
-    this.gl.clearColor(0, 0, 0, 0);
+    this.gl.clearColor(9 / 255, 13 / 255, 10 / 255, 1);
 
     this.canvas = this.gl.canvas as HTMLCanvasElement;
     this.canvas.className = "morph-engine-canvas";
@@ -280,6 +326,9 @@ export class MorphEngine {
         uReduce: { value: this.reducedMotion ? 1 : 0 },
         uPointer: { value: [0.5, 0.5] },
         uOverlay: { value: hexToRgb(initial.overlayColor) },
+        uWaveCenters: { value: this.waveCenters.map((c) => [c[0], c[1]]) },
+        uWaveStarts: { value: [...this.waveStarts] },
+        uWaveCount: { value: 0 },
       },
     });
 
@@ -318,9 +367,8 @@ export class MorphEngine {
   }
 
   resize() {
-    const rect = this.container.getBoundingClientRect();
-    const w = Math.max(rect.width, 1);
-    const h = Math.max(rect.height, 1);
+    const w = Math.max(this.container.offsetWidth, 1);
+    const h = Math.max(this.container.offsetHeight, 1);
     this.renderer.setSize(w, h);
     this.program.uniforms.uResolution.value = [this.gl.canvas.width, this.gl.canvas.height];
   }
@@ -336,10 +384,38 @@ export class MorphEngine {
   }
 
   loop(t: number) {
+    if (this.paused) {
+      this.raf = requestAnimationFrame(this.boundLoop);
+      return;
+    }
     this.program.uniforms.uTime.value = t * 0.001;
     if (!this.dragging && !this.animating) this.syncOptions();
     this.renderer.render({ scene: this.mesh });
     this.raf = requestAnimationFrame(this.boundLoop);
+  }
+
+  setPaused(paused: boolean) {
+    this.paused = paused;
+  }
+
+  // Spawns a new ripple wave once the pointer has moved far enough from the
+  // last spawn point, mirroring react-bits' Ripple Distortion spacing
+  // threshold (components/RippleDistortion.tsx) so the trail reads the same.
+  setRipplePointer(x: number, y: number) {
+    if (this.reducedMotion) return;
+    const last = this.lastWavePoint;
+    if (last && Math.hypot(x - last[0], y - last[1]) < 0.045) return;
+    this.lastWavePoint = [x, y];
+
+    const i = this.waveCursor;
+    this.waveCursor = (this.waveCursor + 1) % this.waveCenters.length;
+    this.waveCenters[i] = [x, y];
+    this.waveStarts[i] = performance.now() * 0.001;
+    this.waveCount = Math.min(this.waveCenters.length, this.waveCount + 1);
+
+    this.program.uniforms.uWaveCenters.value = this.waveCenters.map((c) => [c[0], c[1]]);
+    this.program.uniforms.uWaveStarts.value = [...this.waveStarts];
+    this.program.uniforms.uWaveCount.value = this.waveCount;
   }
 
   wrap(i: number) {
@@ -359,6 +435,7 @@ export class MorphEngine {
 
   goTo(dir: number) {
     if (this.animating || this.dragging || this.images.length < 2) return;
+    this.paused = false;
     const opts = this.getOptions();
     if (!opts.loop) {
       const raw = this.current + dir;
@@ -366,7 +443,13 @@ export class MorphEngine {
     }
     this.syncOptions();
     const target = this.prepareNext(dir);
+    this.program.uniforms.uProgress.value = 0;
+    // Paint the current image into the opaque morph canvas before React hides
+    // the ripple layer. Without this synchronous first frame, the browser can
+    // briefly composite the canvas's default surface during the handoff.
+    this.renderer.render({ scene: this.mesh });
     this.animating = true;
+    this.onTransitionStart?.();
     this.announce(target);
     const duration = this.reducedMotion ? Math.min(opts.duration, 0.4) : opts.duration;
     this.tween = gsap.fromTo(
@@ -387,9 +470,14 @@ export class MorphEngine {
     this.program.uniforms.tCurrent.value = this.textures[target];
     this.program.uniforms.uCurrentSize.value = this.sizes[target];
     this.program.uniforms.uProgress.value = 0;
+    // Commit the target frame to the opaque canvas before React swaps the
+    // interactive ripple overlay to the new image. This keeps a fully painted
+    // frame beneath that remount and prevents a one-frame page-background flash.
+    this.renderer.render({ scene: this.mesh });
     this.animating = false;
     this.tween = null;
     this.announce(target);
+    this.onTransitionEnd?.(target);
   }
 
   next() {

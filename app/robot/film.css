@@ -94,29 +94,6 @@
   opacity: clamp(0, calc(1 - var(--video-p, 0) * 4), 1);
 }
 
-.robot-film__scroll-cue {
-  display: grid;
-  gap: 0.75rem;
-  place-items: center;
-  color: rgba(244, 246, 243, 0.86);
-  font-family: "IBM Plex Sans", sans-serif;
-  font-size: 0.76rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.robot-film__scroll-cue::after {
-  width: 2.5rem;
-  height: 2.5rem;
-  border: 1px solid rgba(244, 246, 243, 0.72);
-  border-radius: 50%;
-  content: "↓";
-  display: grid;
-  place-items: center;
-  font-size: 1.2rem;
-  line-height: 1;
-}
-
 .robot-film__progress {
   position: absolute;
   z-index: 5;

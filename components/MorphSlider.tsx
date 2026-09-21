@@ -31,6 +31,10 @@ export interface MorphSliderProps {
   showControls?: boolean;
   showIndicators?: boolean;
   progressRef?: MutableRefObject<number>;
+  /** Opt-in robot-silhouette transition mask, built for the scroll-scrubbed
+   * robot reveal (components/robot/robot-morph-experience.tsx). Leave off
+   * for the plain stock melt transition. */
+  robotMask?: boolean;
   className?: string;
   [key: string]: unknown;
 }
@@ -45,6 +49,7 @@ interface EngineOptions {
   drift: number;
   overlayColor: string;
   loop: boolean;
+  robotMask: boolean;
 }
 
 type GL = Renderer['gl'];
@@ -99,6 +104,7 @@ uniform float uTime;
 uniform float uReduce;
 uniform vec2 uPointer;
 uniform vec3 uOverlay;
+uniform float uRobotMask;
 
 varying vec2 vUv;
 
@@ -214,17 +220,21 @@ void main() {
     }
   }
 
-  // The robot handoff starts where the subject actually occupies the final
-  // film frame. Near completion the mask opens to the full plate so progress
-  // 1 is the complete destination image, exactly like the stock slider.
-  // Match the final-frame silhouette: a narrower mechanism above a wider,
-  // lower bumper. Unlike an ellipse, this leaves the arena rails and towers
-  // untouched while the robot itself melts away.
-  float mechanismMask = softBox(uv, vec2(0.5, 0.50), vec2(0.19, 0.23), 0.035);
-  float bumperMask = softBox(uv, vec2(0.5, 0.22), vec2(0.25, 0.09), 0.03);
-  float robotMask = max(mechanismMask, bumperMask);
-  float fullFrame = smoothstep(0.72, 1.0, p);
-  float transitionMask = mix(robotMask, 1.0, fullFrame);
+  // Opt-in only (uRobotMask): the robot handoff starts where the subject
+  // actually occupies the final film frame. Near completion the mask opens
+  // to the full plate so progress 1 is the complete destination image,
+  // exactly like the stock slider. Match the final-frame silhouette: a
+  // narrower mechanism above a wider, lower bumper. Unlike an ellipse, this
+  // leaves the arena rails and towers untouched while the robot itself
+  // melts away. Everyone else gets the plain stock transition (mask = 1.0).
+  float transitionMask = 1.0;
+  if (uRobotMask > 0.5) {
+    float mechanismMask = softBox(uv, vec2(0.5, 0.50), vec2(0.19, 0.23), 0.035);
+    float bumperMask = softBox(uv, vec2(0.5, 0.22), vec2(0.25, 0.09), 0.03);
+    float robotMask = max(mechanismMask, bumperMask);
+    float fullFrame = smoothstep(0.72, 1.0, p);
+    transitionMask = mix(robotMask, 1.0, fullFrame);
+  }
   m *= transitionMask;
   uvC = mix(uv, uvC, transitionMask);
   uvN = mix(uv, uvN, transitionMask);
@@ -365,7 +375,8 @@ class MorphEngine {
         uTime: { value: 0 },
         uReduce: { value: this.reducedMotion ? 1 : 0 },
         uPointer: { value: [0.5, 0.5] },
-        uOverlay: { value: hexToRgb(opts.overlayColor) }
+        uOverlay: { value: hexToRgb(opts.overlayColor) },
+        uRobotMask: { value: opts.robotMask ? 1 : 0 }
       }
     });
 
@@ -421,6 +432,7 @@ class MorphEngine {
     this.program.uniforms.uAberration.value = opts.aberration;
     this.program.uniforms.uDrift.value = opts.drift;
     this.program.uniforms.uOverlay.value = hexToRgb(opts.overlayColor);
+    this.program.uniforms.uRobotMask.value = opts.robotMask ? 1 : 0;
   }
 
   private loop(t: number): void {
@@ -610,6 +622,7 @@ export default function MorphSlider({
   showControls = true,
   showIndicators = true,
   progressRef,
+  robotMask = false,
   className = '',
   ...props
 }: MorphSliderProps) {
@@ -627,9 +640,10 @@ export default function MorphSlider({
     aberration,
     drift,
     overlayColor,
-    loop
+    loop,
+    robotMask
   });
-  optsRef.current = { transition, duration, ease, intensity, scale, aberration, drift, overlayColor, loop };
+  optsRef.current = { transition, duration, ease, intensity, scale, aberration, drift, overlayColor, loop, robotMask };
 
   useEffect(() => {
     if (!containerRef.current) return undefined;

@@ -10,7 +10,7 @@ export function HowItWorksSection({ awards }: { awards: Award[] }) {
           <p className="section-copy">From rookie honors to creativity, sustainability, team spirit, and gracious professionalism.</p>
         </AnimatedSection>
 
-        <div className="award-ledger" role="region" aria-label="Awards archive" tabIndex={0}>
+        <div className="award-ledger" role="region" aria-label="Awards archive" tabIndex={0} data-lenis-prevent>
           <div className="award-ledger-head" aria-hidden="true">
             <span>No.</span><span>Year</span><span>Award</span><span>Event</span><span>Link</span>
           </div>

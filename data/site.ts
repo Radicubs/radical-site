@@ -23,6 +23,7 @@ export const navigation = [
   { label: "Robot", href: "/robot" },
   { label: "Team", href: "/team" },
   { label: "Journey", href: "/journey" },
+  { label: "Gallery", href: "/gallery" },
   { label: "Sponsors", href: "/sponsors" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" }

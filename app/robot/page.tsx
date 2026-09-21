@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/sections/navbar";
 import { RobotFilmIntro } from "@/components/robot/robot-film-intro";
 import { getSiteSettings } from "@/lib/cms";
+import { getRobotFilmVideo } from "@/lib/robot-cms";
 import "./scrollcraft.css";
 import "./film.css";
 
@@ -12,11 +13,11 @@ export const metadata: Metadata = {
 };
 
 export default async function RobotPage() {
-  const settings = await getSiteSettings();
+  const [settings, videoSrc] = await Promise.all([getSiteSettings(), getRobotFilmVideo()]);
   return (
     <main>
       <Navbar settings={settings} />
-      <RobotFilmIntro />
+      <RobotFilmIntro videoSrc={videoSrc} />
     </main>
   );
 }

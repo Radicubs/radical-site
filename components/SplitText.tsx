@@ -167,7 +167,15 @@ const SplitText: React.FC<SplitTextProps> = ({
       willChange: 'transform, opacity'
     };
     const classes = `split-parent ${className}`;
-    const Tag = (tag || 'p') as React.ElementType;
+    // Spell out the prop shape instead of a bare React.ElementType: @react-three/fiber
+    // augments React's IntrinsicElements with every three.js element, which widens
+    // ElementType far enough that the shared prop type collapses to `never`.
+    const Tag = (tag || 'p') as unknown as React.ComponentType<{
+      ref?: React.Ref<HTMLParagraphElement>;
+      style?: React.CSSProperties;
+      className?: string;
+      children?: React.ReactNode;
+    }>;
 
     return (
       <Tag ref={ref} style={style} className={classes}>

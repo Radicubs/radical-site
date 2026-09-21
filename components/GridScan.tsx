@@ -37,6 +37,7 @@ type GridScanProps = {
   enableGyro?: boolean;
   scanOnClick?: boolean;
   snapBackDelay?: number;
+  interactionTarget?: 'container' | 'window';
   className?: string;
   style?: React.CSSProperties;
 };
@@ -56,6 +57,9 @@ uniform float iTime;
 uniform vec2 uSkew;
 uniform float uTilt;
 uniform float uYaw;
+uniform vec2 uRippleCenter;
+uniform float uRippleActivity;
+uniform float uRippleEnabled;
 uniform float uLineThickness;
 uniform vec3 uLinesColor;
 uniform vec3 uScanColor;
@@ -86,6 +90,17 @@ float smoother01(float a, float b, float x){
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
     vec2 p = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
+
+    vec2 rippleVector = p - uRippleCenter;
+    float rippleRadius = length(rippleVector);
+    vec2 rippleDirection = rippleVector / max(rippleRadius, 0.001);
+    float breath = 0.72 + 0.28 * sin(iTime * 0.85);
+    float idleRipple = sin(rippleRadius * 21.0 - iTime * 2.15) * exp(-rippleRadius * 2.65);
+    float cursorRipple = sin(rippleRadius * 34.0 - iTime * 7.0) * exp(-rippleRadius * 4.2);
+    p += rippleDirection * (
+      idleRipple * 0.007 * breath +
+      cursorRipple * 0.016 * uRippleActivity
+    ) * uRippleEnabled;
 
     vec3 ro = vec3(0.0);
     vec3 rd = normalize(vec3(p, 2.0));
@@ -333,6 +348,7 @@ export const GridScan: React.FC<GridScanProps> = ({
   enableGyro = false,
   scanOnClick = false,
   snapBackDelay = 250,
+  interactionTarget = 'container',
   className,
   style
 }) => {
@@ -352,6 +368,9 @@ export const GridScan: React.FC<GridScanProps> = ({
   const lookTarget = useRef(new THREE.Vector2(0, 0));
   const tiltTarget = useRef(0);
   const yawTarget = useRef(0);
+  const rippleTarget = useRef(new THREE.Vector2(0, 0));
+  const rippleCurrent = useRef(new THREE.Vector2(0, 0));
+  const lastPointerMove = useRef(Number.NEGATIVE_INFINITY);
 
   const lookCurrent = useRef(new THREE.Vector2(0, 0));
   const lookVel = useRef(new THREE.Vector2(0, 0));
@@ -395,9 +414,13 @@ export const GridScan: React.FC<GridScanProps> = ({
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    const globalInteraction = interactionTarget === 'window';
+    const moveTarget: HTMLElement | Window = globalInteraction ? window : el;
+    const leaveTarget: HTMLElement = globalInteraction ? document.documentElement : el;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let leaveTimer: number | null = null;
-    const onMove = (e: MouseEvent) => {
-      if (uiFaceActive) return;
+    const onMove = (e: PointerEvent) => {
+      if (uiFaceActive || reduceMotion.matches) return;
       if (leaveTimer) {
         clearTimeout(leaveTimer);
         leaveTimer = null;
@@ -406,8 +429,14 @@ export const GridScan: React.FC<GridScanProps> = ({
       const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
       lookTarget.current.set(nx, ny);
+      rippleTarget.current.set(
+        (2 * (e.clientX - rect.left) - rect.width) / rect.height,
+        (rect.height - 2 * (e.clientY - rect.top)) / rect.height
+      );
+      lastPointerMove.current = performance.now();
     };
     const onClick = async () => {
+      if (reduceMotion.matches) return;
       const nowSec = performance.now() / 1000;
       if (scanOnClick) pushScan(nowSec);
       if (
@@ -439,18 +468,18 @@ export const GridScan: React.FC<GridScanProps> = ({
         Math.max(0, snapBackDelay || 0)
       );
     };
-    el.addEventListener('mousemove', onMove);
-    el.addEventListener('mouseenter', onEnter);
-    if (scanOnClick) el.addEventListener('click', onClick);
-    el.addEventListener('mouseleave', onLeave);
+    moveTarget.addEventListener('pointermove', onMove as EventListener, { passive: true });
+    if (!globalInteraction) el.addEventListener('pointerenter', onEnter);
+    if (scanOnClick) window.addEventListener('pointerdown', onClick, { passive: true });
+    leaveTarget.addEventListener('pointerleave', onLeave);
     return () => {
-      el.removeEventListener('mousemove', onMove);
-      el.removeEventListener('mouseenter', onEnter);
-      el.removeEventListener('mouseleave', onLeave);
-      if (scanOnClick) el.removeEventListener('click', onClick);
+      moveTarget.removeEventListener('pointermove', onMove as EventListener);
+      if (!globalInteraction) el.removeEventListener('pointerenter', onEnter);
+      leaveTarget.removeEventListener('pointerleave', onLeave);
+      if (scanOnClick) window.removeEventListener('pointerdown', onClick);
       if (leaveTimer) clearTimeout(leaveTimer);
     };
-  }, [uiFaceActive, snapBackDelay, scanOnClick, enableGyro]);
+  }, [uiFaceActive, snapBackDelay, scanOnClick, enableGyro, interactionTarget]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -474,6 +503,9 @@ export const GridScan: React.FC<GridScanProps> = ({
       uSkew: { value: new THREE.Vector2(0, 0) },
       uTilt: { value: 0 },
       uYaw: { value: 0 },
+      uRippleCenter: { value: new THREE.Vector2(0, 0) },
+      uRippleActivity: { value: 0 },
+      uRippleEnabled: { value: 1 },
       uLineThickness: { value: lineThickness },
       uLinesColor: { value: srgbColor(linesColor) },
       uScanColor: { value: srgbColor(scanColor) },
@@ -542,8 +574,42 @@ export const GridScan: React.FC<GridScanProps> = ({
     };
     window.addEventListener('resize', onResize);
 
+    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
     let last = performance.now();
+    const renderOutput = (dt: number) => {
+      renderer.clear(true, true, true);
+      if (composerRef.current) composerRef.current.render(dt);
+      else renderer.render(scene, camera);
+    };
+
     const tick = () => {
+      if (document.hidden) {
+        rafRef.current = null;
+        return;
+      }
+
+      if (motionPreference.matches) {
+        lookTarget.current.set(0, 0);
+        lookCurrent.current.set(0, 0);
+        lookVel.current.set(0, 0);
+        tiltTarget.current = 0;
+        tiltCurrent.current = 0;
+        tiltVel.current = 0;
+        yawTarget.current = 0;
+        yawCurrent.current = 0;
+        yawVel.current = 0;
+        material.uniforms.uSkew.value.set(0, 0);
+        material.uniforms.uTilt.value = 0;
+        material.uniforms.uYaw.value = 0;
+        material.uniforms.uRippleCenter.value.set(0, 0);
+        material.uniforms.uRippleActivity.value = 0;
+        material.uniforms.uRippleEnabled.value = 0;
+        material.uniforms.iTime.value = 0;
+        renderOutput(0);
+        rafRef.current = null;
+        return;
+      }
+
       const now = performance.now();
       const dt = Math.max(0, Math.min(0.1, (now - last) / 1000));
       last = now;
@@ -578,21 +644,46 @@ export const GridScan: React.FC<GridScanProps> = ({
       material.uniforms.uSkew.value.set(skew.x, skew.y);
       material.uniforms.uTilt.value = tiltCurrent.current * tiltScale;
       material.uniforms.uYaw.value = THREE.MathUtils.clamp(yawCurrent.current * yawScale, -0.6, 0.6);
+      rippleCurrent.current.lerp(rippleTarget.current, 1 - Math.exp(-dt * 7));
+      material.uniforms.uRippleCenter.value.copy(rippleCurrent.current);
+      material.uniforms.uRippleActivity.value = Math.exp(-(now - lastPointerMove.current) / 520);
+      material.uniforms.uRippleEnabled.value = 1;
 
       material.uniforms.iTime.value = now / 1000;
-      renderer.clear(true, true, true);
-      if (composerRef.current) {
-        composerRef.current.render(dt);
-      } else {
-        renderer.render(scene, camera);
-      }
+      renderOutput(dt);
       rafRef.current = requestAnimationFrame(tick);
     };
+
+    const resume = () => {
+      if (rafRef.current !== null || document.hidden) return;
+      last = performance.now();
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      } else {
+        resume();
+      }
+    };
+
+    const onMotionPreferenceChange = () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      resume();
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    motionPreference.addEventListener('change', onMotionPreferenceChange);
     rafRef.current = requestAnimationFrame(tick);
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener('resize', onResize);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      motionPreference.removeEventListener('change', onMotionPreferenceChange);
       material.dispose();
       (quad.geometry as THREE.BufferGeometry).dispose();
       if (composerRef.current) {
@@ -683,6 +774,10 @@ export const GridScan: React.FC<GridScanProps> = ({
   }, [enableGyro, uiFaceActive]);
 
   useEffect(() => {
+    if (!enableWebcam) {
+      setModelsReady(false);
+      return;
+    }
     let canceled = false;
     const load = async () => {
       try {
@@ -699,7 +794,7 @@ export const GridScan: React.FC<GridScanProps> = ({
     return () => {
       canceled = true;
     };
-  }, [modelsPath]);
+  }, [enableWebcam, modelsPath]);
 
   useEffect(() => {
     let stop = false;

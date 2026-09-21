@@ -167,5 +167,5 @@ function LiveStrapiRobot({ progress }: { progress: MutableRefObject<number> }) {
 
 export function RobotMorphOverlay({ progress }: { progress: MutableRefObject<number> }) {
   const items = useMemo(() => [{ image: "/api/robot-assets/morphSource" }, { image: "/api/robot-assets/morphEnvironment" }], []);
-  return <div className="robot-morph-overlay"><div className="robot-morph-overlay__shader"><MorphSlider items={items} progressRef={progress} transition="melt" intensity={0.62} scale={2.8} aberration={0.14} drift={0} radius={0} loop={false} overlayColor="#000000" showCaptions={false} showControls={false} showIndicators={false} /></div><LiveStrapiRobot progress={progress} /></div>;
+  return <div className="robot-morph-overlay"><div className="robot-morph-overlay__shader"><MorphSlider items={items} progressRef={progress} transition="melt" intensity={0.62} scale={2.8} aberration={0.14} drift={0} radius={0} loop={false} overlayColor="#000000" showCaptions={false} showControls={false} showIndicators={false} robotMask /></div><LiveStrapiRobot progress={progress} /></div>;
 }

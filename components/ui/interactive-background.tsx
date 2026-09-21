@@ -19,6 +19,7 @@ export function InteractiveBackground() {
         scanSoftness={2.2}
         scanGlow={0.45}
         enablePost={false}
+        interactionTarget="window"
       />
       <div className="site-background-vignette" />
     </div>

@@ -1,0 +1,100 @@
+.site-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 32%, rgba(0, 199, 0, 0.12), transparent 58%),
+    radial-gradient(circle at 85% 85%, rgba(102, 255, 85, 0.05), transparent 45%),
+    linear-gradient(180deg, #060707 0%, #0b0c0d 45%, #121416 100%);
+  opacity: 1;
+  transition: opacity 550ms ease;
+}
+
+.site-loader--exiting {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.site-loader-grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at 50% 42%, #000 0%, transparent 70%);
+  -webkit-mask-image: radial-gradient(circle at 50% 42%, #000 0%, transparent 70%);
+}
+
+.site-loader-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+.site-loader-mark {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  background: #0f1611;
+  border: 1px solid rgba(102, 255, 85, 0.18);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  animation: site-loader-pulse 2.4s ease-in-out infinite;
+}
+
+.site-loader-mark img {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+}
+
+.site-loader-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.site-loader-name {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: #f5faf4;
+}
+
+.site-loader-team {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: #6f7a72;
+}
+
+.site-loader-lattice {
+  color: #cdd3cf;
+  margin-top: 6px;
+}
+
+@keyframes site-loader-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 22px rgba(102, 255, 85, 0.14);
+  }
+  50% {
+    box-shadow: 0 0 44px rgba(102, 255, 85, 0.34);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-loader-mark {
+    animation: none;
+    box-shadow: 0 0 30px rgba(102, 255, 85, 0.22);
+  }
+}

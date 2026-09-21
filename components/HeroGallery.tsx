@@ -3,6 +3,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import AccordionGallery from "@/components/AccordionGallery";
+import RippleDistortion from "@/components/RippleDistortion";
 import { MorphEngine } from "@/components/morph-engine";
 import type { GalleryAlbum } from "@/lib/cms";
 import "./HeroGallery.css";
@@ -13,6 +15,8 @@ const SWIPE_VELOCITY = 450;
 export function HeroGallery({ album }: { album: GalleryAlbum }) {
   const [index, setIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [morphing, setMorphing] = useState(false);
+  const [rippleReady, setRippleReady] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const stageHostRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<MorphEngine | null>(null);
@@ -45,7 +49,14 @@ export function HeroGallery({ album }: { album: GalleryAlbum }) {
         overlayColor: "#090d0a",
         loop: true,
       }),
-      onIndexChange: setIndex,
+      onTransitionStart: () => {
+        setRippleReady(false);
+        setMorphing(true);
+      },
+      onTransitionEnd: (nextIndex) => {
+        setIndex(nextIndex);
+        setMorphing(false);
+      },
     });
     engineRef.current = engine;
     setIndex(0);
@@ -54,7 +65,6 @@ export function HeroGallery({ album }: { album: GalleryAlbum }) {
       engine.destroy();
       engineRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [photos]);
 
   const setTiltSuspended = (suspended: boolean) => {
@@ -98,23 +108,16 @@ export function HeroGallery({ album }: { album: GalleryAlbum }) {
     document.body.style.overflow = "hidden";
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeLightbox();
-      if (event.key === "ArrowRight") move(1);
-      if (event.key === "ArrowLeft") move(-1);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [closeLightbox, lightboxOpen, move]);
+  }, [closeLightbox, lightboxOpen]);
 
   if (!photos.length) return null;
   const active = photos[index];
-  const variants = {
-    enter: { opacity: 0, scale: 1.035 },
-    center: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: .985 }
-  };
 
   return (
     <>
@@ -126,7 +129,19 @@ export function HeroGallery({ album }: { album: GalleryAlbum }) {
             onPointerDown={(event) => startPointerSwipe(event.clientX)}
             onPointerUp={(event) => finishPointerSwipe(event.clientX)}
             onPointerCancel={() => { pointerStartX.current = null; setTiltSuspended(false); }}
-          />
+          >
+            <RippleDistortion
+              key={active.src}
+              className={`gallery-ripple-overlay${!morphing && rippleReady ? " is-visible" : ""}`}
+              src={active.src}
+              quality="medium"
+              grayscale={false}
+              onReady={() => {
+                setRippleReady(true);
+                engineRef.current?.setPaused(true);
+              }}
+            />
+          </div>
 
           <button ref={openButtonRef} className="gallery-open" type="button" onClick={openLightbox} aria-label={`Open ${active.alt} in full screen`}>
             <Expand size={17} aria-hidden="true" />
@@ -152,34 +167,18 @@ export function HeroGallery({ album }: { album: GalleryAlbum }) {
           <motion.div className="gallery-lightbox" role="dialog" aria-modal="true" aria-label={`${album.title} photo viewer`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <button className="gallery-lightbox-backdrop" type="button" onClick={closeLightbox} aria-label="Close full-screen photo" />
             <button className="gallery-lightbox-close" type="button" onClick={closeLightbox} autoFocus aria-label="Close full-screen photo"><X size={22} /></button>
-            <div className="gallery-lightbox-stage">
-              <AnimatePresence initial={false} mode="sync">
-                <motion.img
-                  key={`lightbox-${active.id}`}
-                  src={active.fullSrc}
-                  alt={active.alt}
-                  variants={variants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{ duration: .28, ease: [0.22, 1, 0.36, 1] }}
-                  drag={photos.length > 1 ? "x" : false}
-                  dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={.12}
-                  onPointerDown={(event) => startPointerSwipe(event.clientX, false)}
-                  onPointerUp={(event) => finishPointerSwipe(event.clientX)}
-                  onPointerCancel={() => { pointerStartX.current = null; }}
-                  decoding="async"
-                />
-              </AnimatePresence>
+            <div className="gallery-lightbox-stage gallery-lightbox-accordion">
+              <AccordionGallery
+                items={photos.map((photo) => ({ image: photo.fullSrc, alt: photo.alt }))}
+                defaultIndex={index}
+                showLabels={false}
+                height={520}
+                grayscale={false}
+              />
             </div>
-            {photos.length > 1 && (
-              <div className="gallery-lightbox-nav">
-                <button type="button" onClick={() => move(-1)} aria-label="Previous photo"><ChevronLeft size={21} /></button>
-                <span>{album.title} · {index + 1} / {photos.length}</span>
-                <button type="button" onClick={() => move(1)} aria-label="Next photo"><ChevronRight size={21} /></button>
-              </div>
-            )}
+            <div className="gallery-lightbox-nav">
+              <span>{album.title} · {photos.length} photos</span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

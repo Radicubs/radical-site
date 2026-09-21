@@ -8,6 +8,8 @@ type UploadFile = {
   mime?: string;
 };
 
+const ROBOT_FILM_ASSET_ID = 502;
+
 const ROBOT_ASSETS = {
   background: "Robot Background.png",
   model: "2026-robot-hierarchical.glb",
@@ -18,6 +20,11 @@ const ROBOT_ASSETS = {
 } as const;
 
 export type RobotAssetKey = keyof typeof ROBOT_ASSETS;
+
+export async function getRobotFilmVideo(): Promise<string | undefined> {
+  const file = await strapiFetch<UploadFile>(`upload/files/${ROBOT_FILM_ASSET_ID}`);
+  return file?.mime?.startsWith("video/") ? strapiUrl(file.url) : undefined;
+}
 
 export async function getRobotAsset(key: RobotAssetKey) {
   const name = ROBOT_ASSETS[key];

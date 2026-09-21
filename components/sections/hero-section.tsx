@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { HeroGallery } from "@/components/HeroGallery";
+import { ScrollToExplore } from "@/components/ui/scroll-to-explore";
 import type { GalleryAlbum, SiteSettings } from "@/lib/cms";
 
 export function HeroSection({ settings, gallery }: { settings: SiteSettings; gallery: GalleryAlbum }) {
@@ -31,6 +32,9 @@ export function HeroSection({ settings, gallery }: { settings: SiteSettings; gal
         >
           <HeroGallery album={gallery} />
         </motion.div>
+      </div>
+      <div className="hero-scroll-cue-anchor">
+        <ScrollToExplore href="#explore-disciplines" />
       </div>
     </section>
   );

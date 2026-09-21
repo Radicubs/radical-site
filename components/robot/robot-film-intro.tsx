@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { ScrollToExplore } from "@/components/ui/scroll-to-explore";
 
-export function RobotFilmIntro() {
+export function RobotFilmIntro({ videoSrc }: { videoSrc?: string }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -42,10 +43,10 @@ export function RobotFilmIntro() {
   return <div className="robot-film" ref={rootRef}>
     <section className="robot-film__act" ref={sectionRef}>
       <div className="robot-film__stage">
-        <video ref={videoRef} src="/robot/fullvideo-scroll.mp4" playsInline muted preload="auto" aria-label="Radicubs robot film" />
+        <video ref={videoRef} src={videoSrc || "/robot/fullvideo-scroll.mp4"} playsInline muted preload="auto" aria-label="Radicubs robot film" />
         <div className="robot-film__vignette" aria-hidden="true" />
         <div className="robot-film__intro"><h1><span>Built to</span><strong>move.</strong></h1><p>The 2026 machine by Radicubs 7503.</p></div>
-        <div className="robot-film__scroll-cue-anchor"><div className="robot-film__scroll-cue">Scroll to explore</div></div>
+        <div className="robot-film__scroll-cue-anchor"><ScrollToExplore /></div>
         <div className="robot-film__progress" aria-hidden="true"><i /></div>
       </div>
     </section>
