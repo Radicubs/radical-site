@@ -172,7 +172,8 @@ body{position:relative;background:linear-gradient(180deg,#070809 0%,#0a0c0d 48%,
 .notfound-kicker{font-family:"IBM Plex Mono","IBM Plex Sans",monospace;font-size:12px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:#77ff66;margin:0 0 18px;text-shadow:0 0 18px rgba(102,255,85,.5)}
 .notfound-code{margin:0;font-size:clamp(96px,18vw,220px);line-height:.9;font-weight:700;letter-spacing:-.03em;color:#f5faf4;text-shadow:0 0 40px rgba(102,255,85,.35),0 0 100px rgba(0,199,0,.2)}
 .notfound-title{margin:14px 0 8px;font-size:clamp(20px,3vw,28px);font-weight:600;color:#fff}
-.notfound-copy{margin:0 auto 30px;max-width:420px;color:#c3cac5;font-size:15px;line-height:1.7}
+.notfound-copy{margin:0 auto 14px;max-width:420px;color:#c3cac5;font-size:15px;line-height:1.7}
+.notfound-hint{margin:0 auto 30px;font-family:"IBM Plex Mono","IBM Plex Sans",monospace;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#77ff66;opacity:.8}
 .notfound-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 @media (prefers-reduced-motion:reduce){.notfound-scene{display:none}.notfound{background:radial-gradient(circle at 50% 30%,rgba(0,199,0,.12),transparent 60%),#050605}}
 @media (max-width:700px){.notfound-scene{top:-22svh;right:-18vw;bottom:-4svh;left:-18vw}.notfound-content{padding:20px}.notfound-copy{max-width:34ch}}
@@ -237,9 +238,13 @@ h3,.journey-title,.post-title,.team-name,.mentor-name,.award-name{font-family:"I
 /* React Bits background and content treatments. */
 .site-interactive-background{background:#151718}
 .site-interactive-background .gridscan{position:absolute;inset:0;opacity:.66}
+.site-interactive-background .galaxy-container{position:absolute;inset:0;opacity:1}
+.site-interactive-background .hexagon-background{position:absolute;inset:0}
 /* Chrome accepts SVG URLs in backdrop-filter but does not render their
    displacement. Apply the maps directly to the two page planes instead. */
 .site-background-vignette{background:radial-gradient(circle at 50% 20%,transparent 12%,rgba(9,11,10,.28) 64%,rgba(7,8,8,.72) 100%),linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.25))}
+.site-interactive-background--galaxy .site-background-vignette{background:radial-gradient(circle at 50% 28%,transparent 34%,rgba(7,9,8,.1) 72%,rgba(5,7,6,.34) 100%),linear-gradient(180deg,transparent 0%,rgba(0,0,0,.08) 100%)}
+.site-interactive-background--hexagon .site-background-vignette{background:radial-gradient(circle at 50% 24%,transparent 24%,rgba(7,9,8,.08) 68%,rgba(5,7,6,.38) 100%),linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.12))}
 .rb-section-title{display:block!important;max-width:14ch;margin:0;font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:clamp(54px,6vw,78px);font-weight:600;letter-spacing:-.018em;line-height:.94}
 .rb-copy-reveal{margin:14px 0 0;max-width:700px}
 .rb-copy-reveal .scroll-reveal-text{margin:0;font-size:17px;line-height:1.7;font-weight:400}
@@ -333,7 +338,7 @@ h3,.journey-title,.post-title,.team-name,.mentor-name,.award-name{font-family:"I
 
 @media(max-width:1024px){.hero-grid{grid-template-columns:1fr;gap:42px}.hero-wordmark{width:min(78vw,620px)}.telemetry-grid{grid-template-columns:1fr}.robot-card{min-height:500px}.brand-meta{display:none}}
 @media(max-width:760px){.brand-wordmark{width:112px}.brand-mark{display:grid}.site-header .brand-wordmark{display:none}.hero{padding:64px 0 100px}.hero-scroll-cue-anchor{bottom:16px}.hero-wordmark{width:100%;margin-bottom:24px}.hero-kicker{margin-bottom:22px}.hero .lead{font-size:16px}.robot-card{min-height:390px;padding:18px}.robot-card .robot-glare{inset:18px}.discipline-section{padding:20px 0}.discipline-menu-item,.discipline-menu-row{min-height:82px}.discipline-menu-row{padding:0 16px}.discipline-menu-row h3{font-size:34px}.discipline-flow-track{gap:22px}.discipline-flow-track b{font-size:38px}.discipline-flow-track img{width:104px;height:50px}.telemetry{padding-top:10px}.telemetry-grid{margin-top:24px}.telemetry-panel{padding:16px}.telemetry-panel-head{align-items:flex-start}.chart-key{display:none}.telemetry-source{display:none}.telemetry-years{padding-left:28px;padding-right:10px}.footer-brand .brand-wordmark{display:block;width:170px}.sponsor-loop{height:176px}.sponsor-loop .logoloop{--logoloop-logoHeight:116px!important}.sponsor-loop .logoloop__item img{--sponsor-logo-scale:1.25}.sponsor-loop .sponsor-loop-logo-haas{--sponsor-logo-scale:1;width:230px;height:auto!important}.sponsor-loop .logoloop__item img.sponsor-loop-logo-workforce{--sponsor-logo-scale:1.12}.award-ledger-head{display:none}.award-ledger .award{grid-template-columns:30px 54px minmax(0,1fr) 20px;column-gap:8px;min-height:72px}.award-title{gap:10px}.award-ledger .award-image{width:32px;height:32px;flex-basis:32px}.award-ledger .award-name{font-size:14px}.award-ledger .award-event{grid-column:3;grid-row:2;margin-top:-12px;font-size:11px}.award-arrow{grid-column:4;grid-row:1/span 2}.award-index{font-size:9px}}
-@media(prefers-reduced-motion:reduce){.site-interactive-background .gridscan{display:none}}
+@media(prefers-reduced-motion:reduce){.site-interactive-background .gridscan{display:none}.site-interactive-background .galaxy-container{opacity:.52}}
 
 /* Team season switcher — pick a past roster year (mirrors the original site's year select). */
 .team-roster-section{padding-top:36px;content-visibility:visible;contain-intrinsic-size:auto}

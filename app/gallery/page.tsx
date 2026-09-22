@@ -14,7 +14,7 @@ export default async function GalleryPage() {
   return (
     <main className="gallery-page">
       <div className="gallery-page-bg">
-        <GalleryWall items={photos.map((photo) => ({ image: photo.fullSrc, title: photo.alt }))} />
+        <GalleryWall items={photos.map((photo) => ({ image: photo.src, previewImage: photo.thumbSrc, fullImage: photo.fullSrc, title: photo.alt }))} />
       </div>
       <Navbar settings={settings} />
     </main>

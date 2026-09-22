@@ -14,8 +14,11 @@ import React, {
   useMemo,
   useRef
 } from "react";
-import type Lenis from "lenis";
-import { lenisRef } from "@/components/ui/lenis-singleton";
+import {
+  elasticScrollBoundaryRef,
+  type ElasticBoundaryEdge,
+  type ElasticScrollBoundary
+} from "@/components/ui/lenis-singleton";
 import "./CardSwap.css";
 
 export interface CardSwapProps {
@@ -76,30 +79,6 @@ const placeNow = (el: HTMLElement, slot: Slot, skew: number) =>
     force3D: true
   });
 
-// Same end-state as placeNow, but eased over a short duration instead of an
-// instant jump — used when scrolling fast crosses more than one card in a
-// single tick, so the catch-up reads as a quick animation, not a pop.
-const placeQuick = (el: HTMLElement, slot: Slot, skew: number) => {
-  // zIndex must snap instantly, not tween: interpolating it alongside
-  // position is what let fast-scrolling cards clip through each other —
-  // for a beat mid-tween a card's stacking order didn't match where it
-  // visually was yet.
-  gsap.set(el, { zIndex: slot.zIndex });
-  gsap.to(el, {
-    x: slot.x,
-    y: slot.y,
-    z: slot.z,
-    xPercent: -50,
-    yPercent: -50,
-    skewY: skew,
-    transformOrigin: "center center",
-    force3D: true,
-    duration: 0.32,
-    ease: "power2.out",
-    overwrite: true
-  });
-};
-
 const CardSwap: React.FC<CardSwapProps> = ({
   width = 500,
   height = 400,
@@ -154,12 +133,11 @@ const CardSwap: React.FC<CardSwapProps> = ({
     // Place by the *current* order, not by raw index. order is a ref that
     // survives effect re-runs, so placing by index would strand the deck
     // showing one card while the logic believed another was in front.
-    const placeForFront = (frontIdx: number, announce = true, quick = false) => {
+    const placeForFront = (frontIdx: number, announce = true) => {
       const next = Array.from({ length: total }, (_, k) => (frontIdx + k) % total);
       order.current = next;
-      const place = quick ? placeQuick : placeNow;
       next.forEach((cardIdx, slotIdx) =>
-        place(refs[cardIdx].current!, makeSlot(slotIdx, cardDistance, verticalDistance, total), skewAmount)
+        placeNow(refs[cardIdx].current!, makeSlot(slotIdx, cardDistance, verticalDistance, total), skewAmount)
       );
       if (announce) activeCbRef.current?.(frontIdx);
     };
@@ -324,8 +302,13 @@ const CardSwap: React.FC<CardSwapProps> = ({
       // pinned scroll after the final card appeared. Advancing at the interval
       // boundary keeps each card readable for a complete interval and makes
       // the final swap coincide with the lower scroll boundary.
+      // The epsilon absorbs sub-pixel rounding when something (e.g. the
+      // magnet's scrollTo) lands a hair short of an exact step boundary —
+      // 0.00001 only tolerated ~0.0000025 of progress, far less than a
+      // pixel's worth on a several-hundred-pixel-per-step deck, so landing
+      // even slightly short of the last card read as one step behind it.
       const stepFor = (progress: number) =>
-        Math.max(0, Math.min(steps, Math.floor(progress * steps + 0.00001)));
+        Math.max(0, Math.min(steps, Math.floor(progress * steps + 0.01)));
       let step = 0;
 
       // Snap the deck to whatever the scroll position already implies, so
@@ -336,44 +319,57 @@ const CardSwap: React.FC<CardSwapProps> = ({
         placeForFront(step);
       };
 
-      const MIN_RECOIL = 18;
-      const MAX_RECOIL = 72;
-      const RECOIL_HYSTERESIS = MAX_RECOIL + 12;
-      let recoilArmed = true;
-      let recoilActive = false;
-      let recoilTarget = 0;
+      const boundary: ElasticScrollBoundary = {
+        id: Symbol("card-swap-boundary"),
+        start: 0,
+        end: 0,
+        pinStart: 0,
+        pinEnd: 0,
+        holdingEdge: null,
+        releaseReady: true,
+        holdingStep: false,
+        holdPosition: 0,
+        onImpact: (edge: ElasticBoundaryEdge) => {
+          boundary.releaseReady = false;
+          const destination = edge === "end" ? steps : 0;
 
-      const onLenisScroll = () => {
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-        const lenis = lenisRef.current;
-        if (!lenis) return;
-
-        const pos = lenis.targetScroll;
-        if (pos < trigger.end - RECOIL_HYSTERESIS && lenis.velocity < 0) recoilArmed = true;
-
-        if (recoilActive) {
-          // A trackpad keeps emitting smaller deltas after a flick. Absorb
-          // that tail at the boundary so the page cannot jump downward again
-          // when the recoil finishes.
-          if (pos > recoilTarget) lenis.scrollTo(recoilTarget, { lerp: 0.085 });
-          return;
-        }
-
-        if (!recoilArmed || pos < trigger.end || lenis.velocity <= 0) return;
-
-        const force = gsap.utils.clamp(0, 1, lenis.velocity / 40);
-        const recoil = MIN_RECOIL + (MAX_RECOIL - MIN_RECOIL) * force;
-        recoilArmed = false;
-        recoilActive = true;
-        recoilTarget = trigger.end - recoil;
-        lenis.scrollTo(recoilTarget, {
-          // Lenis's interpolation gives this the same continuous velocity
-          // falloff as ordinary scrolling instead of a fixed tween ending.
-          lerp: 0.085,
-          onComplete: () => {
-            recoilActive = false;
+          if (step !== destination) {
+            tlRef.current?.kill();
+            // A very fast gesture can skip multiple cards. Snap only the
+            // skipped states, then play the edge transition itself in full.
+            if (edge === "end") {
+              if (step < steps - 1) {
+                placeForFront(steps - 1, false);
+                step = steps - 1;
+              }
+              swap();
+            } else {
+              if (step > 1) {
+                placeForFront(1, false);
+                step = 1;
+              }
+              swapBack();
+            }
+            step = destination;
           }
-        });
+
+          const finalTransition = tlRef.current;
+          // isActive() is false during the tiny gap between creating a GSAP
+          // timeline and its first rendered frame. Progress is authoritative:
+          // zero means the transition has started and must still hold scroll.
+          if (!finalTransition || finalTransition.progress() >= 1) {
+            boundary.releaseReady = true;
+            return;
+          }
+
+          // Scroll release is tied to the actual GSAP timeline, not a timeout,
+          // so changing the card timing cannot accidentally shorten the gate.
+          finalTransition.eventCallback("onComplete", () => {
+            if (elasticScrollBoundaryRef.current?.id === boundary.id && step === destination) {
+              boundary.releaseReady = true;
+            }
+          });
+        }
       };
 
       const trigger = ScrollTrigger.create({
@@ -387,46 +383,151 @@ const CardSwap: React.FC<CardSwapProps> = ({
         pinSpacing: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
-        onRefresh: self => syncToScroll(self.progress),
+        onRefresh: self => {
+          // On the upward trip, the matching edge is the 02 -> 01 boundary,
+          // not the top of the pin. Card 01 still gets its full interval after
+          // the gated transition finishes.
+          boundary.start = self.start + (self.end - self.start) / steps;
+          boundary.end = self.end;
+          boundary.pinStart = self.start;
+          boundary.pinEnd = self.end;
+          elasticScrollBoundaryRef.current = boundary;
+          if (boundary.holdingEdge) {
+            step = boundary.holdingEdge === "end" ? steps : 0;
+            placeForFront(step);
+          } else {
+            syncToScroll(self.progress);
+          }
+        },
+        onLeave: () => {
+          // ScrollTrigger also fires onLeave when the recoil first touches the
+          // exact end. Keep the final card held until its timeline is complete;
+          // the later, released crossing is the one that may clear the hold.
+          if (boundary.releaseReady && boundary.holdingEdge === "end") boundary.holdingEdge = null;
+        },
+        onLeaveBack: () => {
+          if (boundary.releaseReady && boundary.holdingEdge === "start") boundary.holdingEdge = null;
+        },
         onUpdate: self => {
+          // A hold is already in flight — SmoothScroll is clamping scroll to
+          // holdPosition and swallowing wheel input for us, so ScrollTrigger's
+          // progress readout here is stale until that transition completes.
+          if (boundary.holdingStep) return;
           const next = stepFor(self.progress);
-          // Keep the final card active through the short physical recoil.
-          if (step === steps && next < steps && self.scroll() > trigger.end - RECOIL_HYSTERESIS) return;
+          if (boundary.holdingEdge === "end" && step === steps && next < steps) return;
+          if (boundary.holdingEdge === "start" && step === 0 && next > 0) return;
           if (next === step) return;
           const dir = next > step ? 1 : -1;
-          // Scrolling fast can cross several cards in one frame. Animating each
-          // hop stacks timelines and stutters, so snap through the skipped ones
-          // and animate only the final hop.
-          if (Math.abs(next - step) > 1) {
-            tlRef.current?.kill();
-            placeForFront((next - dir + total) % total, false, true);
+          // Only one card advances per gesture, in either direction — hold
+          // scroll at this step's threshold until its transition finishes,
+          // regardless of how far the triggering scroll actually reached.
+          const target = step + dir;
+          // The transition into the very first/last card is owned by the
+          // wheel-level elastic-boundary system, whose boundary.start/end
+          // sit one card-interval inset from self.start/self.end (they mark
+          // the 01<->02 and 04<->05 thresholds, not this deck's own progress
+          // boundary) — anchor the hold there instead of this deck's own
+          // step math, and route the actual transition through the same
+          // onImpact it already uses: it's idempotent (checks
+          // step !== destination first), so it's safe even if the wheel
+          // handler's own discrete-event catch also reaches this edge.
+          // Needed as a frame-driven fallback in the first place because
+          // that catch only fires on a wheel event landing at just the
+          // right moment — a gesture that ends while Lenis is still
+          // coasting toward/past the edge would otherwise never get caught,
+          // and without clamping scroll to the edge first (as the wheel
+          // path does), the pin can unpin under leftover momentum and the
+          // page scrolls straight past while the card animates unseen.
+          const isEdgeTransition = target === 0 || target === steps;
+          const edge: ElasticBoundaryEdge | null = target === steps ? "end" : target === 0 ? "start" : null;
+          // Holding exactly at the crossed boundary (step/steps) is only
+          // correct going forward: stepFor's floor convention maps that
+          // exact value to the range starting there, i.e. the step you're
+          // advancing INTO. Reversing crosses the same boundary from the
+          // other side, so holding there reads back as the card you just
+          // left — nudge just inside target's own range (past stepFor's
+          // own 0.01 tolerance) so it reliably reads as target instead.
+          const crossingProgress = Math.max(step, target) / steps;
+          const holdProgress = dir > 0 ? crossingProgress : crossingProgress - 0.02 / steps;
+          boundary.holdPosition = isEdgeTransition && edge
+            ? (edge === "end" ? boundary.end : boundary.start)
+            : self.start + holdProgress * (self.end - self.start);
+          boundary.holdingStep = true;
+          if (isEdgeTransition && edge) {
+            boundary.holdingEdge = edge;
+            // onImpact reads step to decide whether it still has a
+            // transition to play (step !== destination) and sets it to
+            // destination itself — setting it here first would make that
+            // check a no-op and silently skip the animation.
+            boundary.onImpact(edge);
+            step = target;
+          } else {
+            // Landing on a middle card retires any edge hold — onLeave/
+            // onLeaveBack and the wheel handler's reversal-cancel are the
+            // only other places this ever gets cleared, and neither fires
+            // just from moving off the edge card internally (without
+            // actually exiting the pin). Left stale, a later return trip to
+            // this same edge would misread onUpdate's own protective
+            // holdingEdge guards (meant to stop the bounce's inward recoil
+            // from being misread as a user-initiated reversal) as still
+            // applying, even though the bounce that set them ended long ago.
+            boundary.holdingEdge = null;
+            if (dir > 0) swap();
+            else swapBack();
+            step = target;
           }
-          if (dir > 0) swap();
-          else swapBack();
-          step = next;
+
+          const release = () => {
+            boundary.holdingStep = false;
+          };
+          const activeTransition = tlRef.current;
+          if (!activeTransition || activeTransition.progress() >= 1) {
+            release();
+          } else if (isEdgeTransition) {
+            // onImpact already attached its own onComplete (to flip
+            // releaseReady once this transition finishes) — chain ours
+            // after it instead of overwriting, or releaseReady would never
+            // flip and a later leave/re-entry could misread holdingEdge.
+            const existing = activeTransition.eventCallback("onComplete");
+            activeTransition.eventCallback("onComplete", () => {
+              existing?.();
+              release();
+            });
+          } else {
+            activeTransition.eventCallback("onComplete", release);
+          }
         }
       });
 
+      boundary.start = trigger.start + (trigger.end - trigger.start) / steps;
+      boundary.end = trigger.end;
+      boundary.pinStart = trigger.start;
+      boundary.pinEnd = trigger.end;
+      elasticScrollBoundaryRef.current = boundary;
       syncToScroll(trigger.progress);
 
-      let lenisAttached: Lenis | null = null;
-      let attachRaf = 0;
-      const attachLenis = () => {
-        const lenis = lenisRef.current;
-        if (lenis) {
-          lenis.on("scroll", onLenisScroll);
-          lenisAttached = lenis;
-        } else {
-          attachRaf = requestAnimationFrame(attachLenis);
-        }
+      // GSAP auto-refreshes on window "load", but content above this section
+      // (hero images, etc.) can still be reflowing after that snapshot — or
+      // "load" may have already fired before this mounted (client hydration
+      // timing) — leaving pinStart/pinEnd stale until something else forces
+      // a recalculation. Force one more refresh once things have had a beat
+      // to settle, covering both cases. Guarded to skip while the pin is
+      // actively engaged: refreshing mid-interaction can shift self.progress
+      // by a hair, and onRefresh's syncToScroll would then silently re-place
+      // the deck — reading as an unrequested card change or corrupting which
+      // step an in-flight hold thinks it's targeting.
+      const refresh = () => {
+        if (!trigger.isActive) ScrollTrigger.refresh();
       };
-      attachLenis();
+      const refreshTimer = window.setTimeout(refresh, 600);
+      window.addEventListener("load", refresh);
 
       return () => {
+        if (elasticScrollBoundaryRef.current?.id === boundary.id) elasticScrollBoundaryRef.current = null;
+        window.clearTimeout(refreshTimer);
+        window.removeEventListener("load", refresh);
         trigger.kill();
         tlRef.current?.kill();
-        cancelAnimationFrame(attachRaf);
-        lenisAttached?.off("scroll", onLenisScroll);
       };
     }
 

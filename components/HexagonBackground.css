@@ -1,0 +1,60 @@
+.hexagon-background {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #111514;
+}
+
+.hexagon-background__grid {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hexagon-background__row {
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.hexagon-background__cell {
+  position: relative;
+  flex: none;
+  clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+}
+
+.hexagon-background__cell::before,
+.hexagon-background__cell::after {
+  content: "";
+  position: absolute;
+  clip-path: inherit;
+}
+
+.hexagon-background__cell::before {
+  inset: 0;
+  background: rgba(102,255,85,.13);
+  transition: background-color 700ms cubic-bezier(.16,1,.3,1),opacity 700ms cubic-bezier(.16,1,.3,1);
+}
+
+.hexagon-background__cell::after {
+  inset: var(--hexagon-margin);
+  background: #111514;
+  transition: background-color 700ms cubic-bezier(.16,1,.3,1);
+}
+
+.hexagon-background__cell.is-active::before {
+  background: rgba(102,255,85,.72);
+  transition-duration: 90ms;
+}
+
+.hexagon-background__cell.is-active::after {
+  background: #172019;
+  transition-duration: 90ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hexagon-background__cell::before,
+  .hexagon-background__cell::after {
+    transition-duration: 0ms;
+  }
+}

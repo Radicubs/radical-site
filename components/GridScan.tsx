@@ -37,7 +37,7 @@ type GridScanProps = {
   enableGyro?: boolean;
   scanOnClick?: boolean;
   snapBackDelay?: number;
-  interactionTarget?: 'container' | 'window';
+  interactionTarget?: 'container' | 'window' | 'none';
   className?: string;
   style?: React.CSSProperties;
 };
@@ -413,7 +413,7 @@ export const GridScan: React.FC<GridScanProps> = ({
 
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
+    if (!el || interactionTarget === 'none') return;
     const globalInteraction = interactionTarget === 'window';
     const moveTarget: HTMLElement | Window = globalInteraction ? window : el;
     const leaveTarget: HTMLElement = globalInteraction ? document.documentElement : el;

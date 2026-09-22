@@ -6,7 +6,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import DriftWall, { type DriftWallItem } from "@/components/DriftWall";
 import "./gallery-wall.css";
 
-export function GalleryWall({ items }: { items: DriftWallItem[] }) {
+type GalleryWallItem = DriftWallItem & { fullImage?: string };
+
+export function GalleryWall({ items }: { items: GalleryWallItem[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const close = useCallback(() => setOpenIndex(null), []);
@@ -53,7 +55,7 @@ export function GalleryWall({ items }: { items: DriftWallItem[] }) {
             <button className="gallery-lightbox-backdrop" type="button" onClick={close} aria-label="Close full-screen photo" />
             <button className="gallery-lightbox-close" type="button" onClick={close} autoFocus aria-label="Close full-screen photo"><X size={22} /></button>
             <div className="gallery-lightbox-stage">
-              <img src={active.image} alt={active.title || ""} />
+              <img src={active.fullImage ?? active.image} alt={active.title || ""} />
             </div>
           </motion.div>
         )}
