@@ -14,11 +14,7 @@ import React, {
   useMemo,
   useRef
 } from "react";
-import {
-  elasticScrollBoundaryRef,
-  type ElasticBoundaryEdge,
-  type ElasticScrollBoundary
-} from "@/components/ui/lenis-singleton";
+import { lenisRef, scrollLockRef } from "@/components/ui/lenis-singleton";
 import "./CardSwap.css";
 
 export interface CardSwapProps {
@@ -107,7 +103,10 @@ const CardSwap: React.FC<CardSwapProps> = ({
           returnDelay: 0.05
         }
       : {
-          ease: "power1.inOut",
+          // "none" is GSAP's true linear ease. power1.inOut's slow ease-in
+          // ramp left the first ~150-200ms of the drop nearly motionless,
+          // reading as a delay between the scroll input and the animation.
+          ease: easing === "linear" ? "none" : "power1.inOut",
           durDrop: 0.8,
           durMove: 0.8,
           durReturn: 0.8,
@@ -296,20 +295,10 @@ const CardSwap: React.FC<CardSwapProps> = ({
       // card N, so the pin releases the moment either end is reached instead of
       // holding with nothing left to swap.
       const steps = Math.max(1, total - 1);
-      // A card owns the full interval before the next boundary. Using round()
-      // flipped halfway through that interval, at the exact point where the
-      // deck's resistance was strongest, and left half an interval of dead
-      // pinned scroll after the final card appeared. Advancing at the interval
-      // boundary keeps each card readable for a complete interval and makes
-      // the final swap coincide with the lower scroll boundary.
-      // The epsilon absorbs sub-pixel rounding when something (e.g. the
-      // magnet's scrollTo) lands a hair short of an exact step boundary —
-      // 0.00001 only tolerated ~0.0000025 of progress, far less than a
-      // pixel's worth on a several-hundred-pixel-per-step deck, so landing
-      // even slightly short of the last card read as one step behind it.
       const stepFor = (progress: number) =>
         Math.max(0, Math.min(steps, Math.floor(progress * steps + 0.01)));
       let step = 0;
+      const lockId = Symbol("card-swap-lock");
 
       // Snap the deck to whatever the scroll position already implies, so
       // re-entering the section (or a refresh mid-section) shows the card that
@@ -317,59 +306,6 @@ const CardSwap: React.FC<CardSwapProps> = ({
       const syncToScroll = (progress: number) => {
         step = stepFor(progress);
         placeForFront(step);
-      };
-
-      const boundary: ElasticScrollBoundary = {
-        id: Symbol("card-swap-boundary"),
-        start: 0,
-        end: 0,
-        pinStart: 0,
-        pinEnd: 0,
-        holdingEdge: null,
-        releaseReady: true,
-        holdingStep: false,
-        holdPosition: 0,
-        onImpact: (edge: ElasticBoundaryEdge) => {
-          boundary.releaseReady = false;
-          const destination = edge === "end" ? steps : 0;
-
-          if (step !== destination) {
-            tlRef.current?.kill();
-            // A very fast gesture can skip multiple cards. Snap only the
-            // skipped states, then play the edge transition itself in full.
-            if (edge === "end") {
-              if (step < steps - 1) {
-                placeForFront(steps - 1, false);
-                step = steps - 1;
-              }
-              swap();
-            } else {
-              if (step > 1) {
-                placeForFront(1, false);
-                step = 1;
-              }
-              swapBack();
-            }
-            step = destination;
-          }
-
-          const finalTransition = tlRef.current;
-          // isActive() is false during the tiny gap between creating a GSAP
-          // timeline and its first rendered frame. Progress is authoritative:
-          // zero means the transition has started and must still hold scroll.
-          if (!finalTransition || finalTransition.progress() >= 1) {
-            boundary.releaseReady = true;
-            return;
-          }
-
-          // Scroll release is tied to the actual GSAP timeline, not a timeout,
-          // so changing the card timing cannot accidentally shorten the gate.
-          finalTransition.eventCallback("onComplete", () => {
-            if (elasticScrollBoundaryRef.current?.id === boundary.id && step === destination) {
-              boundary.releaseReady = true;
-            }
-          });
-        }
       };
 
       const trigger = ScrollTrigger.create({
@@ -384,126 +320,51 @@ const CardSwap: React.FC<CardSwapProps> = ({
         anticipatePin: 1,
         invalidateOnRefresh: true,
         onRefresh: self => {
-          // On the upward trip, the matching edge is the 02 -> 01 boundary,
-          // not the top of the pin. Card 01 still gets its full interval after
-          // the gated transition finishes.
-          boundary.start = self.start + (self.end - self.start) / steps;
-          boundary.end = self.end;
-          boundary.pinStart = self.start;
-          boundary.pinEnd = self.end;
-          elasticScrollBoundaryRef.current = boundary;
-          if (boundary.holdingEdge) {
-            step = boundary.holdingEdge === "end" ? steps : 0;
-            placeForFront(step);
-          } else {
-            syncToScroll(self.progress);
-          }
-        },
-        onLeave: () => {
-          // ScrollTrigger also fires onLeave when the recoil first touches the
-          // exact end. Keep the final card held until its timeline is complete;
-          // the later, released crossing is the one that may clear the hold.
-          if (boundary.releaseReady && boundary.holdingEdge === "end") boundary.holdingEdge = null;
-        },
-        onLeaveBack: () => {
-          if (boundary.releaseReady && boundary.holdingEdge === "start") boundary.holdingEdge = null;
+          if (!scrollLockRef.current?.holding) syncToScroll(self.progress);
         },
         onUpdate: self => {
-          // A hold is already in flight — SmoothScroll is clamping scroll to
-          // holdPosition and swallowing wheel input for us, so ScrollTrigger's
-          // progress readout here is stale until that transition completes.
-          if (boundary.holdingStep) return;
-          const next = stepFor(self.progress);
-          if (boundary.holdingEdge === "end" && step === steps && next < steps) return;
-          if (boundary.holdingEdge === "start" && step === 0 && next > 0) return;
+          // A transition is already playing — SmoothScroll is clamping
+          // scroll to holdPosition and swallowing wheel input for us, so
+          // progress here is stale until that transition completes.
+          if (scrollLockRef.current?.holding) return;
+
+          // Drive step detection off Lenis's *target* scroll, not the
+          // lerp-smoothed position self.progress is built from. Lenis eases
+          // toward the target over ~1s, so waiting for the smoothed
+          // position to actually cross a step boundary added that same
+          // settle time as a felt delay between the scroll gesture and the
+          // card flip. The pin holds the deck in place regardless, so
+          // nothing here needs the smoothed pixel position — only where the
+          // user meant to scroll to.
+          const lenisTarget = lenisRef.current?.targetScroll;
+          const progress =
+            lenisTarget != null
+              ? gsap.utils.clamp(0, 1, (lenisTarget - self.start) / (self.end - self.start))
+              : self.progress;
+          const next = stepFor(progress);
           if (next === step) return;
-          const dir = next > step ? 1 : -1;
+
           // Only one card advances per gesture, in either direction — hold
           // scroll at this step's threshold until its transition finishes,
           // regardless of how far the triggering scroll actually reached.
+          const dir = next > step ? 1 : -1;
           const target = step + dir;
-          // The transition into the very first/last card is owned by the
-          // wheel-level elastic-boundary system, whose boundary.start/end
-          // sit one card-interval inset from self.start/self.end (they mark
-          // the 01<->02 and 04<->05 thresholds, not this deck's own progress
-          // boundary) — anchor the hold there instead of this deck's own
-          // step math, and route the actual transition through the same
-          // onImpact it already uses: it's idempotent (checks
-          // step !== destination first), so it's safe even if the wheel
-          // handler's own discrete-event catch also reaches this edge.
-          // Needed as a frame-driven fallback in the first place because
-          // that catch only fires on a wheel event landing at just the
-          // right moment — a gesture that ends while Lenis is still
-          // coasting toward/past the edge would otherwise never get caught,
-          // and without clamping scroll to the edge first (as the wheel
-          // path does), the pin can unpin under leftover momentum and the
-          // page scrolls straight past while the card animates unseen.
-          const isEdgeTransition = target === 0 || target === steps;
-          const edge: ElasticBoundaryEdge | null = target === steps ? "end" : target === 0 ? "start" : null;
-          // Holding exactly at the crossed boundary (step/steps) is only
-          // correct going forward: stepFor's floor convention maps that
-          // exact value to the range starting there, i.e. the step you're
-          // advancing INTO. Reversing crosses the same boundary from the
-          // other side, so holding there reads back as the card you just
-          // left — nudge just inside target's own range (past stepFor's
-          // own 0.01 tolerance) so it reliably reads as target instead.
-          const crossingProgress = Math.max(step, target) / steps;
-          const holdProgress = dir > 0 ? crossingProgress : crossingProgress - 0.02 / steps;
-          boundary.holdPosition = isEdgeTransition && edge
-            ? (edge === "end" ? boundary.end : boundary.start)
-            : self.start + holdProgress * (self.end - self.start);
-          boundary.holdingStep = true;
-          if (isEdgeTransition && edge) {
-            boundary.holdingEdge = edge;
-            // onImpact reads step to decide whether it still has a
-            // transition to play (step !== destination) and sets it to
-            // destination itself — setting it here first would make that
-            // check a no-op and silently skip the animation.
-            boundary.onImpact(edge);
-            step = target;
-          } else {
-            // Landing on a middle card retires any edge hold — onLeave/
-            // onLeaveBack and the wheel handler's reversal-cancel are the
-            // only other places this ever gets cleared, and neither fires
-            // just from moving off the edge card internally (without
-            // actually exiting the pin). Left stale, a later return trip to
-            // this same edge would misread onUpdate's own protective
-            // holdingEdge guards (meant to stop the bounce's inward recoil
-            // from being misread as a user-initiated reversal) as still
-            // applying, even though the bounce that set them ended long ago.
-            boundary.holdingEdge = null;
-            if (dir > 0) swap();
-            else swapBack();
-            step = target;
-          }
+          const holdPosition = self.start + (target / steps) * (self.end - self.start);
+          scrollLockRef.current = { id: lockId, holding: true, holdPosition };
+
+          if (dir > 0) swap();
+          else swapBack();
+          step = target;
 
           const release = () => {
-            boundary.holdingStep = false;
+            if (scrollLockRef.current?.id === lockId) scrollLockRef.current.holding = false;
           };
           const activeTransition = tlRef.current;
-          if (!activeTransition || activeTransition.progress() >= 1) {
-            release();
-          } else if (isEdgeTransition) {
-            // onImpact already attached its own onComplete (to flip
-            // releaseReady once this transition finishes) — chain ours
-            // after it instead of overwriting, or releaseReady would never
-            // flip and a later leave/re-entry could misread holdingEdge.
-            const existing = activeTransition.eventCallback("onComplete");
-            activeTransition.eventCallback("onComplete", () => {
-              existing?.();
-              release();
-            });
-          } else {
-            activeTransition.eventCallback("onComplete", release);
-          }
+          if (!activeTransition || activeTransition.progress() >= 1) release();
+          else activeTransition.eventCallback("onComplete", release);
         }
       });
 
-      boundary.start = trigger.start + (trigger.end - trigger.start) / steps;
-      boundary.end = trigger.end;
-      boundary.pinStart = trigger.start;
-      boundary.pinEnd = trigger.end;
-      elasticScrollBoundaryRef.current = boundary;
       syncToScroll(trigger.progress);
 
       // GSAP auto-refreshes on window "load", but content above this section
@@ -514,8 +375,7 @@ const CardSwap: React.FC<CardSwapProps> = ({
       // to settle, covering both cases. Guarded to skip while the pin is
       // actively engaged: refreshing mid-interaction can shift self.progress
       // by a hair, and onRefresh's syncToScroll would then silently re-place
-      // the deck — reading as an unrequested card change or corrupting which
-      // step an in-flight hold thinks it's targeting.
+      // the deck — reading as an unrequested card change.
       const refresh = () => {
         if (!trigger.isActive) ScrollTrigger.refresh();
       };
@@ -523,7 +383,7 @@ const CardSwap: React.FC<CardSwapProps> = ({
       window.addEventListener("load", refresh);
 
       return () => {
-        if (elasticScrollBoundaryRef.current?.id === boundary.id) elasticScrollBoundaryRef.current = null;
+        if (scrollLockRef.current?.id === lockId) scrollLockRef.current = null;
         window.clearTimeout(refreshTimer);
         window.removeEventListener("load", refresh);
         trigger.kill();
