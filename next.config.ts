@@ -10,6 +10,10 @@ const STATIC_MEDIA_CACHE = "public, max-age=604800, stale-while-revalidate=25920
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
+  // pg reads this certificate from DATABASE_URL at runtime, outside Next's static imports.
+  outputFileTracingIncludes: {
+    "/*": ["./cms/certs/supabase-ca.crt"]
+  },
   // Lets a production build run beside a dev server without sharing .next.
   distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,

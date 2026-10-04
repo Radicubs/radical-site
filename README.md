@@ -26,6 +26,19 @@ npm run build
 npm start
 ```
 
+## Vercel deployment
+
+`vercel.json` sets the Next.js framework, installs the committed lockfile with
+`npm ci`, builds with `npm run build`, and uses `.next` as the output directory.
+Set the Vercel project's Root Directory to the repository root (leave it blank)
+and connect it to `Radicubs/radical-site`. Root Directory is a dashboard setting;
+it cannot be overridden by `vercel.json`.
+
+Add the required variables from `.env.example` to the deployment environment.
+The Supabase certificate in `cms/certs/supabase-ca.crt` is included in server
+bundles for database URLs using verified TLS. The build command also runs the
+Payload migrations against the configured database.
+
 ## Content / asset sourcing
 
 Current navigation, mission copy, team roster, mentor roster, awards, individual sponsor names, blog titles and dates, 2026 blog copy, PayPal link, application link, robot image, favicon mark, team portraits, sponsor artwork, and blog covers were mapped from the original site and its CMS. All site-owned media is stored locally in this project.
