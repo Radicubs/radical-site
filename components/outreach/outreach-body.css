@@ -1,0 +1,143 @@
+/* Outreach page body. Lives inside .outreach-sheet, which scrolls up over the pinned hero video.
+   Cells reuse the CAD corner-mark language from the awards ledger and discipline cards. */
+.outreach-page {
+  --ob-ink: #eef2ec;
+  --ob-muted: #a3ada2;
+  --ob-accent: #8cff6e;
+  --ob-line: rgba(255, 255, 255, .1);
+  --ob-tick: rgba(140, 255, 110, .6);
+  --ob-cell: rgba(16, 19, 17, .72);
+  --ob-hover: rgba(140, 255, 110, .06);
+  --ob-sheet: #0a0c0d;
+}
+html[data-theme="light"] .outreach-page {
+  --ob-ink: #142012;
+  --ob-muted: #4d5a4a;
+  --ob-accent: #1f7f0d;
+  --ob-line: var(--lm-edge, rgba(18, 26, 17, .14));
+  --ob-tick: var(--accent-bright, #3fc41c);
+  --ob-cell: var(--lm-surface, #fff);
+  --ob-hover: rgba(31, 127, 13, .06);
+  --ob-sheet: #f3f6f0;
+}
+
+.outreach-sheet {
+  position: relative;
+  z-index: 1;
+  padding-top: 24px;
+  background: var(--ob-sheet);
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -24px 60px rgba(0, 0, 0, .35);
+}
+
+/* ---- Shared type ---- */
+.outreach-eyebrow {
+  margin: 0 0 16px;
+  color: var(--ob-accent);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.outreach-sheet :is(.section, .outreach-reel) h2 {
+  max-width: none;
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--ob-ink);
+  font-size: clamp(28px, 3.1vw, 50px);
+  line-height: 1;
+  letter-spacing: -.035em;
+}
+.outreach-sheet :is(.section, .outreach-reel) h2 em { color: var(--ob-accent); font-style: normal; }
+.outreach-sheet .section-copy { margin: 0; color: var(--ob-muted); }
+.outreach-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+
+.outreach-cell {
+  --tick: 12px;
+  position: relative;
+  border: 1px solid var(--ob-line);
+  border-radius: 4px;
+  background:
+    linear-gradient(var(--ob-tick), var(--ob-tick)) top left / var(--tick) 1px,
+    linear-gradient(var(--ob-tick), var(--ob-tick)) top left / 1px var(--tick),
+    linear-gradient(var(--ob-tick), var(--ob-tick)) top right / var(--tick) 1px,
+    linear-gradient(var(--ob-tick), var(--ob-tick)) top right / 1px var(--tick),
+    linear-gradient(var(--ob-tick), var(--ob-tick)) bottom left / var(--tick) 1px,
+    linear-gradient(var(--ob-tick), var(--ob-tick)) bottom left / 1px var(--tick),
+    linear-gradient(var(--ob-tick), var(--ob-tick)) bottom right / var(--tick) 1px,
+    linear-gradient(var(--ob-tick), var(--ob-tick)) bottom right / 1px var(--tick),
+    var(--ob-cell);
+  background-repeat: no-repeat;
+}
+
+/* ---- Intro ---- */
+.outreach-intro-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: clamp(32px, 5vw, 80px); }
+.outreach-lead { max-width: 48ch; margin: 22px 0 0; color: var(--ob-muted); font-size: 17px; line-height: 1.55; }
+.outreach-intro-photo { --tick: 16px; margin: 0; padding: 10px; }
+.outreach-intro-photo img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 2px; }
+
+/* ---- Programs ---- */
+.outreach-program-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.outreach-program-grid > li { display: flex; }
+.outreach-program { display: flex; flex-direction: column; width: 100%; min-height: 300px; padding: 18px 20px; }
+.outreach-index { color: var(--ob-muted); font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .08em; }
+.outreach-program h3 { margin: 36px 0 12px; color: var(--ob-ink); font-size: 22px; font-weight: 600; line-height: 1.15; letter-spacing: -.02em; }
+.outreach-program p { margin: 0; color: var(--ob-muted); font-size: 15px; line-height: 1.55; }
+.outreach-where {
+  margin-top: auto;
+  padding-top: 20px;
+  color: var(--ob-accent);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* ---- Stats ---- */
+.outreach-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: clamp(40px, 6vw, 72px) 0 0; }
+.outreach-stats > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 6px; padding: 18px 20px; }
+.outreach-stats dd { margin: 0; color: var(--ob-ink); font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: clamp(40px, 4.6vw, 68px); font-weight: 600; line-height: 1; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+.outreach-stats dt { color: var(--ob-muted); font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+
+/* ---- Partner ticker ---- */
+.outreach-partners { padding: 20px 0 64px; }
+.outreach-marquee {
+  display: flex;
+  overflow: hidden;
+  border-top: 1px solid var(--ob-line);
+  border-bottom: 1px solid var(--ob-line);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.outreach-marquee ul { display: flex; flex: 0 0 auto; margin: 0; padding: 0; list-style: none; animation: outreach-marquee 32s linear infinite; }
+.outreach-marquee:hover ul { animation-play-state: paused; }
+.outreach-marquee li { display: flex; align-items: center; gap: 36px; padding: 22px 0 22px 36px; color: var(--ob-ink); font-size: clamp(20px, 2.2vw, 32px); font-weight: 600; letter-spacing: -.02em; white-space: nowrap; }
+.outreach-marquee li span { color: var(--ob-accent); font-size: .5em; }
+@keyframes outreach-marquee { to { transform: translateX(-100%); } }
+
+@media (max-width: 1100px) {
+  .outreach-program-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .outreach-program { min-height: 0; }
+}
+@media (max-width: 800px) {
+  .outreach-intro-grid { grid-template-columns: 1fr; }
+  .outreach-head { flex-direction: column; align-items: start; gap: 10px; }
+  .outreach-stats { gap: 8px; }
+  .outreach-stats > div { padding: 14px 12px; }
+  .outreach-stats dd { font-size: clamp(26px, 8vw, 40px); }
+  .outreach-stats dt { font-size: 9px; letter-spacing: .06em; }
+}
+@media (max-width: 560px) {
+  .outreach-program-grid { grid-template-columns: 1fr; }
+  .outreach-lead { font-size: 15px; }
+  .outreach-sheet { border-radius: 20px 20px 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .outreach-marquee ul { animation: none; }
+  .outreach-marquee ul[aria-hidden] { display: none; }
+  .outreach-marquee { flex-wrap: wrap; }
+}

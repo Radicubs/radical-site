@@ -1,0 +1,79 @@
+/* Pinned horizontal reel. Without pinning (reduced motion, or before measuring) it is a native swipe row. */
+.outreach-reel { position: relative; }
+.outreach-reel-stage { display: flex; flex-direction: column; justify-content: center; gap: clamp(20px, 3.5vh, 36px); padding: 74px 0; }
+.outreach-reel[data-pinned] .outreach-reel-stage { position: sticky; top: 0; height: 100svh; padding: 88px 0 40px; overflow: hidden; }
+
+.outreach-reel-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; width: 100%; }
+.outreach-reel-meter { display: grid; grid-template-columns: auto 160px; align-items: center; gap: 16px; color: var(--ob-muted); font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: .08em; }
+.outreach-reel-count strong { color: var(--ob-ink); font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
+.outreach-reel-bar { position: relative; height: 2px; overflow: hidden; background: var(--ob-line); }
+.outreach-reel-bar > span { position: absolute; inset: 0; background: var(--ob-accent); transform-origin: left; }
+
+.outreach-reel-track {
+  display: flex;
+  gap: 14px;
+  margin: 0;
+  padding: 0 max(24px, calc((100vw - 1160px) / 2));
+  list-style: none;
+  will-change: transform;
+}
+/* Trailing padding isn't counted in a flex row's scroll width, so a spacer keeps the last card off the edge. */
+.outreach-reel-track::after { content: ""; flex: 0 0 max(10px, calc((100vw - 1160px) / 2 - 14px)); }
+.outreach-reel:not([data-pinned]) .outreach-reel-track { overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.outreach-reel:not([data-pinned]) .outreach-reel-track > li { scroll-snap-align: center; }
+.outreach-reel-track > li { flex: 0 0 auto; display: flex; }
+
+.outreach-reel-card {
+  --tick: 14px;
+  display: flex;
+  flex-direction: column;
+  width: clamp(270px, 30vw, 440px);
+  height: clamp(400px, 60svh, 580px);
+  padding: 10px;
+  color: var(--ob-ink);
+  text-decoration: none;
+  transition: border-color .25s ease, transform .35s cubic-bezier(.22, 1, .36, 1);
+}
+.outreach-reel-track > li:nth-child(3n + 2) .outreach-reel-card { width: clamp(250px, 24vw, 360px); }
+a.outreach-reel-card:hover { border-color: color-mix(in srgb, var(--ob-accent) 55%, transparent); transform: translateY(-4px); }
+a.outreach-reel-card:focus-visible { outline: 2px solid var(--ob-accent); outline-offset: 3px; }
+
+.outreach-reel-photo { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; border-radius: 2px; background: #0b100c; }
+.outreach-reel-photo img { position: absolute; inset: 0 -8%; width: 116%; max-width: none; height: 100%; object-fit: cover; filter: saturate(.9); transition: filter .35s ease, scale .6s cubic-bezier(.22, 1, .36, 1); }
+a.outreach-reel-card:hover .outreach-reel-photo img { filter: saturate(1.1); scale: 1.04; }
+.outreach-reel-photo--contain { display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, var(--ob-accent) 7%, var(--ob-sheet)); }
+.outreach-reel-photo--contain img { position: static; width: auto; max-width: 100%; height: 100%; object-fit: contain; box-shadow: 0 16px 40px rgba(0, 0, 0, .35); }
+
+/* Text-only cards: an oversized outlined year fills the space a photo would. */
+.outreach-reel-ghost {
+  display: grid;
+  flex: 1 1 auto;
+  place-items: center;
+  overflow: hidden;
+  color: transparent;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: clamp(80px, 9vw, 150px);
+  font-weight: 600;
+  letter-spacing: -.06em;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--ob-accent) 55%, transparent);
+  background: repeating-linear-gradient(135deg, transparent 0 14px, color-mix(in srgb, var(--ob-accent) 5%, transparent) 14px 15px);
+  border-radius: 2px;
+}
+
+.outreach-reel-meta { display: grid; gap: 4px; padding: 16px 8px 6px; }
+.outreach-reel-year { color: var(--ob-accent); font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; font-weight: 600; letter-spacing: .04em; }
+.outreach-reel-year span { color: var(--ob-muted); font-weight: 500; }
+.outreach-reel-meta strong { font-size: clamp(18px, 1.5vw, 22px); font-weight: 600; line-height: 1.2; letter-spacing: -.015em; }
+.outreach-reel-place { color: var(--ob-muted); font-size: 14px; }
+.outreach-reel-read { margin-top: 8px; color: var(--ob-ink); font-size: 13px; font-weight: 600; opacity: .7; transition: opacity .2s ease, color .2s ease; }
+a.outreach-reel-card:hover .outreach-reel-read { color: var(--ob-accent); opacity: 1; }
+
+@media (max-width: 800px) {
+  .outreach-reel-head { flex-direction: column; align-items: start; gap: 14px; }
+  .outreach-reel-meter { grid-template-columns: auto 120px; }
+  .outreach-reel-card { width: min(78vw, 340px); height: clamp(380px, 58svh, 520px); }
+  .outreach-reel-track > li:nth-child(3n + 2) .outreach-reel-card { width: min(66vw, 290px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .outreach-reel-card, .outreach-reel-photo img { transition: none; }
+}

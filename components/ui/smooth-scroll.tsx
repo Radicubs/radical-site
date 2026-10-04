@@ -5,12 +5,15 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect } from "react";
 import { lenisRef, scrollLockRef } from "@/components/ui/lenis-singleton";
+import { installHorizontalWheelLock } from "@/components/ui/horizontal-wheel-lock";
 
-// lerp 0.1 is Lenis' documented default (~1.2s settle) — weighted but not
-// sluggish. Raise toward 0.2 for snappier, drop toward 0.06 for heavier.
-const LERP = 0.1;
+// A quicker settle keeps sections fluid without making the page feel delayed.
+const LERP = 0.18;
 
 export function SmoothScroll() {
+  // Needed with or without Lenis: native scrolling has the same diagonal-swipe problem.
+  useEffect(() => installHorizontalWheelLock(), []);
+
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
@@ -20,6 +23,8 @@ export function SmoothScroll() {
       lerp: LERP,
       smoothWheel: true,
       syncTouch: false,
+      // Glide to in-page #anchors instead of jumping; section scroll-margin-top clears the sticky navbar.
+      anchors: { duration: 1.4, easing: (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) },
       virtualScroll: data => {
         // A card transition is playing — swallow scroll entirely until it
         // completes. The raf loop below is what actually holds the position.

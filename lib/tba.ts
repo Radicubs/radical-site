@@ -46,7 +46,7 @@ export async function getAwards(): Promise<SiteAward[]> {
         year: award.year,
         name: award.name,
         event: event?.city || event?.short_name || event?.name || award.event_key,
-        href: `https://www.thebluealliance.com/event/${award.event_key}`,
+        href: `https://www.thebluealliance.com/event/${award.event_key}#awards`,
         image: awardArtwork.find(([pattern]) => pattern.test(award.name))?.[1] || "/awards/frc-judged-trophy.jpg"
       };
     })

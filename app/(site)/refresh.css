@@ -1,0 +1,70 @@
+/* Site refresh: a quiet canvas gives the team's photography the emphasis. */
+html, body { background: #101112 !important; }
+/* Native anchor jumps (reduced motion) also land below the sticky navbar. */
+section[id] { scroll-margin-top: 96px; }
+/* Scrolling stays fully functional; the bars themselves are hidden site-wide. */
+html, body, * { scrollbar-width: none !important; }
+*::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+/* Animate UI stars sit fixed behind every page; its own radial gradient is the canvas. */
+.site-stars { position: fixed !important; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
+.site-content { position: relative; z-index: 1; background: transparent; }
+
+.section { padding: 74px 0; }
+.post-date, .footer-bottom, .hero-footnote, .journey-season, .journey-year-dot { font-family: "IBM Plex Sans", sans-serif; letter-spacing: .02em; text-transform: none; }
+.cta-grid, .footer-glow { background: #17191a; }
+/* The CTA panel follows its BorderGlow card's rounded corners. */
+.cta-grid { border-radius: var(--border-radius, 0); }
+.cta-grid p { font-family: "IBM Plex Sans", sans-serif; }
+
+.home-hero { position: relative; min-height: min(790px, calc(100svh - 92px)); overflow: hidden; isolation: isolate; background: transparent; }
+/* The wall dissolves into the stars at its edges instead of under a tinted shade. */
+.home-hero-wall { position: absolute; inset: -7% -4%; z-index: 0; -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%), linear-gradient(180deg, #000 55%, transparent 100%); -webkit-mask-composite: source-in; mask-image: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%), linear-gradient(180deg, #000 55%, transparent 100%); mask-composite: intersect; }
+.home-hero-wall .drift-wall { -webkit-mask-image: none; mask-image: none; }
+.home-hero-content { position: relative; z-index: 2; min-height: inherit; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; max-width: 1500px; margin: auto; padding: 180px 24px 60px; text-align: center; pointer-events: none; }
+/* The content layer covers the wall; let the pointer through to it except on real controls. */
+.home-hero-content :is(a, button) { pointer-events: auto; }
+.home-hero-intro { margin: 0 0 8px; font-size: clamp(13px, 1.4vw, 17px); font-weight: 500; color: #e1e4e1; text-shadow: 0 2px 18px #000; }
+.home-hero h1 { margin: 0; width: min(29vw, 430px); line-height: 0; filter: drop-shadow(0 10px 40px rgba(0,0,0,.5)); }
+.home-hero h1 img { display: block; width: 100%; height: auto; }
+.home-hero-description { margin: 24px 0 0; font-size: clamp(18px, 2vw, 26px); font-weight: 500; color: #fff; text-shadow: 0 2px 20px #000; }
+.home-hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 25px; }
+
+.home-disciplines { background: #101112; padding-top: 92px; }
+.home-disciplines .section-head-row { align-items: end; }
+.home-disciplines h2 { max-width: none; font-family: "IBM Plex Sans", sans-serif; font-size: clamp(38px,4.1vw,58px); font-weight: 600; line-height: 1.05; letter-spacing: -.03em; text-transform: none; }
+.home-disciplines .section-copy { margin: 0; max-width: 33ch; }
+
+.awards-section { padding-top: 96px; }
+.awards-section .section-head-row { align-items: end; }
+.awards-section h2 { max-width: none; font-family: "IBM Plex Sans", sans-serif; font-size: clamp(38px,4.1vw,58px); font-weight: 600; line-height: 1.05; letter-spacing: -.03em; text-transform: none; }
+.awards-section .section-copy { margin: 12px 0 0; color: #b7c0b8; font-size: 15px; }
+
+@media (max-width: 800px) {
+
+  .home-disciplines .section-head-row, .awards-section .section-head-row { align-items: start; flex-direction: column; gap: 15px; }
+}
+@media (max-width: 700px) {
+  .section { padding: 58px 0; }
+  footer { overflow-x: clip; }
+
+  .home-hero { min-height: 650px; }
+  .home-hero-wall { inset: 0; }
+  .home-hero-content { padding: 200px 18px 48px; }
+  .home-hero-wall .drift-wall__plane { transform: translate(-50%, -50%) scale(1.08) !important; }
+  .home-hero-wall .drift-wall__col { transform: none !important; }
+  .home-hero h1 { width: min(62vw, 270px); }
+  .home-hero-intro { max-width: 26ch; line-height: 1.4; }
+  .home-hero-description { margin-top: 20px; }
+  .home-disciplines { padding-top: 62px; }
+
+  .awards-section h2 { font-size: 38px; }
+
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-hero-wall .drift-wall__plane, .home-hero-wall .drift-wall__track, .home-hero-wall .drift-wall__col { transform: none !important; }
+
+}
+
+/* Blog index: the hero already spaces the title; cards follow closely. */
+.blog-index{padding-top:0}
+.blog-index .blog-grid{margin-top:28px}

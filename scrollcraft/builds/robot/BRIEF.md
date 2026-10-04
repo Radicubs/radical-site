@@ -8,10 +8,10 @@ The complete 2026 robot occupies the opening viewport in its calibrated field po
 
 ## Asset decision
 
-- Authoritative geometry: `2026-robot-hierarchical.glb` from Strapi.
+- Authoritative geometry: `2026-robot-hierarchical.glb`.
 - Same-origin runtime URL: `/api/robot-assets/model`.
 - Local fallback: `/public/robot/models/2026-robot-hierarchical.glb` (6.7 MB).
-- Background plate: `Robot Background.png` from Strapi through `/api/robot-assets/background`.
+- Background plate: `Robot Background.png`.
 - Rendering mode: true 3D over the unchanged supplied background plate. The GLB retains independently transformable subsystem parents, so 2D compositing is not needed.
 - No geometry, mechanisms, electronics, or dimensions are invented.
 

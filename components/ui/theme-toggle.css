@@ -1,0 +1,113 @@
+/* Light/dark switch: rimmed pill track, glowing grainy blue thumb that stretches as it travels. */
+.tt {
+  --tt-w: 104px;
+  --tt-h: 46px;
+  --tt-pad: 5px;
+  --tt-thumb-w: 56px;
+  --tt-track: #161b27;
+  --tt-rim: #2a3245;
+  --tt-idle: #5d6a93;
+  --tt-glow: rgba(56, 110, 255, .55);
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--tt-w);
+  height: var(--tt-h);
+  padding: 0;
+  border: 3px solid var(--tt-rim);
+  border-radius: 999px;
+  background: var(--tt-track);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .03), 0 6px 18px rgba(0, 0, 0, .35);
+  cursor: pointer;
+  transition: background .4s ease, border-color .4s ease, box-shadow .4s ease;
+}
+html[data-theme="light"] .tt {
+  --tt-track: #dbe4fb;
+  --tt-rim: #f2f5fe;
+  --tt-idle: #5d6a93;
+  --tt-glow: rgba(56, 110, 255, .45);
+  box-shadow: inset 0 2px 6px rgba(60, 80, 140, .18), 0 6px 18px rgba(70, 95, 170, .18);
+}
+
+.tt-slot {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  /* Exactly the free space beside the thumb, so the idle icon sits centred in it. */
+  width: calc(var(--tt-w) - 6px - var(--tt-thumb-w) - var(--tt-pad) + 3px);
+  height: calc(var(--tt-h) - 6px);
+  color: var(--tt-idle);
+  transform: translateY(-50%);
+}
+.tt-slot--sun { left: 0; }
+.tt-slot--moon { right: 0; }
+
+.tt-icon { display: block; width: 17px; height: 17px; overflow: visible; }
+.tt-icon circle,
+.tt-icon path { fill: currentColor; }
+.tt-icon line { stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+/* Thumb: sits right (moon) in dark mode, left (sun) in light mode. */
+.tt-thumb {
+  position: absolute;
+  top: calc(var(--tt-pad) - 3px);
+  bottom: calc(var(--tt-pad) - 3px);
+  left: calc(100% - var(--tt-thumb-w) - var(--tt-pad) + 3px);
+  width: var(--tt-thumb-w);
+  border-radius: 999px;
+  overflow: hidden;
+  background:
+    radial-gradient(90% 70% at 50% 108%, #6fb4ff 0%, rgba(80, 150, 255, .55) 35%, transparent 70%),
+    radial-gradient(80% 90% at 50% 20%, #1030c8 0%, transparent 80%),
+    linear-gradient(180deg, #0f2fd0 0%, #1d4cf0 55%, #3a7dff 100%);
+  box-shadow: 0 0 16px var(--tt-glow), 0 0 4px rgba(90, 150, 255, .6), inset 0 1px 0 rgba(255, 255, 255, .22), inset 0 -4px 8px rgba(140, 200, 255, .35);
+  transform-origin: center;
+  transition: left .5s cubic-bezier(.7, 0, .2, 1), box-shadow .4s ease;
+}
+html[data-theme="light"] .tt-thumb { left: calc(var(--tt-pad) - 3px); }
+/* Fine grain over the thumb. */
+.tt-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='64' height='64' filter='url(%23g)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: .5;
+  pointer-events: none;
+}
+.tt--switching .tt-thumb { animation: tt-stretch .5s cubic-bezier(.7, 0, .2, 1); }
+
+.tt-thumb-icon {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: #f4f8ff;
+  filter: drop-shadow(0 0 4px rgba(200, 225, 255, .9));
+  transition: opacity .25s ease, transform .45s cubic-bezier(.7, 0, .2, 1);
+}
+.tt-thumb-icon--sun { opacity: 0; transform: rotate(-90deg) scale(.6); }
+html[data-theme="light"] .tt-thumb-icon--sun { opacity: 1; transform: none; }
+html[data-theme="light"] .tt-thumb-icon--moon { opacity: 0; transform: rotate(90deg) scale(.6); }
+
+.tt:hover .tt-thumb { box-shadow: 0 0 22px var(--tt-glow), 0 0 5px rgba(90, 150, 255, .7), inset 0 1px 0 rgba(255, 255, 255, .22), inset 0 -4px 8px rgba(140, 200, 255, .35); }
+.tt:focus-visible { outline: 2px solid #6f9bff; outline-offset: 3px; }
+
+@keyframes tt-stretch {
+  0% { transform: scaleX(1); }
+  45% { transform: scaleX(1.4) scaleY(.9); }
+  100% { transform: scaleX(1); }
+}
+
+/* Theme reveal: the new snapshot is clipped open from the toggle (see ThemeToggle). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt, .tt-thumb, .tt-thumb-icon { transition: none; }
+  .tt--switching .tt-thumb { animation: none; }
+}

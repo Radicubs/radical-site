@@ -1,0 +1,10 @@
+/* Get involved page: a centered intro above the onboarding card. */
+.ct-hero { padding-top: 70px; padding-bottom: 110px; }
+.ct-hero > div:first-child { max-width: 680px; margin: 0 auto 36px; text-align: center; }
+.ct-hero h1 { margin: 0; max-width: none; }
+.ct-hero .section-copy { margin: 14px auto 0; }
+
+@media (max-width: 760px) {
+  .ct-hero { padding-top: 44px; padding-bottom: 72px; }
+  .ct-hero > div:first-child { margin-bottom: 24px; }
+}

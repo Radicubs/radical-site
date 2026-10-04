@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/intent-link";
 import { MathUtils } from "three";
 import type { Group, Mesh, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -338,7 +338,7 @@ export function RobotCalibrationStudio({ backgroundUrl, modelUrl }: { background
     hasAutoloadedRef.current = true;
     void (async () => {
       try {
-        setStatus("Retrieving 2026-robot-hierarchical.glb from Strapi.");
+        setStatus("Retrieving 2026-robot-hierarchical.glb.");
         const response = await fetch(modelUrl);
         if (!response.ok) throw new Error(`CMS returned ${response.status}`);
         const blob = await response.blob();

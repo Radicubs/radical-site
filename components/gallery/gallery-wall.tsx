@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import DriftWall, { type DriftWallItem } from "@/components/DriftWall";
 import "./gallery-wall.css";
 

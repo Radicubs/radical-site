@@ -1,0 +1,48 @@
+.gallery-archive-page { min-height: 100vh; }
+.gallery-archive-intro { padding-top: 76px; padding-bottom: 36px; }
+.gallery-archive-intro h1 { margin: 0; max-width: 22ch; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: clamp(34px, 4.1vw, 54px); font-weight: 600; line-height: 1.07; letter-spacing: -.01em; text-transform: uppercase; }
+.gallery-archive { padding-bottom: 80px; }
+/* Kept mounted (tiles hold their layout for the return trip) but out of the flow while the game runs. */
+.gallery-archive--stowed { height: 0; padding: 0; overflow: hidden; visibility: hidden; }
+.gallery-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,.12); }
+.gallery-toolbar p { margin: 0; font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: #8f9891; }
+html[data-theme="light"] .gallery-toolbar { border-color: var(--line); }
+.gallery-play { display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 16px; border: 1px solid rgba(255,255,255,.18); border-radius: 8px; background: transparent; color: var(--text); font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; transition: border-color .2s ease, color .2s ease; }
+.gallery-play svg { width: 18px; height: 12px; fill: #66ff55; transition: transform .25s steps(2); }
+.gallery-play:hover { border-color: rgba(102,255,85,.5); color: #66ff55; }
+.gallery-play:hover svg { transform: rotate(90deg); }
+.gallery-play:focus-visible { outline: 2px solid #66ff55; outline-offset: 3px; }
+html[data-theme="light"] .gallery-play { border-color: var(--line); }
+html[data-theme="light"] .gallery-play:hover { border-color: var(--accent-ink); color: var(--accent-ink); }
+html[data-theme="light"] .gallery-play svg { fill: var(--accent-ink); }
+.gallery-tetris { position: relative; width: 100%; }
+.gallery-block { position: absolute; margin: 0; border-radius: 8px; overflow: hidden; }
+.gallery-year-block { display: flex; flex-direction: column; justify-content: space-between; padding: 16px 18px; background: #66ff55; color: #081009; }
+.gallery-year-block h2 { margin: 0; font-family: "Barlow Condensed", sans-serif; font-size: clamp(56px, 6vw, 96px); font-weight: 600; line-height: .85; letter-spacing: -.01em; }
+.gallery-year-block p, .gallery-event-block p { margin: 0; font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; }
+.gallery-event-block { display: flex; flex-direction: column; justify-content: space-between; gap: 10px; padding: 14px 16px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.035); }
+.gallery-event-block h3 { margin: 0; font-size: clamp(15px, 1.35vw, 19px); font-weight: 600; line-height: 1.2; letter-spacing: -.01em; color: var(--text); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.gallery-event-block p { color: #66ff55; }
+html[data-theme="light"] .gallery-year-block { background: var(--accent-ink); color: #fff; }
+html[data-theme="light"] .gallery-event-block { border-color: var(--line); background: var(--panel); }
+html[data-theme="light"] .gallery-event-block p { color: var(--accent-ink); }
+.gallery-photo { display: block; padding: 0; border: 0; background: #1b1d1e; cursor: zoom-in; transition: box-shadow .3s ease; }
+.gallery-photo img { width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 8px; transition: scale .4s cubic-bezier(.2,.7,.2,1), filter .3s ease; }
+.gallery-photo:hover { z-index: 1; box-shadow: 0 18px 50px rgba(0,0,0,.45); }
+.gallery-photo:hover img { scale: 1.05; filter: brightness(1.08); }
+.gallery-photo:focus-visible { outline: 3px solid #66ff55; outline-offset: 3px; }
+.gallery-archive-lightbox { position: fixed; z-index: 1000; inset: 0; }
+.gallery-archive-lightbox .gallery-lightbox-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; cursor: zoom-out; }
+.gallery-archive-lightbox .gallery-lightbox-stage { position: absolute; z-index: 2; inset: 64px 84px; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.gallery-archive-lightbox .gallery-lightbox-stage img { max-width: 100%; max-height: 100%; width: auto; height: auto; min-width: 0; min-height: 0; object-fit: contain; border-radius: 12px; box-shadow: 0 40px 120px rgba(0,0,0,.5); pointer-events: auto; }
+.gallery-archive-chrome { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.gallery-archive-chrome > * { pointer-events: auto; }
+.gallery-archive-lightbox .gallery-lightbox-close { position: absolute; z-index: 4; top: 18px; right: 20px; width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.16); border-radius: 7px; background: rgba(7,10,8,.76); color: #f2f7f3; cursor: pointer; transition: border-color .2s ease, color .2s ease; }
+.gallery-archive-lightbox .gallery-lightbox-close:hover, .gallery-archive-nav:hover { border-color: rgba(102,255,85,.44); color: #66ff55; }
+.gallery-archive-nav { position: absolute; top: 50%; translate: 0 -50%; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid rgba(255,255,255,.25); border-radius: 8px; background: #17191a; color: #fff; cursor: pointer; }
+.gallery-archive-prev { left: 20px; }
+.gallery-archive-next { right: 20px; }
+.gallery-archive-count { position: absolute; z-index: 3; bottom: 18px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 13px; }
+.gallery-empty { color: #b9c0bc; }
+@media (max-width: 600px) { .gallery-archive-intro { padding-top: 46px; } .gallery-year-block { padding: 12px 14px; } .gallery-event-block { padding: 12px; } .gallery-archive-lightbox .gallery-lightbox-stage { inset: 58px 40px 60px; } .gallery-archive-nav { width: 30px; height: 40px; } .gallery-archive-prev { left: 5px; } .gallery-archive-next { right: 5px; } }
+@media (prefers-reduced-motion: reduce) { .gallery-photo, .gallery-photo img { transition: none; } }

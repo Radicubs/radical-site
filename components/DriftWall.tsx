@@ -6,6 +6,8 @@ import "./DriftWall.css";
 export interface DriftWallItem {
   image: string;
   previewImage?: string;
+  /** Full responsive candidate list; wins over previewImage when present. */
+  srcSet?: string;
   title?: string;
   href?: string;
 }
@@ -13,6 +15,7 @@ export interface DriftWallItem {
 export interface DriftWallProps {
   items?: DriftWallItem[];
   onItemClick?: (item: DriftWallItem, index: number) => void;
+  decorative?: boolean;
   columns?: number;
   tileWidth?: number;
   tileHeight?: number;
@@ -23,6 +26,10 @@ export interface DriftWallProps {
   roll?: number;
   perspective?: number;
   depth?: number;
+  /** Uniform scale of the whole wall plane. */
+  scale?: number;
+  /** Radius (px) of the cylinder the columns wrap around; 0 keeps the wall flat. */
+  curve?: number;
   speed?: number;
   direction?: 'up' | 'down';
   variance?: number;
@@ -62,6 +69,7 @@ const columnFactor = (index: number, variance: number): number => {
 const DriftWall = ({
   items = DEFAULT_ITEMS,
   onItemClick,
+  decorative = false,
   columns = 5,
   tileWidth = 200,
   tileHeight = 132,
@@ -72,6 +80,8 @@ const DriftWall = ({
   roll = 0,
   perspective = 1200,
   depth = 120,
+  scale = 1.18,
+  curve = 0,
   speed = 42,
   direction = 'up',
   variance = 0.45,
@@ -126,6 +136,21 @@ const DriftWall = ({
     });
   }, [columnItems, tileHeight, gap, containerHeight]);
 
+  // Curved layout: `curve` is the radius (px) of a cylinder wrapping around the viewer. Columns sit
+  // at equal arc spacing, the edges come forward and each column turns to face the axis, so gaps stay
+  // proportional to their tiles while the wall visibly bends toward the center.
+  const columnTransforms = useMemo<(string | undefined)[]>(() => {
+    if (!curve) return Array.from({ length: columns }, () => undefined);
+    const mid = (columns - 1) / 2;
+    const colW = tileWidth + gap;
+    return Array.from({ length: columns }, (_, c) => {
+      const phi = ((c - mid) * colW) / curve;
+      const shift = curve * Math.sin(phi) - (c - mid) * colW;
+      const z = curve * (1 - Math.cos(phi));
+      return `translateX(${shift.toFixed(2)}px) translateZ(${z.toFixed(2)}px) rotateY(${((-phi * 180) / Math.PI).toFixed(2)}deg)`;
+    });
+  }, [curve, columns, tileWidth, gap]);
+
   useLayoutEffect(() => {
     if (!containerRef.current) return;
     const ro = new ResizeObserver(([entry]) => {
@@ -153,11 +178,11 @@ const DriftWall = ({
       const plane = planeRef.current;
       if (!plane) return;
       plane.style.transform =
-        `translate(-50%, -50%) scale(1.18) ` +
+        `translate(-50%, -50%) scale(${scale}) ` +
         `rotateX(${tilt + py}deg) rotateY(${turn + px}deg) rotateZ(${roll}deg) ` +
         `translateZ(${-depth}px)`;
     },
-    [tilt, turn, roll, depth]
+    [tilt, turn, roll, depth, scale]
   );
 
   useEffect(() => {
@@ -272,10 +297,10 @@ const DriftWall = ({
       <span className="drift-wall__inner">
         <img
           src={item.previewImage ?? item.image}
-          srcSet={item.previewImage ? `${item.previewImage} 245w, ${item.image} 750w` : undefined}
+          srcSet={item.srcSet ?? (item.previewImage ? `${item.previewImage} 245w, ${item.image} 750w` : undefined)}
           sizes={`${tileWidth}px`}
           alt={item.title ?? ''}
-          loading="eager"
+          loading={decorative ? "eager" : "lazy"}
           decoding="async"
           draggable={false}
         />
@@ -286,8 +311,8 @@ const DriftWall = ({
       className: `drift-wall__tile${activeId === id ? ' is-active' : ''}`,
       'data-tile-id': id,
       'data-col': colIndex,
-      onFocus: () => activate(id, colIndex),
-      onBlur: release,
+      onFocus: decorative ? undefined : () => activate(id, colIndex),
+      onBlur: decorative ? undefined : release,
       ...(onItemClick && !item.href
         ? { onClick: () => onItemClick(item, items.indexOf(item)) }
         : {})
@@ -300,13 +325,13 @@ const DriftWall = ({
       );
     }
     return (
-      <div key={id} tabIndex={0} role="button" aria-label={item.title ?? 'tile'} {...commonProps}>
+      <div key={id} tabIndex={decorative ? undefined : 0} role={decorative ? undefined : "button"} aria-label={decorative ? undefined : item.title ?? 'tile'} {...commonProps}>
         {inner}
       </div>
     );
   };
 
-  const rootClass = ['drift-wall', reduced ? 'drift-wall--reduced' : '', className].filter(Boolean).join(' ');
+  const rootClass = ['drift-wall', reduced ? 'drift-wall--reduced' : '', activeId ? 'drift-wall--focus' : '', className].filter(Boolean).join(' ');
 
   return (
     <div
@@ -318,15 +343,20 @@ const DriftWall = ({
         wallHoveredRef.current = true;
       }}
       onPointerLeave={handlePointerLeaveWall}
-      role="group"
-      aria-label="Drifting wall of tiles"
+      role={decorative ? undefined : "group"}
+      aria-label={decorative ? undefined : "Drifting wall of tiles"}
+      aria-hidden={decorative ? true : undefined}
     >
       <div ref={planeRef} className="drift-wall__plane">
         {columnItems.map((col, c) => {
           const meta = columnMeta[c];
           const copies = Array.from({ length: meta.copies });
           return (
-            <div className="drift-wall__col" key={`col-${c}`}>
+            <div
+              className="drift-wall__col"
+              key={`col-${c}`}
+              style={columnTransforms[c] ? { transform: columnTransforms[c] } : undefined}
+            >
               <div
                 className="drift-wall__track"
                 ref={el => {

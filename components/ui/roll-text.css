@@ -1,0 +1,21 @@
+/* Slot-style letter roll; trigger by hovering/focusing the nearest link or button. */
+.roll-text { display: inline-flex; }
+.roll-text-char {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  height: 1.2em;
+  line-height: 1.2em;
+  overflow: hidden;
+}
+.roll-text-char > span {
+  display: block;
+  transition: transform .42s cubic-bezier(.7, 0, .2, 1);
+  transition-delay: calc(var(--i) * 28ms);
+}
+.roll-text-char > span:last-child { color: var(--roll-accent, #8cff6e); }
+:is(a, button):is(:hover, :focus-visible) > .roll-text .roll-text-char > span { transform: translateY(-100%); }
+
+@media (prefers-reduced-motion: reduce) {
+  .roll-text-char > span { transition: none; }
+}

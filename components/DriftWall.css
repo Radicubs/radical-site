@@ -34,6 +34,8 @@
   cursor: pointer;
   transform-origin: 50% 50%;
   will-change: transform;
+  /* The flat plane sits in front of columns curved back in Z and would swallow their hits. */
+  pointer-events: none;
 }
 
 .drift-wall__col {
@@ -57,6 +59,7 @@
   flex: 0 0 auto;
   outline: none;
   transform-style: preserve-3d;
+  pointer-events: auto;
 }
 
 .drift-wall__tile:before {
@@ -109,6 +112,10 @@
   opacity: 1;
   transform: translateZ(var(--dw-lift));
   box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.7);
+}
+
+.drift-wall--focus .drift-wall__tile:not(.is-active) .drift-wall__inner {
+  opacity: calc(var(--dw-dim) * 0.72);
 }
 
 .drift-wall__tile.is-active img,

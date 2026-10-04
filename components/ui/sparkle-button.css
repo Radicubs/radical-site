@@ -1,0 +1,125 @@
+/* Sparkle button: green glowing pill, twinkling icon, orbiting edge light, drifting specks. */
+@property --sparkle-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.sparkle-btn {
+  --sb-top: #37d321;
+  --sb-bottom: #179408;
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 26px 0 20px;
+  border-radius: 999px;
+  background:
+    radial-gradient(70% 90% at 50% 125%, rgba(190, 255, 170, .75), transparent 70%),
+    linear-gradient(180deg, var(--sb-top), var(--sb-bottom));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35);
+  color: #fff;
+  font-family: var(--font-geist-sans), "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -.005em;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .18);
+  white-space: nowrap;
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1), box-shadow .3s ease;
+}
+.sparkle-btn:hover,
+.sparkle-btn:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4);
+}
+.sparkle-btn:active { transform: translateY(0) scale(.98); }
+.sparkle-btn:focus-visible { outline: 2px solid #8cff6e; outline-offset: 5px; }
+
+/* A short streak of light that runs around the border. */
+.sparkle-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--sparkle-angle), transparent 0 72%, rgba(255, 255, 255, .15) 80%, #fff 88%, transparent 92%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask-composite: exclude;
+  opacity: 0;
+  transition: opacity .35s ease;
+  pointer-events: none;
+}
+.sparkle-btn:hover::before,
+.sparkle-btn:focus-visible::before { opacity: 1; animation: sparkle-orbit 2.4s linear infinite; }
+
+@keyframes sparkle-orbit { to { --sparkle-angle: 360deg; } }
+
+.sparkle-btn-label { position: relative; z-index: 2; }
+
+.sparkle-btn-icon {
+  position: relative;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  overflow: visible;
+  fill: #fff;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, .5));
+}
+.sparkle-btn-icon path { transform-box: fill-box; transform-origin: center; transition: transform .4s cubic-bezier(.3, 1.4, .5, 1), opacity .3s ease; }
+.sparkle-big { transform: translate(3px, -1px) scale(.72); }
+.sparkle-small { opacity: .7; }
+.sparkle-small-a { transform: translate(-7px, -7px) scale(.3); }
+.sparkle-small-b { transform: translate(-7px, 7px) scale(.3); }
+.sparkle-btn:hover .sparkle-big { animation: sparkle-big 1.6s ease-in-out infinite; }
+.sparkle-btn:hover .sparkle-small-a { animation: sparkle-small-a 1.6s ease-in-out infinite; }
+.sparkle-btn:hover .sparkle-small-b { animation: sparkle-small-b 1.6s ease-in-out .4s infinite; }
+
+@keyframes sparkle-big {
+  0%, 100% { transform: translate(3px, -1px) scale(.72); }
+  50% { transform: translate(3px, -1px) scale(.5) rotate(45deg); }
+}
+@keyframes sparkle-small-a {
+  0%, 100% { transform: translate(-7px, -7px) scale(.3); opacity: .7; }
+  50% { transform: translate(-7px, -7px) scale(.46); opacity: 1; }
+}
+@keyframes sparkle-small-b {
+  0%, 100% { transform: translate(-7px, 7px) scale(.3); opacity: .7; }
+  50% { transform: translate(-7px, 7px) scale(.46); opacity: 1; }
+}
+
+/* Specks that lift off the button while it is hovered. */
+.sparkle-btn-particles { position: absolute; inset: -14px -10px; z-index: 0; pointer-events: none; }
+.sparkle-btn-particles i {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #d4ffc9;
+  box-shadow: 0 0 6px #8cff6e;
+  opacity: 0;
+}
+.sparkle-btn:hover .sparkle-btn-particles i,
+.sparkle-btn:focus-visible .sparkle-btn-particles i { animation: sparkle-speck 2.2s ease-out var(--d) infinite; }
+
+@keyframes sparkle-speck {
+  0% { opacity: 0; transform: translateY(0) scale(.6); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-16px) scale(1.2); }
+}
+
+html[data-theme="light"] .sparkle-btn { --sb-top: #2cb81a; --sb-bottom: #137a06; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sparkle-btn,
+  .sparkle-btn-icon path { transition: none; }
+  .sparkle-btn:hover::before,
+  .sparkle-btn:hover .sparkle-btn-icon path,
+  .sparkle-btn:hover .sparkle-btn-particles i { animation: none; }
+}

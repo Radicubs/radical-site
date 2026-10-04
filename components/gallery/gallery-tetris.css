@@ -1,0 +1,60 @@
+/* The game lives in the gallery section itself: same width, same tiles, same toolbar. */
+.gt { outline: none; }
+.gt-board { position: relative; }
+.gt-board canvas { display: block; }
+.gt-announcement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.gt-progress-hint { margin: 14px 0 0; font: 400 12px/1.6 "IBM Plex Sans", sans-serif; color: var(--muted, #8f9891); }
+.gt-level-up { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; display: grid; place-items: center; background: rgba(0, 5, 1, .9); animation: gt-celebrate 1.6s ease both; }
+.gt-level-title { width: min(76%, 620px); display: grid; justify-items: center; gap: clamp(20px, 4vw, 34px); }
+.gt-arcade-text { display: block; width: 100%; overflow: visible; filter: drop-shadow(0 0 5px rgba(76, 255, 0, .5)); }
+.gt-arcade-word { animation: gt-arcade-reveal .4s steps(7, end) both; }
+.gt-arcade-word--up { animation-delay: .14s; }
+.gt-level-title small { color: #c7ffd6; font: 500 clamp(10px, 1.4vw, 13px)/1.5 "IBM Plex Mono", monospace; letter-spacing: .08em; text-transform: uppercase; text-align: center; animation: gt-in .2s .4s ease both; }
+@keyframes gt-celebrate { 0% { opacity: 0; } 8%, 85% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes gt-arcade-reveal { from { clip-path: inset(0 100% 0 0); opacity: .4; } to { clip-path: inset(0 -5% -20% 0); opacity: 1; } }
+.gt-overlay { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 14px; border-radius: 8px; background: color-mix(in srgb, var(--bg, #060707) 72%, transparent); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); text-align: center; animation: gt-in .25s ease both; }
+.gt-kicker { margin: 0; font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: #66ff55; }
+.gt-final { margin: 0; font-family: "Barlow Condensed", sans-serif; font-size: 72px; font-weight: 600; line-height: 1; color: var(--text); }
+.gt-btn { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: #66ff55; color: #081009; font: 600 15px/1 "IBM Plex Sans", sans-serif; cursor: pointer; }
+.gt-btn:hover { background: #7cff6d; }
+.gt-btn:focus-visible, .gt-touch button:focus-visible { outline: 2px solid #66ff55; outline-offset: 3px; }
+.gt-keys { margin: 16px 0 80px; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #8f9891; }
+
+/* Toolbar: score where the photo count was. */
+.gt-toolbar { animation: gt-in .35s ease both; }
+.gt-stats { display: flex; align-items: center; gap: 28px; margin: 0; }
+.gt-stats div { display: flex; align-items: baseline; gap: 10px; }
+.gt-stats dt { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: #8f9891; }
+.gt-stats dd { margin: 0; font-family: "Barlow Condensed", sans-serif; font-size: 26px; font-weight: 600; line-height: 1; color: var(--text); font-variant-numeric: tabular-nums; }
+.gt-next-wrap { align-items: center !important; }
+.gt-next-wrap canvas { display: block; }
+.gt-actions { display: flex; gap: 10px; }
+.gallery-play--quiet { border-color: transparent; }
+.gallery-play:disabled { opacity: .4; cursor: default; }
+
+.gt-touch { display: none; justify-content: center; gap: 10px; margin: 14px 0 60px; }
+.gt-touch button { width: 58px; height: 52px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--text) 5%, transparent); color: var(--text); touch-action: manipulation; cursor: pointer; }
+.gt-touch button:active { background: rgba(102,255,85,.2); border-color: #66ff55; }
+
+html[data-theme="light"] .gt-kicker { color: var(--accent-ink); }
+html[data-theme="light"] :is(.gt-stats dt, .gt-keys) { color: var(--muted); }
+html[data-theme="light"] .gt-overlay { background: rgba(255,255,255,.7); }
+
+@keyframes gt-in { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 760px) {
+  .gt-toolbar { flex-wrap: wrap; row-gap: 12px; }
+  .gt-stats { gap: 16px; flex-wrap: wrap; }
+  .gt-stats div { flex-direction: column; gap: 4px; }
+  .gt-stats dd { font-size: 20px; }
+  .gt-actions { width: 100%; }
+  .gt-actions .gallery-play:last-child { margin-left: auto; }
+  .gt-keys { display: none; }
+  .gt-touch { display: flex; }
+}
+@media (hover: none) { .gt-keys { display: none; } .gt-touch { display: flex; } }
+@media (prefers-reduced-motion: reduce) {
+  .gt-toolbar, .gt-overlay { animation: none; }
+  .gt-level-up { animation: gt-in .15s ease both; }
+  .gt-arcade-word, .gt-level-title small { animation: none; }
+}

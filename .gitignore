@@ -4,3 +4,7 @@ node_modules
 .env.local
 .env.*.local
 !.env.example
+
+# Payload: local uploads when Supabase Storage isn't configured
+/media
+.next-build

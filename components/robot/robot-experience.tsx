@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/intent-link";
 import { robotSystems } from "@/data/robot";
 import { labelArt } from "./label-art";
 import { CmsRobotHero } from "./cms-robot-hero";

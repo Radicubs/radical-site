@@ -1,0 +1,11 @@
+/* Electric arcs traced over the hero wordmark. */
+.hero-electric { position: relative; display: block; }
+.hero-electric img { display: block; width: 100%; height: auto; }
+.hero-electric-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% / var(--electric-scale));
+  height: calc(100% / var(--electric-scale));
+  transform: translate(-50%, -50%);
+}

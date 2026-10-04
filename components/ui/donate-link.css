@@ -1,0 +1,65 @@
+/* Donate press: a quick squash, the word's letters drop away, a heart pops in and beats. */
+.donate-anim {
+  --donate-heart: #66ff55;
+  display: inline-grid;
+  place-items: center;
+  overflow: hidden;
+  padding-block: 2px;
+  margin-block: -2px;
+  vertical-align: middle;
+}
+html[data-theme="light"] .donate-anim { --donate-heart: #1f7f0d; }
+.donate-anim > * { grid-area: 1 / 1; }
+
+.donate-word { display: inline-flex; }
+/* RollText only rolls as a direct child of its link; keep its hover roll working in here. */
+.donate-link:is(:hover, :focus-visible) .donate-word > .roll-text .roll-text-char > span { transform: translateY(-100%); }
+.donate-char,
+.donate-word > * {
+  display: inline-block;
+  transition: transform .45s cubic-bezier(.5, 0, .2, 1), opacity .3s ease;
+  transition-delay: calc(var(--i, 0) * 28ms);
+}
+
+.donate-heart {
+  width: 1.05em;
+  height: 1.05em;
+  fill: var(--donate-heart);
+  opacity: 0;
+  transform: translateY(110%) scale(.4);
+  transition: transform .45s cubic-bezier(.3, 1.5, .5, 1), opacity .25s ease;
+}
+
+.donate-link[data-donate="thanks"] { animation: donate-press .45s cubic-bezier(.3, 1.4, .5, 1); }
+.donate-link[data-donate="thanks"] .donate-char,
+.donate-link[data-donate="thanks"] .donate-word > * { transform: translateY(-120%); opacity: 0; }
+.donate-link[data-donate="thanks"] .donate-heart {
+  opacity: 1;
+  transform: none;
+  transition-delay: .18s;
+  animation: donate-beat 1s ease-in-out .55s 2;
+}
+/* On the way back the heart leaves first and the letters follow it in, left to right. */
+.donate-link[data-donate="idle"] .donate-heart { transform: translateY(-110%) scale(.6); transition-duration: .3s; }
+.donate-link[data-donate="idle"] .donate-char { transition-delay: calc(.12s + var(--i, 0) * 28ms); }
+
+@keyframes donate-press {
+  0% { transform: scale(1); }
+  30% { transform: scale(.92); }
+  70% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+@keyframes donate-beat {
+  0%, 40%, 100% { transform: scale(1); }
+  15% { transform: scale(1.28); }
+  28% { transform: scale(.95); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .donate-char, .donate-word > *, .donate-heart { transition: opacity .2s ease; transition-delay: 0s !important; }
+  .donate-link[data-donate="thanks"],
+  .donate-link[data-donate="thanks"] .donate-heart { animation: none; }
+  .donate-link[data-donate="thanks"] .donate-char,
+  .donate-link[data-donate="thanks"] .donate-word > *,
+  .donate-link[data-donate] .donate-heart { transform: none; }
+}

@@ -1,0 +1,100 @@
+/* Paper plane submit: the face folds into a plane that flies off, then "Sent" checks in. */
+.plane-btn {
+  --pp-paper: #f4f7f2;
+  --pp-fold: #c3d0bf;
+  --pp-ink: #0b1a0c;
+  --pp-status: #f4f7f2;
+  --pp-accent: #66ff55;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 148px;
+  height: 50px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pp-ink);
+  font: 600 15px/1 var(--font-geist-sans), "IBM Plex Sans", system-ui, sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.plane-btn > * { grid-area: 1 / 1; }
+.plane-btn:focus-visible { outline: none; }
+.plane-btn:focus-visible .plane-paper { outline: 2px solid var(--pp-accent); outline-offset: 3px; }
+
+.plane-paper {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  background: var(--pp-paper);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .06);
+  clip-path: polygon(0 0, 50% 0, 100% 0, 100% 100%, 0 100%);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.plane-btn[data-state="idle"]:hover .plane-paper { transform: translateY(-2px); box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .06); }
+.plane-btn[data-state="idle"]:active .plane-paper { transform: translateY(0) scale(.97); }
+
+.plane-svg { width: 48px; height: 32px; overflow: visible; opacity: 0; pointer-events: none; }
+.plane-wing { fill: var(--pp-paper); }
+.plane-fold { fill: var(--pp-fold); }
+.plane-trail { fill: none; stroke: var(--pp-paper); stroke-width: 1.5; stroke-linecap: round; stroke-dasharray: 48; stroke-dashoffset: 48; opacity: 0; }
+
+.plane-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pp-status);
+  opacity: 0;
+  pointer-events: none;
+}
+.plane-status-done svg { width: 16px; height: 16px; fill: none; stroke: var(--pp-accent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 16; stroke-dashoffset: 16; }
+
+/* Sending: fold the face into a triangle, pinch it, hand over to the plane. */
+.plane-btn[data-state="sending"] { cursor: progress; }
+.plane-btn[data-state="sending"] .plane-label { animation: plane-label-out .14s ease forwards; }
+.plane-btn[data-state="sending"] .plane-paper { animation: plane-fold .46s cubic-bezier(.6, 0, .4, 1) forwards; }
+.plane-btn[data-state="sending"] .plane-svg { animation: plane-fly .8s cubic-bezier(.55, 0, .3, 1) .42s forwards; }
+.plane-btn[data-state="sending"] .plane-trail { animation: plane-trail .5s ease-out .78s forwards; }
+.plane-btn[data-state="sending"] .plane-trail-b { animation-delay: .84s; }
+.plane-btn[data-state="sending"] .plane-status-sending { animation: plane-status-in .3s ease 1.15s forwards; }
+
+@keyframes plane-label-out { to { opacity: 0; transform: translateY(4px); } }
+@keyframes plane-fold {
+  0% { clip-path: polygon(0 0, 50% 0, 100% 0, 100% 100%, 0 100%); border-radius: 12px; }
+  55% { clip-path: polygon(50% 0, 50% 0, 50% 0, 100% 100%, 0 100%); border-radius: 0; transform: scale(1); opacity: 1; }
+  90% { clip-path: polygon(50% 0, 50% 0, 50% 0, 100% 100%, 0 100%); border-radius: 0; transform: scale(.36, .7); opacity: 1; }
+  100% { clip-path: polygon(50% 0, 50% 0, 50% 0, 100% 100%, 0 100%); border-radius: 0; transform: scale(.32, .66); opacity: 0; box-shadow: none; }
+}
+@keyframes plane-fly {
+  0% { opacity: 1; transform: rotate(-35deg) scale(.7); }
+  30% { opacity: 1; transform: translate(-10px, 6px) rotate(-8deg) scale(.9); }
+  45% { opacity: 1; transform: translate(-12px, 7px) rotate(-12deg) scale(.9); }
+  100% { opacity: 0; transform: translate(150px, -70px) rotate(-22deg) scale(.45); }
+}
+@keyframes plane-trail {
+  0% { opacity: 0; stroke-dashoffset: 48; }
+  40% { opacity: .45; }
+  100% { opacity: 0; stroke-dashoffset: -48; }
+}
+@keyframes plane-status-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* Done: the face is gone and the check draws in beside "Sent". */
+.plane-btn[data-state="done"] { cursor: default; }
+.plane-btn[data-state="done"] .plane-paper { opacity: 0; }
+.plane-btn[data-state="done"] .plane-status-done { animation: plane-status-in .3s ease forwards; }
+.plane-btn[data-state="done"] .plane-status-done svg { animation: plane-check .35s ease .15s forwards; }
+@keyframes plane-check { to { stroke-dashoffset: 0; } }
+
+html[data-theme="light"] .plane-btn { --pp-paper: #1f7f0d; --pp-fold: #155a08; --pp-ink: #fff; --pp-status: #14210f; --pp-accent: #1f7f0d; }
+
+@media (prefers-reduced-motion: reduce) {
+  .plane-paper { transition: none; }
+  .plane-btn[data-state="sending"] .plane-paper,
+  .plane-btn[data-state="sending"] .plane-label,
+  .plane-btn[data-state="sending"] .plane-svg,
+  .plane-btn[data-state="sending"] .plane-trail { animation: none; }
+  .plane-btn[data-state="sending"] .plane-paper { opacity: 0; }
+  .plane-btn[data-state="sending"] .plane-status-sending { animation: none; opacity: 1; }
+}

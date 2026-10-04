@@ -1,0 +1,117 @@
+/* Outreach hero: the RadiCamp film fills the screen and stays pinned while the page content slides up over it.
+   It tucks under the sticky navbar (76px). */
+.outreach-hero {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  display: flex;
+  min-height: max(560px, 100svh);
+  margin-top: -76px;
+  overflow: hidden;
+  color: #fff;
+  isolation: isolate;
+}
+.outreach-hero-media { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: #0b100c; }
+/* The footage has black VHS borders baked in (~1.3% left, ~4% right, ~2.8% top, ~3.9% bottom of the frame).
+   Oversize the video box so `cover` pushes them off-screen at any aspect ratio. */
+.outreach-hero-video {
+  position: absolute;
+  top: -4.5%;
+  left: -2.5%;
+  display: block;
+  width: 108.5%;
+  max-width: none; /* beat the global video { max-width: 100% } */
+  height: 110%;
+  object-fit: cover;
+}
+/* Only shade the top (navbar legibility) and the bottom strip behind the caption. */
+.outreach-hero-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5, 8, 6, .45) 0%, rgba(5, 8, 6, 0) 22%, rgba(5, 8, 6, 0) 58%, rgba(5, 8, 6, .8) 100%);
+}
+
+.outreach-hero-bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  margin: auto auto 0;
+  padding-bottom: clamp(28px, 5vh, 48px);
+}
+.outreach-hero-caption { display: grid; gap: clamp(8px, 1.4vw, 16px); min-width: 0; }
+.outreach-hero .outreach-hero-caption h1 {
+  max-width: none;
+  margin: 0 0 0 -.04em;
+  color: #fff;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: clamp(54px, 11.5vw, 184px);
+  font-weight: 600;
+  line-height: .82;
+  letter-spacing: -.07em;
+  text-transform: uppercase;
+  text-shadow: 0 4px 40px rgba(0, 0, 0, .3);
+}
+.outreach-hero-caption p {
+  margin: 0;
+  color: rgba(255, 255, 255, .86);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: clamp(11px, 1vw, 13px);
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.outreach-hero-dot { display: inline-block; margin: 0 10px 1px 0; vertical-align: middle; width: 7px; height: 7px; background: #8cff6e; border-radius: 50%; box-shadow: 0 0 0 0 rgba(140, 255, 110, .6); animation: outreach-live 2s ease-out infinite; }
+.outreach-hero-sep { margin: 0 6px; color: #8cff6e; }
+@keyframes outreach-live { 70%, 100% { box-shadow: 0 0 0 8px rgba(140, 255, 110, 0); } }
+
+/* ---- Mute toggle: a bare icon; sound waves retract and an X draws in (and back). ---- */
+.outreach-hero-mute {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  padding: 6px;
+  margin: 0 -6px -6px 0;
+  color: #fff;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color .2s ease;
+}
+.outreach-hero-mute:hover { color: #8cff6e; }
+.outreach-hero-mute:focus-visible { outline: 2px solid #8cff6e; outline-offset: 2px; border-radius: 4px; }
+.outreach-hero-mute svg { overflow: visible; }
+.outreach-mute-wave,
+.outreach-mute-x {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  /* A 1-unit dash then a long gap; hiding offsets past 1 so round caps don't leave a dot. */
+  stroke-dasharray: 1 3;
+  transition: stroke-dashoffset .22s ease;
+}
+/* Unmuted: waves drawn, X hidden. Waves draw inner-to-outer after the X clears. */
+.outreach-mute-wave { stroke-dashoffset: 0; transition-delay: .18s; }
+.outreach-mute-wave--outer { transition-delay: .28s; }
+.outreach-mute-x { stroke-dashoffset: 1.05; transition-delay: .08s; }
+.outreach-mute-x--second { transition-delay: 0s; }
+/* Muted: waves retract outer-to-inner, then the X draws stroke by stroke. */
+.outreach-hero-mute[data-muted] .outreach-mute-wave { stroke-dashoffset: 1.05; transition-delay: .1s; }
+.outreach-hero-mute[data-muted] .outreach-mute-wave--outer { transition-delay: 0s; }
+.outreach-hero-mute[data-muted] .outreach-mute-x { stroke-dashoffset: 0; transition-delay: .22s; }
+.outreach-hero-mute[data-muted] .outreach-mute-x--second { transition-delay: .32s; }
+
+@media (max-width: 700px) {
+  .outreach-hero { min-height: max(520px, 88svh); }
+}
+@media (max-width: 480px) {
+  .outreach-hero-sub { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .outreach-hero { position: relative; }
+  .outreach-hero-mute, .outreach-mute-wave, .outreach-mute-x { transition: none; }
+  .outreach-hero-dot { animation: none; }
+}

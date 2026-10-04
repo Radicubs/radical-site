@@ -1,67 +1,41 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import LatticeLoader from "@/components/LatticeLoader";
-import { navigation, site } from "@/data/site";
+import { site } from "@/data/site";
 import "./site-loader.css";
 
 const SESSION_KEY = "radicubs-loaded";
 const MIN_DURATION_MS = 900;
-// Hard cap on the *visible* loading phase — waiting for all ~250 CMS images
-// to finish would take 7s+. Instead we cap the blocking wait short and let
-// the pool keep fetching the rest in the background after the loader hides
-// (its workers aren't aborted, they just stop being awaited), so by the time
-// someone actually clicks into another page most of it is already cached.
+// Hard cap on the visible loading phase so a slow image never holds the
+// boot screen; anything unfinished keeps loading behind the page.
 const MAX_WAIT_MS = 1300;
 const FADE_DELAY_MS = 400;
 const FADE_DURATION_MS = 350;
-const PER_IMAGE_TIMEOUT_MS = 6000;
-// The CMS's media host rate-limits bursts of simultaneous requests — a small
-// pool keeps this looking like normal browser traffic while still getting
-// enough images through the short blocking window.
-const CONCURRENCY = 12;
 
 type Phase = "active" | "exiting" | "hidden";
-type Manifest = { images: string[]; heavy: string[] };
 
-// An `Image()` with nothing else referencing it is fair game for the GC to
-// collect mid-request, which silently aborts the load — this pool runs long
-// after the component that kicked it off stops being awaited, so every
-// in-flight image needs a live reference kept somewhere for its duration.
-function preloadImage(url: string, keepAlive: Set<HTMLImageElement>): Promise<void> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    keepAlive.add(img);
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      keepAlive.delete(img);
-      resolve();
-    };
-    img.onload = finish;
-    img.onerror = finish;
-    img.src = url;
-    setTimeout(finish, PER_IMAGE_TIMEOUT_MS);
+// Waits only for images the current page has already put on screen. The
+// browser is fetching those anyway, so the loader costs no extra bandwidth —
+// it never downloads assets for pages the visitor may not open.
+function pendingVisibleImages(): HTMLImageElement[] {
+  const viewportHeight = window.innerHeight;
+  return Array.from(document.images).filter((img) => {
+    if (img.complete || img.closest(".site-loader")) return false;
+    const rect = img.getBoundingClientRect();
+    return rect.width > 0 && rect.bottom > 0 && rect.top < viewportHeight;
   });
 }
 
-async function preloadPool(urls: string[], concurrency: number, onSettle: () => void): Promise<void> {
-  const keepAlive = new Set<HTMLImageElement>();
-  let cursor = 0;
-  const worker = async () => {
-    while (cursor < urls.length) {
-      const url = urls[cursor++];
-      await preloadImage(url, keepAlive);
-      onSettle();
-    }
-  };
-  await Promise.all(Array.from({ length: Math.min(concurrency, urls.length) }, worker));
+function whenSettled(img: HTMLImageElement): Promise<void> {
+  return new Promise((resolve) => {
+    if (img.complete) return resolve();
+    img.addEventListener("load", () => resolve(), { once: true });
+    img.addEventListener("error", () => resolve(), { once: true });
+  });
 }
 
 export function SiteLoader() {
-  const router = useRouter();
   const [phase, setPhase] = useState<Phase>("active");
   const [status, setStatus] = useState<"working" | "done">("working");
   const [progress, setProgress] = useState({ loaded: 0, total: 0 });
@@ -104,38 +78,20 @@ export function SiteLoader() {
     // the CMS or an asset hangs — move on and let the page finish loading normally.
     maxWaitTimer = setTimeout(finish, MAX_WAIT_MS);
 
-    // Warm the route cache for every nav destination so switching pages
-    // doesn't wait on an RSC round-trip either.
-    for (const item of navigation) router.prefetch(item.href);
-
-    fetch("/api/asset-manifest")
-      .then((res) => (res.ok ? (res.json() as Promise<Manifest>) : null))
-      .then((manifest) => {
-        if (cancelled || !manifest) {
-          settleWithMinDuration();
-          return;
-        }
-
-        // Heavy media (video, 3D models) just gets a background warm-up,
-        // staggered so it doesn't add to the burst hitting the CMS host —
-        // never blocks the loader either, it'd take far too long.
-        manifest.heavy.forEach((url, i) => {
-          setTimeout(() => fetch(url, { mode: "no-cors" }).catch(() => {}), i * 400);
-        });
-
-        const urls = manifest.images;
-        if (!urls.length) {
-          settleWithMinDuration();
-          return;
-        }
-
-        setProgress({ loaded: 0, total: urls.length });
-        const bump = () => setProgress((prev) => ({ ...prev, loaded: prev.loaded + 1 }));
-        preloadPool(urls, CONCURRENCY, bump).then(() => {
-          if (!cancelled) settleWithMinDuration();
-        });
-      })
-      .catch(() => settleWithMinDuration());
+    // Let the first commit lay out before measuring what is on screen.
+    const measureFrame = requestAnimationFrame(() => {
+      if (cancelled) return;
+      const images = pendingVisibleImages();
+      if (!images.length) {
+        settleWithMinDuration();
+        return;
+      }
+      setProgress({ loaded: 0, total: images.length });
+      const bump = () => setProgress((prev) => ({ ...prev, loaded: prev.loaded + 1 }));
+      Promise.all(images.map((img) => whenSettled(img).then(bump))).then(() => {
+        if (!cancelled) settleWithMinDuration();
+      });
+    });
 
     return () => {
       cancelled = true;
@@ -143,6 +99,7 @@ export function SiteLoader() {
       clearTimeout(fadeTimer);
       clearTimeout(hideTimer);
       clearTimeout(maxWaitTimer);
+      cancelAnimationFrame(measureFrame);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

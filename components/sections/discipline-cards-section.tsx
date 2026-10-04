@@ -1,74 +1,61 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Circle, Code, Cog, Megaphone, Ruler } from "lucide-react";
-import CardSwap, { Card } from "@/components/CardSwap";
-import RippleDistortion from "@/components/RippleDistortion";
-import type { DisciplineImages } from "@/lib/cms";
+import Link from "@/components/ui/intent-link";
+import FlipCard from "@/components/FlipCard";
+import type { DisciplineCard } from "@/lib/cms";
+import "./discipline-cards.css";
 
-const disciplines = [
-  { key: "mechanical", title: "Mechanical", Icon: Cog, copy: "Design, machine and assemble the drivetrain, superstructure and every mechanism on the robot." },
-  { key: "cad", title: "CAD & Design", Icon: Ruler, copy: "Model the whole machine in CAD and validate fits and tolerances before a single chip is cut." },
-  { key: "programming", title: "Programming", Icon: Code, copy: "Autonomous routines, vision targeting, odometry and the controls our drivers trust in match." },
-  { key: "business", title: "Business", Icon: Circle, copy: "Fundraising, sponsor relations and the operations that keep a student-led 501(c)(3) running." },
-  { key: "media", title: "Media", Icon: Megaphone, copy: "Photo, video, design and the brand that carries the team on and off the field." }
-] as const;
+const pad = (n: number) => String(n).padStart(2, "0");
 
-export function DisciplineCardsSection({ images }: { images: DisciplineImages }) {
-  const pinRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
-  const current = disciplines[active] ?? disciplines[0];
+function FlipIcon() {
+  return <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M13 5.5A5.5 5.5 0 1 0 13.5 9" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /><path d="M13.6 2.2v3.6H10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
 
+function Hint({ back }: { back?: boolean }) {
   return (
-    <section id="explore-disciplines" className="section discipline-deck-section">
-      <div ref={pinRef} className="discipline-deck-pin">
-        <div className="discipline-deck-grid">
-          <div className="discipline-deck-copy">
-            <p className="discipline-deck-eyebrow">Explore disciplines</p>
-            <h2 className="discipline-deck-title">{current.title}</h2>
-            <p className="discipline-deck-lead">{current.copy}</p>
-            <div className="discipline-deck-progress" aria-hidden="true">
-              {disciplines.map((d, i) => (
-                <span key={d.key} className={`discipline-deck-dot${i === active ? " is-active" : ""}`} />
-              ))}
-            </div>
-            <p className="discipline-deck-count">
-              {String(active + 1).padStart(2, "0")} / {String(disciplines.length).padStart(2, "0")}
-            </p>
-          </div>
-
-          <div className="discipline-deck-stage">
-            <CardSwap
-              className="is-centered"
-              width={520}
-              height={400}
-              cardDistance={44}
-              verticalDistance={40}
-              skewAmount={6}
-              easing="linear"
-              scrollDriven
-              pinRef={pinRef}
-              stepHeight={0.38}
-              onActiveChange={setActive}
-            >
-              {disciplines.map(({ key, title, Icon }) => {
-                const image = images[key];
-                return (
-                  <Card key={key} style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
-                    <div className="discipline-deck-card-head">
-                      <Icon size={13} aria-hidden="true" />
-                      <span>{title}</span>
-                    </div>
-                    <div className="discipline-deck-card-body">
-                      {image && <RippleDistortion src={image} quality="medium" grayscale={false} />}
-                    </div>
-                  </Card>
-                );
-              })}
-            </CardSwap>
-          </div>
-        </div>
-      </div>
-    </section>
+    <span className="disc-hint" aria-hidden="true">
+      <span className="disc-hint-pointer">{back ? "Click to flip back" : "Click to reveal"}</span>
+      <span className="disc-hint-touch">{back ? "Tap to flip back" : "Tap to reveal"}</span>
+    </span>
   );
+}
+
+export function DisciplineCardsSection({ disciplines }: { disciplines: DisciplineCard[] }) {
+  return <section id="explore-disciplines" className="section home-disciplines"><div className="wrap disc-wrap">
+    <div className="section-head-row disc-head">
+      <h2>Find where you <em>fit in.</em></h2>
+      <Link className="home-disciplines-link" href="/team">Meet the team <span aria-hidden="true">↗</span></Link>
+    </div>
+    <ul className="disc-grid">{disciplines.map(({ key, title, copy, tags, alt, image }, i) => {
+      const index = `${pad(i + 1)} / ${pad(disciplines.length)}`;
+      return <li key={key}>
+        <FlipCard
+          className="disc-card"
+          ariaLabel={`${title}: flip for details`}
+          radius={4}
+          background="var(--disc-back-bg)"
+          color="var(--disc-ink)"
+          shadow={false}
+          tiltMax={8}
+          hoverScale={1.02}
+          dragDistance={260}
+          glare={false}
+          front={<div className="disc-face">
+            <span className="disc-ticks" aria-hidden="true" />
+            <header className="disc-head-row"><span className="disc-index">{pad(i + 1)}</span><h3>{title}</h3><span className="disc-flip"><FlipIcon /></span></header>
+            <div className="disc-photo">{image && <img src={image.src} srcSet={image.srcSet} sizes="(max-width: 760px) 50vw, 25vw" alt={alt} loading="lazy" decoding="async" draggable={false} />}</div>
+            <Hint />
+          </div>}
+          back={<div className="disc-face disc-face--back" data-index={pad(i + 1)}>
+            <span className="disc-ticks" aria-hidden="true" />
+            <header className="disc-head-row"><span className="disc-index">{index}</span><span className="disc-flip"><FlipIcon /></span></header>
+            <h3>{title}</h3>
+            <p>{copy}</p>
+            <ul className="disc-skills">{tags.map((tag) => <li key={tag}>{tag}</li>)}</ul>
+            <Hint back />
+          </div>}
+        />
+      </li>;
+    })}</ul>
+  </div></section>;
 }

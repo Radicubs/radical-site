@@ -124,7 +124,7 @@ function smooth(a: number, b: number, value: number) {
   return x * x * (3 - 2 * x);
 }
 
-function LiveStrapiRobot({ progress }: { progress: MutableRefObject<number> }) {
+function LiveCmsRobot({ progress }: { progress: MutableRefObject<number> }) {
   const host = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const element = host.current; if (!element) return;
@@ -140,7 +140,7 @@ function LiveStrapiRobot({ progress }: { progress: MutableRefObject<number> }) {
     const resize = () => { const rect = element.getBoundingClientRect(); camera.aspect = rect.width / Math.max(rect.height, 1); camera.updateProjectionMatrix(); renderer.setSize(rect.width, rect.height, false); renderDirty = true; };
     resize(); const observer = new ResizeObserver(resize); observer.observe(element);
     const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
-    void fetch(CMS_MODEL).then((response) => { if (!response.ok) throw new Error(`Strapi robot returned ${response.status}`); return response.arrayBuffer(); }).then((buffer) => new Promise<import("three/examples/jsm/loaders/GLTFLoader.js").GLTF>((resolve, reject) => loader.parse(buffer, "", resolve, reject))).then((gltf) => {
+    void fetch(CMS_MODEL).then((response) => { if (!response.ok) throw new Error(`Robot model returned ${response.status}`); return response.arrayBuffer(); }).then((buffer) => new Promise<import("three/examples/jsm/loaders/GLTFLoader.js").GLTF>((resolve, reject) => loader.parse(buffer, "", resolve, reject))).then((gltf) => {
       if (disposed) return;
       const robot = gltf.scene; robot.updateMatrixWorld(true); const bounds = new THREE.Box3().setFromObject(robot); const center = bounds.getCenter(new THREE.Vector3()); robot.position.sub(center); robot.updateMatrixWorld(true);
       const shooter = robot.getObjectByName("Shooter_v3_v42_1") ?? robot.getObjectByName("Shooter v3 v42_1") ?? robot.getObjectByName("Shooter_v3_v42") ?? robot.getObjectByName("Shooter v3 v42");
@@ -150,7 +150,7 @@ function LiveStrapiRobot({ progress }: { progress: MutableRefObject<number> }) {
       addRobotSurfaceDetails(rig, robot, direction, resources);
       element.dataset.loaded = "true";
       renderDirty = true;
-    }).catch((error) => { if (!disposed) element.dataset.error = error instanceof Error ? error.message : "Strapi GLB failed"; });
+    }).catch((error) => { if (!disposed) element.dataset.error = error instanceof Error ? error.message : "Robot model failed to load"; });
     let lastOpacity = -1;
     renderer.setAnimationLoop(() => {
       const opacity = smooth(0.78, 1, progress.current);
@@ -162,10 +162,10 @@ function LiveStrapiRobot({ progress }: { progress: MutableRefObject<number> }) {
     });
     return () => { disposed = true; observer.disconnect(); renderer.setAnimationLoop(null); resources.forEach((resource) => resource.dispose()); environment.dispose(); renderer.dispose(); element.replaceChildren(); };
   }, [progress]);
-  return <div className="robot-morph-overlay__live" ref={host} aria-label="2026 robot model loaded from Strapi" />;
+  return <div className="robot-morph-overlay__live" ref={host} aria-label="2026 robot model" />;
 }
 
 export function RobotMorphOverlay({ progress }: { progress: MutableRefObject<number> }) {
   const items = useMemo(() => [{ image: "/api/robot-assets/morphSource" }, { image: "/api/robot-assets/morphEnvironment" }], []);
-  return <div className="robot-morph-overlay"><div className="robot-morph-overlay__shader"><MorphSlider items={items} progressRef={progress} transition="melt" intensity={0.62} scale={2.8} aberration={0.14} drift={0} radius={0} loop={false} overlayColor="#000000" showCaptions={false} showControls={false} showIndicators={false} robotMask /></div><LiveStrapiRobot progress={progress} /></div>;
+  return <div className="robot-morph-overlay"><div className="robot-morph-overlay__shader"><MorphSlider items={items} progressRef={progress} transition="melt" intensity={0.62} scale={2.8} aberration={0.14} drift={0} radius={0} loop={false} overlayColor="#000000" showCaptions={false} showControls={false} showIndicators={false} robotMask /></div><LiveCmsRobot progress={progress} /></div>;
 }

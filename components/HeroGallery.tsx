@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import AccordionGallery from "@/components/AccordionGallery";
@@ -136,6 +136,8 @@ export function HeroGallery({ album }: { album: GalleryAlbum }) {
               src={active.src}
               quality="medium"
               grayscale={false}
+              strength={0.14}
+              spread={4}
               onReady={() => {
                 setRippleReady(true);
                 engineRef.current?.setPaused(true);

@@ -1,0 +1,5 @@
+/* Oversized interactive team number under the footer card. */
+.footer-tech-text {
+  height: clamp(120px, 19vw, 290px);
+  margin-top: 28px;
+}

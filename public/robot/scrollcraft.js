@@ -47,6 +47,8 @@
                               (path template : frameCount : startIndex).
      data-sc-pan="0.6"        on a wide rail inside data-sc-act="pan". p drives
                               horizontal travel. Value = extra travel multiplier.
+     data-sc-pan-ease="0.16"  fraction of the rail's travel used to ease into
+                              and out of horizontal motion. The middle stays linear.
      data-sc-parallax="-0.2"  translateY by rate * act-progress * viewport.
                               Negative = moves up faster than scroll (recedes).
      data-sc-cue="0.1 0.5"    opacity/rise keyed to p. One value = enter+hold.
@@ -149,6 +151,20 @@
   var clamp01 = function (x) { return clamp(x, 0, 1); };
   var smooth = function (x) { x = clamp01(x); return x * x * (3 - 2 * x); };
   var lerp = function (a, b, t) { return a + (b - a) * t; };
+
+  // Ramp the pan's velocity at the two ends while keeping the middle linear.
+  // This lets the page settle into the pinned stage before the rail moves.
+  function panEase(x, edge) {
+    x = clamp01(x);
+    edge = clamp(edge || 0, 0, 0.35);
+    if (!edge) return x;
+    var ramp = function (distance) {
+      return (distance / 2 - edge * Math.sin(Math.PI * distance / edge) / (2 * Math.PI)) / (1 - edge);
+    };
+    if (x < edge) return ramp(x);
+    if (x > 1 - edge) return 1 - ramp(1 - x);
+    return (x - edge / 2) / (1 - edge);
+  }
 
   // Monotone dwell remap. Settles the camera mid-act (where the copy peaks) and
   // moves quicker at the edges. f(0)=0 and f(1)=1 always, so seam frames between
@@ -355,6 +371,7 @@
       // horizontal rail
       act.rail = el.querySelector('[data-sc-pan]');
       if (act.rail) act.railExtra = parseFloat(act.rail.getAttribute('data-sc-pan')) || 0;
+      if (act.rail) act.panEase = parseFloat(el.getAttribute('data-sc-pan-ease')) || 0;
 
       // cues
       Array.prototype.forEach.call(el.querySelectorAll('[data-sc-cue]'), function (c) {
@@ -869,7 +886,9 @@
           var over = a.rail.scrollWidth - vw;
           if (over > 0) {
             var extra = over * (a.railExtra || 0);
-            a.rail.style.transform = 'translate3d(' + (-(over + extra) * a.p).toFixed(2) + 'px,0,0)';
+            var panProgress = panEase(a.p, a.panEase);
+            a.el.style.setProperty('--sc-pan-p', panProgress.toFixed(4));
+            a.rail.style.transform = 'translate3d(' + (-(over + extra) * panProgress).toFixed(2) + 'px,0,0)';
           }
         }
 

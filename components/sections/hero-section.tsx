@@ -1,40 +1,29 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { HeroGallery } from "@/components/HeroGallery";
-import { ScrollToExplore } from "@/components/ui/scroll-to-explore";
-import type { GalleryAlbum, SiteSettings } from "@/lib/cms";
+import DriftWall, { type DriftWallItem } from "@/components/DriftWall";
+import { HeroElectricWordmark } from "@/components/sections/hero-electric-wordmark";
+import { PixelArrowButton } from "@/components/ui/pixel-arrow-button";
+import type { GalleryPhoto, SiteSettings } from "@/lib/cms";
 
-export function HeroSection({ settings, gallery }: { settings: SiteSettings; gallery: GalleryAlbum }) {
+const localMoments = [{ image: "/radicubs-2026-hero.webp", title: "Radicubs robot on the competition field" }];
+
+export function HeroSection({ settings, photos }: { settings: SiteSettings; photos: GalleryPhoto[] }) {
+  const items: DriftWallItem[] = photos.length
+    ? photos.map((photo) => ({ image: photo.src, srcSet: photo.srcSet, title: photo.alt }))
+    : localMoments;
+
   return (
-    <section className="hero">
-      <div className="wrap hero-grid">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: .65 }}
-        >
-          <p className="hero-kicker">FRC TEAM 7503 / FRISCO, TEXAS / EST. 2019</p>
-          <h1 className="sr-only">Radicubs Robotics</h1>
-          <img className="hero-wordmark" src="/radicubs-wordmark-green.png" alt="Radicubs" />
-          <p className="lead">{settings.description}</p>
-          <div className="actions">
-            <a className="btn btn-dark" href={settings.applyUrl} target="_blank" rel="noreferrer">Apply for {settings.applicationSeason}–{settings.applicationSeason + 1} →</a>
-            <a className="btn btn-light" href={settings.donateUrl} target="_blank" rel="noreferrer">Support the team</a>
-          </div>
-          <p className="hero-footnote">STUDENT-LED · 501(C)(3) NONPROFIT</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 28, scale: .97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: .8, delay: .1 }}
-        >
-          <HeroGallery album={gallery} />
-        </motion.div>
+    <section className="home-hero" aria-labelledby="home-title">
+      <div className="home-hero-wall">
+        <DriftWall items={items} decorative columns={7} tileWidth={245} tileHeight={178} gap={15} radius={12} tilt={1} turn={0} perspective={850} depth={200} scale={1.05} curve={700} speed={12} variance={0.22} parallax={0.45} lift={70} dim={1} fade={0.08} overlayColor="transparent" />
       </div>
-      <div className="hero-scroll-cue-anchor">
-        <ScrollToExplore href="#explore-disciplines" />
+      <div className="home-hero-content">
+        <h1 id="home-title"><span className="sr-only">Radicubs</span><HeroElectricWordmark /></h1>
+        <p className="home-hero-description">We build robots, compete, and figure things out together in Frisco, Texas.</p>
+        <div className="home-hero-actions">
+          <PixelArrowButton href={settings.applyUrl} external>Join the team</PixelArrowButton>
+          <PixelArrowButton href="#explore-disciplines" variant="secondary" direction="down">Explore what we do</PixelArrowButton>
+        </div>
       </div>
     </section>
   );
