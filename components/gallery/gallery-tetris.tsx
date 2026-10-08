@@ -13,6 +13,20 @@ const LEVEL_UP_DURATION = 1600;
 // Big tiles over a big board: few rows (still one screen tall), so each photo reads clearly.
 const ROWS_DESKTOP = 9;
 const ROWS_MOBILE = 11;
+const FALLBACK_PHOTO = "/radicubs-2026-hero.webp";
+
+// A resized CMS image can be unavailable even when another copy still works.
+function loadPieceImage(candidates: string[]) {
+  const img = new Image();
+  img.decoding = "async";
+  const urls = [...new Set([...candidates, FALLBACK_PHOTO])];
+  let index = 0;
+  img.onerror = () => {
+    if (++index < urls.length) img.src = urls[index];
+  };
+  img.src = urls[index];
+  return img;
+}
 
 const SHAPES = {
   I: ["....", "XXXX", "....", "...."],
@@ -126,8 +140,9 @@ export function GalleryTetris({ photos, onClose }: { photos: GalleryPhoto[]; onC
   const nextRef = useRef<HTMLCanvasElement>(null);
   const visible = useRef(true);
   // Photos are fetched as pieces first use them, not all at once on open.
-  const sources = useRef<string[]>([]);
+  const sources = useRef<string[][]>([]);
   const images = useRef<(HTMLImageElement | undefined)[]>([]);
+  const fallbackImage = useRef<HTMLImageElement | null>(null);
   // Board dimensions are fixed for a game; only the pixel size follows the section width.
   const dims = useRef({ cols: 0, rows: 0 });
   const [size, setSize] = useState({ cell: 0, gap: 0 });
@@ -139,17 +154,28 @@ export function GalleryTetris({ photos, onClose }: { photos: GalleryPhoto[]; onC
   const game = useRef({ board: [] as (Cell | null)[][], piece: null as Piece | null, next: null as Piece | null, bag: [] as Kind[], score: 0, lines: 0, level: 1, celebration: 0, acc: 0, status: "playing" as Status });
 
   if (!sources.current.length) {
-    const pool = photos.length ? [...photos].sort(() => Math.random() - 0.5).slice(0, 40) : [{ src: "/radicubs-2026-hero.webp" }];
-    sources.current = pool.map((photo) => photo.src);
+    const pool = [...photos].sort(() => Math.random() - 0.5).slice(0, 40);
+    sources.current = pool.length
+      ? pool.map((photo) => [photo.src, photo.thumbSrc, photo.fullSrc])
+      : [[FALLBACK_PHOTO]];
   }
+
+  useEffect(() => {
+    fallbackImage.current = loadPieceImage([FALLBACK_PHOTO]);
+  }, []);
+
+  // Keep a photo on the board while a newly chosen image is downloading.
+  const readyImage = (img: HTMLImageElement) => {
+    if (img.complete && img.naturalWidth) return img;
+    return images.current.find((candidate) => candidate?.complete && candidate.naturalWidth)
+      ?? fallbackImage.current ?? img;
+  };
 
   const pickImage = () => {
     const index = Math.floor(Math.random() * sources.current.length);
     let img = images.current[index];
     if (!img) {
-      img = new Image();
-      img.decoding = "async";
-      img.src = sources.current[index];
+      img = loadPieceImage(sources.current[index]);
       images.current[index] = img;
     }
     return img;
@@ -190,7 +216,7 @@ export function GalleryTetris({ photos, onClose }: { photos: GalleryPhoto[]; onC
     g.board.forEach((row, y) => row.forEach((c, x) => {
       if (!c) return;
       const joins = { up: same(c, x, y - 1), down: same(c, x, y + 1), left: same(c, x - 1, y), right: same(c, x + 1, y), diag: same(c, x + 1, y + 1) };
-      drawBlock(ctx, at(x), at(y), tile, gap, radius, joins, c.img, { x: at(c.x0), y: at(c.y0), w: c.w * cell - gap, h: c.h * cell - gap }, c.rot);
+      drawBlock(ctx, at(x), at(y), tile, gap, radius, joins, readyImage(c.img), { x: at(c.x0), y: at(c.y0), w: c.w * cell - gap, h: c.h * cell - gap }, c.rot);
     }));
     const p = g.piece;
     if (!p) return;
@@ -201,7 +227,7 @@ export function GalleryTetris({ photos, onClose }: { photos: GalleryPhoto[]; onC
     ctx.setLineDash([5, 4]);
     for (const b of p.blocks) if (p.y + b.y + ghost >= 0) { ctx.beginPath(); ctx.roundRect(at(p.x + b.x) + 1, at(p.y + b.y + ghost) + 1, tile - 2, tile - 2, radius); ctx.stroke(); }
     ctx.setLineDash([]);
-    drawPiece(ctx, p.blocks.map((b) => ({ x: p.x + b.x, y: p.y + b.y })), at, cell, gap, radius, p.img, p.rot);
+    drawPiece(ctx, p.blocks.map((b) => ({ x: p.x + b.x, y: p.y + b.y })), at, cell, gap, radius, readyImage(p.img), p.rot);
   }, [size]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const drawNext = useCallback(() => {
@@ -214,7 +240,7 @@ export function GalleryTetris({ photos, onClose }: { photos: GalleryPhoto[]; onC
     ctx.clearRect(0, 0, 4 * s, 2 * s);
     const { minX, minY, w, h } = bounds(p.blocks);
     const ox = (4 - w) / 2 - minX, oy = (2 - h) / 2 - minY;
-    drawPiece(ctx, p.blocks.map((b) => ({ x: b.x + ox, y: b.y + oy })), (c) => c * s + 1, s, 2, 2, p.img, p.rot);
+    drawPiece(ctx, p.blocks.map((b) => ({ x: b.x + ox, y: b.y + oy })), (c) => c * s + 1, s, 2, 2, readyImage(p.img), p.rot);
   }, []);
 
   const randomPiece = useCallback((): Piece => {
@@ -405,11 +431,12 @@ export function GalleryTetris({ photos, onClose }: { photos: GalleryPhoto[]; onC
         }
       }
       draw();
+      drawNext();
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [draw, move]);
+  }, [draw, drawNext, move]);
 
   // Pause when the board is scrolled out of view; keys only drive the game while it's on screen.
   useEffect(() => {
