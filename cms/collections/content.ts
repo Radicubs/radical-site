@@ -1,4 +1,4 @@
-import type { CollectionConfig, FieldHook } from "payload";
+import { APIError, ValidationError, type CollectionBeforeDeleteHook, type CollectionBeforeValidateHook, type CollectionConfig, type FieldHook } from "payload";
 import { BlocksFeature, CodeBlock, FixedToolbarFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import { contentAccess, contentHooks } from "../access";
 
@@ -75,28 +75,100 @@ export const BlogPosts: CollectionConfig = {
   ]
 };
 
+// Required assignments must be removed before their dropdown option is deleted.
+// Give editors an actionable message rather than a database constraint error.
+const protectAssignedOption = (field: "role" | "season"): CollectionBeforeDeleteHook => async ({ id, req }) => {
+  const { totalDocs } = await req.payload.count({ collection: "team-members", where: { [`memberships.${field}`]: { equals: id } }, req });
+  if (totalDocs) throw new APIError(`This ${field} is assigned to ${totalDocs} team member${totalDocs === 1 ? "" : "s"}. Remove or change those season assignments before deleting it.`, 409);
+};
+
+export const TeamRoles: CollectionConfig = {
+  slug: "team-roles",
+  labels: { singular: "Team role", plural: "Team roles" },
+  admin: { group: "People", useAsTitle: "name", defaultColumns: ["name"], description: "Reusable roles for season assignments. You can also create a role from a person's role dropdown." },
+  defaultSort: "name",
+  access: contentAccess,
+  hooks: { ...contentHooks, beforeDelete: [protectAssignedOption("role")] },
+  fields: [{ name: "name", type: "text", required: true, unique: true }]
+};
+
+export const TeamSeasons: CollectionConfig = {
+  slug: "team-seasons",
+  labels: { singular: "Team season", plural: "Team seasons" },
+  admin: { group: "People", useAsTitle: "title", defaultColumns: ["title", "year"], description: "Create a season, then assign people to it in Team members. Related profiles appear below." },
+  defaultSort: "-year",
+  access: contentAccess,
+  hooks: { ...contentHooks, beforeDelete: [protectAssignedOption("season")] },
+  fields: [
+    { name: "year", type: "number", required: true, unique: true, min: 2000, max: 2200, validate: (value: number | null | undefined) => (typeof value === "number" && Number.isInteger(value) && value >= 2000 && value <= 2200) || "Enter a whole starting year between 2000 and 2200.", admin: { description: "Starting year: 2025 means the 2025–2026 robotics season." } },
+    { name: "title", type: "text", admin: { readOnly: true }, hooks: { beforeValidate: [({ data, originalDoc }) => { const year = data?.year ?? originalDoc?.year; return year != null ? `${year}–${Number(year) + 1}` : undefined; }] } },
+    { name: "members", label: "People in this season", type: "join", collection: "team-members", on: "memberships.season", defaultSort: "name", admin: { allowCreate: false, defaultColumns: ["name", "photo"] } }
+  ]
+};
+
+const normalizeName = (name: string) => name.trim().replace(/\s+/g, " ");
+
+const prepareTeamProfile: CollectionBeforeValidateHook = async ({ data, originalDoc, req }) => {
+  if (!data) return data;
+  const name = normalizeName(data.name ?? originalDoc?.name ?? "");
+  if (!name) throw new ValidationError({ collection: "team-members", errors: [{ path: "name", message: "Enter the person's name." }] });
+  const identityKey = name.toLowerCase();
+  const { docs } = await req.payload.find({
+    collection: "team-members", depth: 0, limit: 1, req,
+    where: { and: [
+      { identityKey: { equals: identityKey } },
+      ...(originalDoc?.id ? [{ id: { not_equals: originalDoc.id } }] : [])
+    ] }
+  });
+  if (docs.length) throw new ValidationError({ collection: "team-members", errors: [{ path: "name", message: `${name} already has a profile. Open that person and add another season assignment.` }] });
+  data.name = name;
+  data.identityKey = identityKey;
+  // Copy the default photo into new seasons. Changing a profile's default later
+  // must not replace the photos already saved for previous seasons.
+  if (Array.isArray(data.memberships)) {
+    const existing = new Map((originalDoc?.memberships ?? []).map((row: { id: string; photo?: unknown }) => [row.id, row]));
+    data.memberships = data.memberships.map((row: { id?: string; photo?: unknown }) => {
+      if (row.photo !== undefined) return row;
+      const old = row.id ? existing.get(row.id) as { photo?: unknown } | undefined : undefined;
+      return { ...row, photo: old ? old.photo ?? null : data.photo !== undefined ? data.photo : originalDoc?.photo ?? null };
+    });
+  }
+  return data;
+};
+
 export const TeamMembers: CollectionConfig = {
   slug: "team-members",
   labels: { singular: "Team member", plural: "Team members" },
   admin: {
     group: "People",
     useAsTitle: "name",
-    defaultColumns: ["name", "role", "season", "photo"],
-    description: "One entry per person per season. The Team page groups them by season."
+    defaultColumns: ["name", "photo", "memberships"],
+    description: "Create each person once. Edit their profile to add a new season, keeping the old assignments. Each season has its own role and photo. Unassigned people do not appear on the website."
   },
-  defaultSort: "-season",
+  defaultSort: "name",
   access: contentAccess,
-  hooks: contentHooks,
+  hooks: { ...contentHooks, beforeValidate: [prepareTeamProfile] },
   fields: [
+    { name: "name", type: "text", required: true },
+    photo("photo", "Default profile photo", "Prefills new season assignments. Existing seasons keep their saved photos."),
     {
-      type: "row",
-      fields: [
-        { name: "name", type: "text", required: true },
-        { name: "role", type: "text", required: true, admin: { description: "e.g. Senior Captain, Programming Lead, Sophomore" } },
-        { name: "season", type: "number", required: true, admin: { description: "The year the season starts, e.g. 2025 for 2025–26." } }
-      ]
+      name: "memberships", label: "Season assignments", type: "array",
+      labels: { singular: "Season assignment", plural: "Season assignments" },
+      admin: { description: "Returning member? Add a new row here and keep the old one. Edit a row to change only that season’s role or photo. The + buttons create seasons or roles." },
+      validate: (value: unknown[] | null | undefined) => {
+        const seasons = ((value ?? []) as { season?: number | { id: number } }[]).map((row) => typeof row.season === "object" ? row.season?.id : row.season).filter((id) => id != null);
+        return new Set(seasons).size === seasons.length || "Assign each person to a season only once.";
+      },
+      fields: [{ type: "row", fields: [
+        { name: "season", type: "relationship", relationTo: "team-seasons", required: true, admin: { allowCreate: true } },
+        { name: "role", type: "relationship", relationTo: "team-roles", required: true, admin: { allowCreate: true } }
+      ] }, photo("photo", "Photo for this season", "Changing this photo only affects this season. Leave empty to show initials.")]
     },
-    photo("photo", "Photo", "A square-ish headshot works best.")
+    { name: "identityKey", type: "text", unique: true, index: true, admin: { hidden: true } },
+    { name: "mergedProfiles", type: "json", admin: { hidden: true }, access: { read: ({ req }) => Boolean(req.user), update: () => false } },
+    // Retained for migration/older seed scripts; public rosters use assignments.
+    { name: "role", type: "text", admin: { hidden: true } },
+    { name: "season", type: "number", admin: { hidden: true } }
   ]
 };
 

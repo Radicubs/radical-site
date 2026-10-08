@@ -6,8 +6,8 @@ export const anyone: Access = () => true;
 export const signedIn: Access = ({ req }) => Boolean(req.user);
 export const adminsOnly: Access = ({ req }) => req.user?.role === "admin";
 
-// Every page reads through lib/cms.ts, which caches under this tag. Clearing it
-// after a save makes the edit show up on the live site right away.
+// Clear snapshots from older deployments too. Current pages read fresh CMS
+// content per request through lib/cms.ts.
 export const CMS_TAG = "cms";
 
 function refreshSite() {

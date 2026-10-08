@@ -11,7 +11,7 @@ export function Icon() {
 
 const shortcuts = [
   { href: "/admin/collections/blog-posts/create", title: "Write a blog post", copy: "Build-season updates, recaps and news." },
-  { href: "/admin/collections/team-members", title: "Update the team", copy: "Add this season's members and their photos." },
+  { href: "/admin/collections/team-members", title: "Update the team", copy: "Create people, upload photos and assign seasons and roles." },
   { href: "/admin/collections/albums", title: "Add photos", copy: "Create an album for an event and drop photos in." },
   { href: "/admin/globals/home-page", title: "Edit the homepage", copy: "Photo wall, discipline cards and season video." },
   { href: "/admin/collections/sponsors", title: "Manage sponsors", copy: "Logos, links and their order." },

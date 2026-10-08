@@ -41,15 +41,47 @@ Payload migrations against the configured database.
 
 For `DATABASE_URL`, copy the **Session pooler** URI (port `5432`) from
 Supabase's **Connect** dialog, fill in the database password, and preserve the
-project-specific host and username (`postgres.<project-ref>`). Use the session
-pooler because the build runs migrations with the same connection. Preserve
-the TLS parameters described in `.env.example`.
+project-specific host and username (`postgres.<project-ref>`). The app selects
+transaction mode (port `6543`) on that same shared-pooler host for runtime reads
+and writes, while `payload migrate` retains session mode (port `5432`). This
+avoids reserving a database backend for every Vercel instance. Preserve the TLS
+parameters described in `.env.example`. If `DATABASE_URL` already uses transaction
+mode, set `DATABASE_MIGRATION_URL` to the session-pooler URI for migrations.
 
 If Vercel reports `connect ENETUNREACH` with an IPv6 address during migrations,
 replace the direct database URI in the applicable Vercel environment with the
 session pooler URI and create a new deployment. Supabase's direct database host
 uses IPv6 by default; the shared session pooler supports IPv4. See
 [Supabase's network compatibility guide](https://supabase.com/docs/guides/troubleshooting/supabase--your-network-ipv4-and-ipv6-compatibility-cHe3BP).
+
+## Editing content
+
+Open `/admin` to manage blog posts, photo albums, team members, mentors,
+sponsors, journey seasons, outreach events, and the homepage/outreach/settings
+pages. Public pages read fresh CMS content on each request; repeated reads in the
+same request are deduplicated. Bundled data is used only when no database is
+configured, so removing CMS records does not restore old content.
+
+Under **People**, create **Team seasons** using the starting year (2025 means
+2025–2026) and **Team roles** using the names you want in the role dropdown.
+Create a **Team member** with their name and photo, then add **Season assignments**.
+Each assignment selects a season and role; the + button can create either option
+without leaving the person. For a returning member, open their existing profile
+and add a new assignment without removing the old one. Edit a season's row to
+change its role or photo independently of earlier seasons. The default profile
+photo prefills new assignments; changing it leaves existing season photos intact.
+
+The migration combines recurring profiles whose names match after trimming spaces
+and ignoring case. Each season retains its own role and photo, including seasons
+without photos. Original merged records are retained privately in the database;
+automatic rollback refuses to discard later edits. Different spellings are kept
+as separate people. Creating an already-existing name directs the editor to use
+the existing profile. The website's season picker shows the member count for each
+season; a person without a season assignment stays off the public roster.
+
+The normal `npm run build` applies this migration before building the site.
+Deploy the code and migration together. Media uploads use the configured S3
+bucket; the bucket's public URL must match `MEDIA_PUBLIC_URL` for `/media` links.
 
 ## Content / asset sourcing
 
@@ -72,4 +104,6 @@ The dark and green values are consistent with Radicubs' prior public stylesheet;
 
 ## Validation
 
-`npx tsc --noEmit` passes in the build workspace. The supplied Maya ZIP contained a macOS-only Next SWC binary, and the isolated build environment cannot access npm to download the Linux SWC package, so `next build` cannot complete inside this sandbox. A normal `npm install` on the deployment machine will install the correct platform binary before `npm run build`.
+Run `npx tsc --noEmit --incremental false` for TypeScript validation and
+`npm run build` for migrations and the production build. To build without applying
+migrations, use `NEXT_DIST_DIR=.next-build npx next build`.

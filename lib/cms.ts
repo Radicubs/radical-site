@@ -1,9 +1,7 @@
 import "server-only";
 import { cache } from "react";
-import { unstable_cache } from "next/cache";
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { CMS_TAG } from "@/cms/access";
 import type { Album, Media } from "@/cms/payload-types";
 import { blogPosts as fallbackBlogPosts, type BlogBlock, type BlogPost, type BlogSection } from "@/data/blog";
 import { disciplines as fallbackDisciplines } from "@/data/disciplines";
@@ -63,20 +61,21 @@ export type HomeVideos = { video?: string; mobileVideo?: string; poster?: string
 
 const payloadClient = () => getPayload({ config });
 
-// Each query is cached until an editor saves something (the collections clear
-// this tag in their afterChange hooks), with a slow time-based refresh as a
-// backstop. If the database can't be reached, pages fall back to data/*.ts.
-function cached<T>(key: string, load: () => Promise<T>, fallback: T): () => Promise<T> {
-  const read = unstable_cache(load, ["cms", key], { tags: [CMS_TAG], revalidate: 3600 });
-  return async () => {
+// Deduplicate reads within a request. Never persist an offline/build fallback
+// after an editor changes content, and never resurrect deleted CMS records.
+function cmsRead<T>(key: string, load: () => Promise<T>, fallback: T): () => Promise<T> {
+  return cache(async () => {
+    if (!process.env.DATABASE_URL) return fallback;
     try {
-      return await read();
+      return await load();
     } catch (error) {
       console.error(`CMS read failed for ${key}:`, error instanceof Error ? error.message : error);
-      return fallback;
+      throw error;
     }
-  };
+  });
 }
+
+const loadHome = cache(async () => (await payloadClient()).findGlobal({ slug: "home-page", depth: 1 }));
 
 const asMedia = (value: unknown): Media | undefined =>
   value && typeof value === "object" && "url" in value ? value as Media : undefined;
@@ -122,7 +121,7 @@ const formatDate = (value?: string | null) => value
 // ---------------------------------------------------------------------------
 // Site settings
 
-export const getSiteSettings = cached("site-settings", async (): Promise<SiteSettings> => {
+export const getSiteSettings = cmsRead("site-settings", async (): Promise<SiteSettings> => {
   const payload = await payloadClient();
   const settings = await payload.findGlobal({ slug: "site-settings", depth: 0 });
   return {
@@ -200,10 +199,10 @@ function lexicalToSections(content: unknown): BlogSection[] | undefined {
 // Blog publishing must not reuse a build-time snapshot of posts or media.
 // React cache deduplicates metadata/page reads within one request only.
 export const getBlogPosts = cache(async (): Promise<BlogPost[]> => {
+  if (!process.env.DATABASE_URL) return fallbackBlogPosts;
   try {
     const payload = await payloadClient();
     const { docs } = await payload.find({ collection: "blog-posts", sort: "-date", limit: 1000, depth: 2, overrideAccess: false, draft: false });
-    if (!docs.length) return fallbackBlogPosts;
     return docs.map((post) => {
       const cover = asMedia(post.cover);
       return {
@@ -220,7 +219,9 @@ export const getBlogPosts = cache(async (): Promise<BlogPost[]> => {
     });
   } catch (error) {
     console.error("CMS read failed for blog-posts:", error instanceof Error ? error.message : error);
-    return fallbackBlogPosts;
+    // A configured CMS is authoritative, even when empty or temporarily offline.
+    // Restoring the bundled archive would bring back unpublished/deleted posts.
+    return process.env.DATABASE_URL ? [] : fallbackBlogPosts;
   }
 });
 
@@ -240,17 +241,22 @@ const sortRoster = (members: TeamMember[]): TeamMember[] =>
 const FALLBACK_TEAM_YEAR = 2025;
 const fallbackRosters: TeamRoster[] = [{ year: FALLBACK_TEAM_YEAR, members: sortRoster(fallbackTeamMembers) }];
 
-export const getTeamRosters = cached("team-rosters", async (): Promise<TeamRoster[]> => {
+export const getTeamRosters = cmsRead("team-rosters", async (): Promise<TeamRoster[]> => {
   const payload = await payloadClient();
-  const { docs } = await payload.find({ collection: "team-members", sort: "-season", limit: 5000, depth: 1 });
-  if (!docs.length) return fallbackRosters;
-
-  const byYear = new Map<number, TeamMember[]>();
+  const [{ docs }, { docs: seasons }] = await Promise.all([
+    payload.find({ collection: "team-members", sort: "name", limit: 5000, depth: 1, select: { name: true, memberships: true } }),
+    payload.find({ collection: "team-seasons", sort: "-year", limit: 500, depth: 0, joins: { members: false } })
+  ]);
+  const byYear = new Map<number, TeamMember[]>(seasons.map((season) => [season.year, []]));
   for (const member of docs) {
-    const roster = byYear.get(member.season) ?? [];
-    // Older rosters often have no photo; TeamCard shows a placeholder for those.
-    roster.push({ name: member.name, role: member.role, image: imageUrl(member.photo, ["medium", "small", "thumbnail"]) ?? "" });
-    byYear.set(member.season, roster);
+    for (const assignment of member.memberships ?? []) {
+      const season = typeof assignment.season === "object" ? assignment.season : seasons.find((season) => season.id === assignment.season);
+      const role = typeof assignment.role === "object" ? assignment.role : undefined;
+      if (!season || !role) continue;
+      const roster = byYear.get(season.year) ?? [];
+      roster.push({ name: member.name, role: role.name, image: imageUrl(assignment.photo, ["medium", "small", "thumbnail"]) ?? "" });
+      byYear.set(season.year, roster);
+    }
   }
   return [...byYear.entries()]
     .map(([year, members]) => ({ year, members: sortRoster(members) }))
@@ -259,10 +265,10 @@ export const getTeamRosters = cached("team-rosters", async (): Promise<TeamRoste
 
 export async function getTeamMembers(): Promise<TeamMember[]> {
   const [current] = await getTeamRosters();
-  return current?.members ?? sortRoster(fallbackTeamMembers);
+  return current?.members ?? [];
 }
 
-export const getMentors = cached("mentors", async (): Promise<Mentor[]> => {
+export const getMentors = cmsRead("mentors", async (): Promise<Mentor[]> => {
   const payload = await payloadClient();
   const { docs } = await payload.find({ collection: "mentors", sort: "_order", limit: 1000, depth: 1 });
   return docs.map((mentor) => ({ name: mentor.name, role: mentor.role, image: imageUrl(mentor.photo, ["medium", "small", "thumbnail"]) }));
@@ -273,7 +279,7 @@ const fallbackSponsors = {
   individual: fallbackIndividualSponsors
 };
 
-export const getSponsors = cached("sponsors", async (): Promise<{ corporate: Sponsor[]; individual: string[] }> => {
+export const getSponsors = cmsRead("sponsors", async (): Promise<{ corporate: Sponsor[]; individual: string[] }> => {
   const payload = await payloadClient();
   const [{ docs }, settings] = await Promise.all([
     payload.find({ collection: "sponsors", sort: "_order", limit: 1000, depth: 1 }),
@@ -294,8 +300,8 @@ export const getSponsors = cached("sponsors", async (): Promise<{ corporate: Spo
     }] : [];
   });
   return {
-    corporate: corporate.length ? corporate : fallbackSponsors.corporate,
-    individual: settings.individualSponsors?.map((entry) => entry.name) ?? fallbackSponsors.individual
+    corporate,
+    individual: settings.individualSponsors?.map((entry) => entry.name) ?? []
   };
 }, fallbackSponsors);
 
@@ -320,11 +326,11 @@ function galleryPhoto(media: Media, id: string, alt: string): GalleryPhoto | nul
   };
 }
 
-async function loadAlbums(): Promise<Album[]> {
+const loadAlbums = cache(async (): Promise<Album[]> => {
   const payload = await payloadClient();
   const { docs } = await payload.find({ collection: "albums", sort: "-year", limit: 1000, depth: 1 });
   return docs;
-}
+});
 
 const albumPhotos = (album: Album): GalleryPhoto[] => (album.photos ?? []).flatMap((value, index) => {
   const media = asMedia(value);
@@ -332,7 +338,7 @@ const albumPhotos = (album: Album): GalleryPhoto[] => (album.photos ?? []).flatM
   return photo ? [photo] : [];
 });
 
-export const getPhotoAlbums = cached("photo-albums", async (): Promise<GalleryAlbum[]> => {
+export const getPhotoAlbums = cmsRead("photo-albums", async (): Promise<GalleryAlbum[]> => {
   const albums = await loadAlbums();
   return albums
     .map((album) => ({ title: album.title, year: album.year ?? null, photos: albumPhotos(album) }))
@@ -346,9 +352,8 @@ export async function getPhotoAlbum(): Promise<GalleryPhoto[]> {
 
 // The homepage wall alternates the chosen wall photos with a spread of photos
 // from albums marked "Include on the homepage".
-export const getHomeWallPhotos = cached("home-wall", async (): Promise<GalleryPhoto[]> => {
-  const payload = await payloadClient();
-  const [home, albums] = await Promise.all([payload.findGlobal({ slug: "home-page", depth: 1 }), loadAlbums()]);
+export const getHomeWallPhotos = cmsRead("home-wall", async (): Promise<GalleryPhoto[]> => {
+  const [home, albums] = await Promise.all([loadHome(), loadAlbums()]);
   const wall = (home.wallPhotos ?? []).flatMap((value, index) => {
     const media = asMedia(value);
     const photo = media && galleryPhoto(media, `wall-${media.id}`, `Radicubs gallery photo ${index + 1}`);
@@ -376,7 +381,7 @@ export const getHomeWallPhotos = cached("home-wall", async (): Promise<GalleryPh
       if (result.length === 20) return result;
     }
   }
-  return result.length ? result : [{ id: "fallback", src: site.robotImage, fullSrc: site.robotImage, thumbSrc: site.robotImage, alt: "Radicubs robot from the 2026 season", width: 1600, height: 1200 }];
+  return result;
 }, [{ id: "fallback", src: site.robotImage, fullSrc: site.robotImage, thumbSrc: site.robotImage, alt: "Radicubs robot from the 2026 season", width: 1600, height: 1200 }]);
 
 // ---------------------------------------------------------------------------
@@ -384,9 +389,8 @@ export const getHomeWallPhotos = cached("home-wall", async (): Promise<GalleryPh
 
 const fallbackDisciplineCards: DisciplineCard[] = fallbackDisciplines.map(({ key, title, copy, tags, alt }) => ({ key, title, copy, tags, alt }));
 
-export const getDisciplines = cached("disciplines", async (): Promise<DisciplineCard[]> => {
-  const payload = await payloadClient();
-  const home = await payload.findGlobal({ slug: "home-page", depth: 1 });
+export const getDisciplines = cmsRead("disciplines", async (): Promise<DisciplineCard[]> => {
+  const home = await loadHome();
   const cards = (home.disciplines ?? []).map((card) => ({
     key: card.id || card.title,
     title: card.title,
@@ -395,12 +399,11 @@ export const getDisciplines = cached("disciplines", async (): Promise<Discipline
     alt: asMedia(card.photo)?.alt || card.title,
     image: cmsImage(card.photo)
   }));
-  return cards.length ? cards : fallbackDisciplineCards;
+  return cards;
 }, fallbackDisciplineCards);
 
-export const getHomeVideos = cached("home-videos", async (): Promise<HomeVideos> => {
-  const payload = await payloadClient();
-  const home = await payload.findGlobal({ slug: "home-page", depth: 1 });
+export const getHomeVideos = cmsRead("home-videos", async (): Promise<HomeVideos> => {
+  const home = await loadHome();
   return { video: fileUrl(home.seasonVideo), mobileVideo: fileUrl(home.seasonVideoMobile), poster: imageUrl(home.seasonPoster) };
 }, {});
 
@@ -409,10 +412,9 @@ export const getHomeVideos = cached("home-videos", async (): Promise<HomeVideos>
 
 export type JourneyEntry = JourneySeason;
 
-export const getJourneySeasons = cached("journey", async (): Promise<JourneySeason[]> => {
+export const getJourneySeasons = cmsRead("journey", async (): Promise<JourneySeason[]> => {
   const payload = await payloadClient();
   const { docs } = await payload.find({ collection: "journey-seasons", sort: "year", limit: 100, depth: 1 });
-  if (!docs.length) return fallbackJourney;
   return docs.map((season) => ({
     year: season.year,
     game: season.game,
@@ -436,7 +438,7 @@ const fallbackOutreach: OutreachContent = {
   events: fallbackOutreachEvents
 };
 
-export const getOutreach = cached("outreach", async (): Promise<OutreachContent> => {
+export const getOutreach = cmsRead("outreach", async (): Promise<OutreachContent> => {
   const payload = await payloadClient();
   const [page, { docs }] = await Promise.all([
     payload.findGlobal({ slug: "outreach-page", depth: 1 }),
@@ -449,11 +451,10 @@ export const getOutreach = cached("outreach", async (): Promise<OutreachContent>
     heroVideo: fileUrl(page.heroVideo),
     heroPoster: imageUrl(page.heroPoster),
     intro: cmsImage(page.introPhoto),
-    stats: stats.length ? stats : fallbackOutreach.stats,
-    programs: programs.length ? programs : fallbackOutreach.programs,
-    partners: partners.length ? partners : fallbackOutreach.partners,
-    events: docs.length
-      ? docs.map((event) => ({
+    stats,
+    programs,
+    partners,
+    events: docs.map((event) => ({
           year: event.year,
           title: event.title,
           place: event.place,
@@ -461,6 +462,5 @@ export const getOutreach = cached("outreach", async (): Promise<OutreachContent>
           fit: event.showWholeImage ? "contain" as const : undefined,
           photo: cmsImage(event.photo)
         }))
-      : fallbackOutreach.events
   };
 }, fallbackOutreach);

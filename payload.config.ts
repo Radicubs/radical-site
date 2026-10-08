@@ -6,9 +6,10 @@ import { s3Storage } from "@payloadcms/storage-s3";
 import sharp from "sharp";
 import { Users } from "./cms/collections/Users";
 import { Media } from "./cms/collections/Media";
-import { Albums, BlogPosts, JourneySeasons, Mentors, OutreachEvents, Sponsors, TeamMembers } from "./cms/collections/content";
+import { Albums, BlogPosts, JourneySeasons, Mentors, OutreachEvents, Sponsors, TeamMembers, TeamRoles, TeamSeasons } from "./cms/collections/content";
 import { HomePage, OutreachPage, SiteSettings } from "./cms/globals";
 import { googleSignInEnabled } from "./cms/supabase-auth";
+import { databaseConnectionString } from "./cms/database-connection";
 
 const root = process.cwd();
 
@@ -66,16 +67,19 @@ export default buildConfig({
     },
     importMap: { baseDir: root }
   },
-  collections: [BlogPosts, Albums, JourneySeasons, OutreachEvents, TeamMembers, Mentors, Sponsors, Media, Users],
+  collections: [BlogPosts, Albums, JourneySeasons, OutreachEvents, TeamMembers, TeamRoles, TeamSeasons, Mentors, Sponsors, Media, Users],
   globals: [HomePage, OutreachPage, SiteSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: { outputFile: path.resolve(root, "cms/payload-types.ts") },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL || "",
+      connectionString: databaseConnectionString(process.env.DATABASE_URL || "", {
+        migration: process.argv.some((argument) => argument === "migrate" || argument.startsWith("migrate:")),
+        migrationUrl: process.env.DATABASE_MIGRATION_URL
+      }),
       // Each build worker / serverless instance gets its own pool. Keep it small
-      // and release idle sessions so they don't exhaust Supabase's session pooler.
+      // and release idle connections instead of holding unused clients open.
       max: 2,
       idleTimeoutMillis: 10000,
       connectionTimeoutMillis: 10000

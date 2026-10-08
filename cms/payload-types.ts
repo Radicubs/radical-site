@@ -72,6 +72,8 @@ export interface Config {
     'journey-seasons': JourneySeason;
     'outreach-events': OutreachEvent;
     'team-members': TeamMember;
+    'team-roles': TeamRole;
+    'team-seasons': TeamSeason;
     mentors: Mentor;
     sponsors: Sponsor;
     media: Media;
@@ -81,13 +83,19 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'team-seasons': {
+      members: 'team-members';
+    };
+  };
   collectionsSelect: {
     'blog-posts': BlogPostsSelect<false> | BlogPostsSelect<true>;
     albums: AlbumsSelect<false> | AlbumsSelect<true>;
     'journey-seasons': JourneySeasonsSelect<false> | JourneySeasonsSelect<true>;
     'outreach-events': OutreachEventsSelect<false> | OutreachEventsSelect<true>;
     'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
+    'team-roles': TeamRolesSelect<false> | TeamRolesSelect<true>;
+    'team-seasons': TeamSeasonsSelect<false> | TeamSeasonsSelect<true>;
     mentors: MentorsSelect<false> | MentorsSelect<true>;
     sponsors: SponsorsSelect<false> | SponsorsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -318,7 +326,7 @@ export interface OutreachEvent {
   createdAt: string;
 }
 /**
- * One entry per person per season. The Team page groups them by season.
+ * Create each person once. Edit their profile to add a new season, keeping the old assignments. Each season has its own role and photo. Unassigned people do not appear on the website.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "team-members".
@@ -327,17 +335,68 @@ export interface TeamMember {
   id: number;
   name: string;
   /**
-   * e.g. Senior Captain, Programming Lead, Sophomore
-   */
-  role: string;
-  /**
-   * The year the season starts, e.g. 2025 for 2025–26.
-   */
-  season: number;
-  /**
-   * A square-ish headshot works best.
+   * Prefills new season assignments. Existing seasons keep their saved photos.
    */
   photo?: (number | null) | Media;
+  /**
+   * Returning member? Add a new row here and keep the old one. Edit a row to change only that season’s role or photo. The + buttons create seasons or roles.
+   */
+  memberships?:
+    | {
+        season: number | TeamSeason;
+        role: number | TeamRole;
+        /**
+         * Changing this photo only affects this season. Leave empty to show initials.
+         */
+        photo?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  identityKey?: string | null;
+  mergedProfiles?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  role?: string | null;
+  season?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Create a season, then assign people to it in Team members. Related profiles appear below.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-seasons".
+ */
+export interface TeamSeason {
+  id: number;
+  /**
+   * Starting year: 2025 means the 2025–2026 robotics season.
+   */
+  year: number;
+  title?: string | null;
+  members?: {
+    docs?: (number | TeamMember)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Reusable roles for season assignments. You can also create a role from a person's role dropdown.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-roles".
+ */
+export interface TeamRole {
+  id: number;
+  name: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -457,6 +516,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'team-members';
         value: number | TeamMember;
+      } | null)
+    | ({
+        relationTo: 'team-roles';
+        value: number | TeamRole;
+      } | null)
+    | ({
+        relationTo: 'team-seasons';
+        value: number | TeamSeason;
       } | null)
     | ({
         relationTo: 'mentors';
@@ -587,9 +654,39 @@ export interface OutreachEventsSelect<T extends boolean = true> {
  */
 export interface TeamMembersSelect<T extends boolean = true> {
   name?: T;
+  photo?: T;
+  memberships?:
+    | T
+    | {
+        season?: T;
+        role?: T;
+        photo?: T;
+        id?: T;
+      };
+  identityKey?: T;
+  mergedProfiles?: T;
   role?: T;
   season?: T;
-  photo?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-roles_select".
+ */
+export interface TeamRolesSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-seasons_select".
+ */
+export interface TeamSeasonsSelect<T extends boolean = true> {
+  year?: T;
+  title?: T;
+  members?: T;
   updatedAt?: T;
   createdAt?: T;
 }

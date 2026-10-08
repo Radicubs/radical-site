@@ -21,6 +21,9 @@ import { NavProgress } from "@/components/ui/nav-progress";
 import { StarsBackground } from "@/components/animate-ui/components/backgrounds/stars";
 import { getSiteSettings } from "@/lib/cms";
 
+// CMS content and media must be read at request time, never frozen during a build.
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   return {

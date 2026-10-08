@@ -113,7 +113,7 @@ html[data-theme="light"] .gi {
 .gi-choice-text { display: grid; gap: 3px; flex: 1; }
 .gi-choice-text strong { font-size: 17px; font-weight: 600; }
 .gi-choice-text span { color: var(--gi-soft); font-size: 14px; }
-.gi-choice-arrow { color: var(--gi-soft); transition: transform .3s cubic-bezier(.3, 1.4, .5, 1), color .2s ease; }
+.gi-choice-arrow { color: var(--gi-soft); transition: transform .3s cubic-bezier(.22, 1, .36, 1), color .2s ease; }
 .gi-choice:hover .gi-choice-arrow { color: var(--gi-accent); transform: translateX(4px); }
 
 .gi-quiet {
@@ -219,7 +219,7 @@ html[data-theme="light"] .gi {
   border-radius: 50%;
   background: var(--gi-accent);
   color: var(--gi-accent-ink);
-  animation: gi-pop .5s cubic-bezier(.3, 1.5, .5, 1);
+  animation: gi-pop .5s cubic-bezier(.22, 1, .36, 1);
 }
 @keyframes gi-pop { from { transform: scale(.4); opacity: 0; } }
 
