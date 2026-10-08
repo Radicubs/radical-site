@@ -19,7 +19,7 @@ export default async function ContactPage() {
     applyUrl: settings.applyUrl,
     season: `${settings.applicationSeason}–${settings.applicationSeason + 1}`,
     email: settings.email,
-    turnstileSiteKey: process.env.TURNSTILE_SITE_KEY ?? "0x4AAAAAAAS8m1QMSH1rRxYU"
+    turnstileSiteKey: process.env.TURNSTILE_SITE_KEY?.trim() || "0x4AAAAAAAS8m1QMSH1rRxYU"
   };
 
   return (

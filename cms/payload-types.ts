@@ -140,6 +140,8 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Save Draft keeps a post in the editor. Publish makes it visible on the blog.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blog-posts".
  */

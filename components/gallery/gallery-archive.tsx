@@ -57,21 +57,12 @@ function TetrisGrid({ albums, onOpen }: { albums: GalleryAlbum[]; onOpen: (photo
   const [width, setWidth] = useState(0);
   const revealed = useRef(new Set<string>());
   const photos = useMemo(() => albums.flatMap((album) => album.photos), [albums]);
-  // CMS dimensions are often placeholders, so read each thumbnail's real
-  // aspect ratio before packing (tiles stay hidden until the reveal anyway).
-  const [ratios, setRatios] = useState<Record<string, number> | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all(photos.map((photo) => new Promise<[string, number]>((resolve) => {
-      const img = new Image();
-      const fallback = (photo.height || 3) / (photo.width || 4);
-      img.onload = () => resolve([photo.id, img.naturalWidth ? img.naturalHeight / img.naturalWidth : fallback]);
-      img.onerror = () => resolve([photo.id, fallback]);
-      img.src = photo.thumbSrc;
-    }))).then((entries) => { if (!cancelled) setRatios(Object.fromEntries(entries)); });
-    return () => { cancelled = true; };
-  }, [photos]);
+  // Pack immediately from upload metadata. Waiting for every thumbnail blocks
+  // the entire gallery on its slowest image and defeats lazy loading.
+  const ratios = useMemo(() => Object.fromEntries(photos.map((photo) => [
+    photo.id, photo.width > 0 && photo.height > 0 ? photo.height / photo.width : ROW_RATIO
+  ])), [photos]);
+  const eagerPhotos = useMemo(() => new Set(photos.slice(0, 4).map((photo) => photo.id)), [photos]);
 
   useLayoutEffect(() => {
     const el = ref.current;
@@ -97,7 +88,7 @@ function TetrisGrid({ albums, onOpen }: { albums: GalleryAlbum[]; onOpen: (photo
   }, [albums]);
 
   const { items, height } = useMemo((): { items: Placed[]; height: number } => {
-    if (!width || !ratios) return { items: [], height: 0 };
+    if (!width) return { items: [], height: 0 };
     const columns = columnsFor(width), gap = gapFor(width);
     const cell = (width - gap * (columns - 1)) / columns;
     const rowH = cell * ROW_RATIO;
@@ -124,11 +115,15 @@ function TetrisGrid({ albums, onOpen }: { albums: GalleryAlbum[]; onOpen: (photo
       gsap.to(hits, { opacity: 1, y: 0, duration: 0.42, ease: "steps(4)", stagger: 0.045, clearProps: "transform,opacity" });
     }, { rootMargin: "0px 0px -8% 0px" });
     tiles.forEach((tile) => observer.observe(tile));
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      gsap.killTweensOf(tiles);
+      gsap.set(tiles, { clearProps: "transform,opacity" });
+    };
   }, [items]);
 
   return (
-    <div ref={ref} className="gallery-tetris" style={{ height: ratios ? height : 360 }}>
+    <div ref={ref} className="gallery-tetris" style={{ height: width ? height : 360 }}>
       {items.map(({ piece, x, y, w, h }) => {
         const style = { left: x, top: y, width: w, height: h };
         if (piece.kind === "year") return (
@@ -162,7 +157,7 @@ function TetrisGrid({ albums, onOpen }: { albums: GalleryAlbum[]; onOpen: (photo
               width={photo.width}
               height={photo.height}
               alt={photo.alt}
-              loading="lazy"
+              loading={eagerPhotos.has(photo.id) ? "eager" : "lazy"}
               decoding="async"
             />
           </button>

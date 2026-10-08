@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { getPayload } from "payload";
 import config from "@payload-config";
@@ -196,25 +197,32 @@ function lexicalToSections(content: unknown): BlogSection[] | undefined {
   return sections.length ? sections : undefined;
 }
 
-export const getBlogPosts = cached("blog-posts", async (): Promise<BlogPost[]> => {
-  const payload = await payloadClient();
-  const { docs } = await payload.find({ collection: "blog-posts", sort: "-date", limit: 1000, depth: 2 });
-  if (!docs.length) return fallbackBlogPosts;
-  return docs.map((post) => {
-    const cover = asMedia(post.cover);
-    return {
-      slug: post.slug || "",
-      date: formatDate(post.date),
-      title: post.title,
-      excerpt: post.excerpt || "",
-      cover: cover ? variant(cover, ["large", "medium", "small"])?.url : undefined,
-      coverSrcSet: cover ? srcSet(cover) : undefined,
-      sections: lexicalToSections(post.content),
-      sourceUrl: post.youtubeVideo || undefined,
-      external: Boolean(post.youtubeVideo)
-    } satisfies BlogPost;
-  });
-}, fallbackBlogPosts);
+// Blog publishing must not reuse a build-time snapshot of posts or media.
+// React cache deduplicates metadata/page reads within one request only.
+export const getBlogPosts = cache(async (): Promise<BlogPost[]> => {
+  try {
+    const payload = await payloadClient();
+    const { docs } = await payload.find({ collection: "blog-posts", sort: "-date", limit: 1000, depth: 2, overrideAccess: false, draft: false });
+    if (!docs.length) return fallbackBlogPosts;
+    return docs.map((post) => {
+      const cover = asMedia(post.cover);
+      return {
+        slug: post.slug || "",
+        date: formatDate(post.date),
+        title: post.title,
+        excerpt: post.excerpt || "",
+        cover: cover ? variant(cover, ["large", "medium", "small"])?.url : undefined,
+        coverSrcSet: cover ? srcSet(cover) : undefined,
+        sections: lexicalToSections(post.content),
+        sourceUrl: post.youtubeVideo || undefined,
+        external: Boolean(post.youtubeVideo)
+      } satisfies BlogPost;
+    });
+  } catch (error) {
+    console.error("CMS read failed for blog-posts:", error instanceof Error ? error.message : error);
+    return fallbackBlogPosts;
+  }
+});
 
 export async function getBlogPost(slug: string): Promise<BlogPost | undefined> {
   return (await getBlogPosts()).find((post) => post.slug === slug);

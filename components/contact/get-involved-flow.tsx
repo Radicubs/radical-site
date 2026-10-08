@@ -25,23 +25,44 @@ const INTERESTS = ["Financial sponsorship", "Parts or materials", "Tools or serv
 type Props = { applyUrl: string; season: string; email: string; turnstileSiteKey: string };
 
 declare global {
-  interface Window { turnstile?: { render: (el: HTMLElement, options: { sitekey: string; theme?: string }) => string; remove: (id: string) => void } }
+  interface Window { turnstile?: {
+    render: (el: HTMLElement, options: {
+      sitekey: string;
+      theme?: string;
+      callback: (token: string) => void;
+      "response-field": boolean;
+      "expired-callback": () => void;
+      "error-callback": () => void;
+      "timeout-callback": () => void;
+    }) => string;
+    remove: (id: string) => void;
+  } }
 }
 
 /** Turnstile rendered on demand, since the widget only appears on the last step. */
-function Turnstile({ siteKey }: { siteKey: string }) {
+function Turnstile({ siteKey, onToken }: { siteKey: string; onToken: (token: string) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     let id: string | undefined;
     let timer = 0;
+    onToken("");
     const mount = () => {
       if (!ref.current) return;
       if (!window.turnstile) { timer = window.setTimeout(mount, 200); return; }
-      id = window.turnstile.render(ref.current, { sitekey: siteKey, theme: document.documentElement.dataset.theme === "light" ? "light" : "dark" });
+      id = window.turnstile.render(ref.current, {
+        sitekey: siteKey,
+        theme: document.documentElement.dataset.theme === "light" ? "light" : "dark",
+        // The form owns one response field, populated only after verification.
+        "response-field": false,
+        callback: onToken,
+        "expired-callback": () => onToken(""),
+        "error-callback": () => onToken(""),
+        "timeout-callback": () => onToken("")
+      });
     };
     mount();
-    return () => { window.clearTimeout(timer); if (id) window.turnstile?.remove(id); };
-  }, [siteKey]);
+    return () => { window.clearTimeout(timer); if (id !== undefined) window.turnstile?.remove(id); onToken(""); };
+  }, [siteKey, onToken]);
   return <div ref={ref} className="gi-turnstile" />;
 }
 
@@ -68,6 +89,7 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
   const [error, setError] = useState<string | null>(result && !succeeded ? result : null);
   // Turnstile tokens are single-use, so a failed send remounts the widget for a new one.
   const [attempt, setAttempt] = useState(0);
+  const [captchaToken, setCaptchaToken] = useState("");
   const panel = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
 
@@ -101,6 +123,10 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
     : path === "student" ? `[Student question]\n\n${form.note}` : form.note;
 
   const send = async (formEl: HTMLFormElement) => {
+    if (!captchaToken) {
+      setError("Please complete the verification before sending.");
+      return false;
+    }
     try {
       const response = await fetch("/api/contact", { method: "POST", body: new FormData(formEl) });
       const data = (await response.json()) as { success: boolean; message: string | null };
@@ -109,6 +135,7 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
     } catch {
       setError("Your message didn't go through.");
     }
+    setCaptchaToken("");
     setAttempt((n) => n + 1);
     return false;
   };
@@ -231,8 +258,8 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
             <textarea rows={5} maxLength={1400} value={form.note} onChange={set("note")} required={step === "ask"} placeholder={step === "note" ? "Timeline, budget, questions…" : "How can we help?"} />
           </label>
           <div className="gi-send">
-            <Turnstile key={attempt} siteKey={turnstileSiteKey} />
-            <PaperPlaneButton onSend={send} />
+            <Turnstile key={attempt} siteKey={turnstileSiteKey} onToken={setCaptchaToken} />
+            <PaperPlaneButton onSend={send} disabled={!captchaToken} />
           </div>
         </>
       );
@@ -257,6 +284,7 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
       <input type="hidden" name="name" value={form.name} />
       <input type="hidden" name="email" value={form.email} />
       <input type="hidden" name="message" value={message} />
+      <input type="hidden" name="cf-turnstile-response" value={captchaToken} />
 
       <div className="gi-top">
         <button type="button" className="gi-back" onClick={back} aria-label="Back" data-hidden={!showProgress}>

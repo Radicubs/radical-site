@@ -26,7 +26,8 @@ export const BlogPosts: CollectionConfig = {
   admin: {
     group: "Content",
     useAsTitle: "title",
-    defaultColumns: ["title", "date", "updatedAt"],
+    description: "Save Draft keeps a post in the editor. Publish makes it visible on the blog.",
+    defaultColumns: ["title", "date", "_status", "updatedAt"],
     listSearchableFields: ["title", "excerpt"]
   },
   defaultSort: "-date",

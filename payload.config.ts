@@ -72,7 +72,14 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: { outputFile: path.resolve(root, "cms/payload-types.ts") },
   db: postgresAdapter({
-    pool: { connectionString: process.env.DATABASE_URL || "" },
+    pool: {
+      connectionString: process.env.DATABASE_URL || "",
+      // Each build worker / serverless instance gets its own pool. Keep it small
+      // and release idle sessions so they don't exhaust Supabase's session pooler.
+      max: 2,
+      idleTimeoutMillis: 10000,
+      connectionTimeoutMillis: 10000
+    },
     // Local development and the live site share one Supabase database, so the
     // schema only changes through migrations (cms/migrations, run by `npm run build`).
     push: false,

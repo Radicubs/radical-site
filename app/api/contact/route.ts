@@ -1,4 +1,4 @@
-const CONTACT_API_URL = process.env.CONTACT_API_URL ?? "https://contact.radicubs.com";
+const CONTACT_API_URL = process.env.CONTACT_API_URL?.trim() || "https://contact.radicubs.com";
 
 /**
  * Relays the get-involved form to the contact API. The API answers every post with a
@@ -7,6 +7,10 @@ const CONTACT_API_URL = process.env.CONTACT_API_URL ?? "https://contact.radicubs
  */
 export async function POST(request: Request) {
   const form = await request.formData();
+  const token = form.get("cf-turnstile-response");
+  if (typeof token !== "string" || !token.trim()) {
+    return Response.json({ success: false, message: "Please complete the verification before sending." }, { status: 400 });
+  }
   const body = new URLSearchParams();
   for (const [key, value] of form) if (typeof value === "string") body.append(key, value);
 

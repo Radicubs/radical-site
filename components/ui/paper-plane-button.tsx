@@ -15,7 +15,7 @@ const FLIGHT_MS = 1100;
  * plane flies and the button settles on the result; without it, the native submit is
  * held until the plane is gone.
  */
-export function PaperPlaneButton({ label = "Send", doneLabel = "Sent", done = false, onSend }: { label?: string; doneLabel?: string; done?: boolean; onSend?: (form: HTMLFormElement) => Promise<boolean> }) {
+export function PaperPlaneButton({ label = "Send", doneLabel = "Sent", done = false, disabled = false, onSend }: { label?: string; doneLabel?: string; done?: boolean; disabled?: boolean; onSend?: (form: HTMLFormElement) => Promise<boolean> }) {
   const [state, setState] = useState<State>(done ? "done" : "idle");
   const ref = useRef<HTMLButtonElement>(null);
   const sendRef = useRef(onSend);
@@ -62,7 +62,7 @@ export function PaperPlaneButton({ label = "Send", doneLabel = "Sent", done = fa
   }, [state]);
 
   return (
-    <button ref={ref} className="plane-btn" data-state={state} type="submit" aria-busy={state === "sending"} aria-label={state === "sending" ? "Sending…" : state === "done" ? doneLabel : label}>
+    <button ref={ref} className="plane-btn" data-state={state} type="submit" disabled={disabled || state === "sending"} aria-busy={state === "sending"} aria-label={state === "sending" ? "Sending…" : state === "done" ? doneLabel : label}>
       <span className="plane-paper" aria-hidden="true"><span className="plane-label">{label}</span></span>
       <svg className="plane-svg" viewBox="0 0 48 32" aria-hidden="true">
         <path className="plane-trail" d="M-34 30C-20 27-8 24 6 18" />

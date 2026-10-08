@@ -39,6 +39,18 @@ The Supabase certificate in `cms/certs/supabase-ca.crt` is included in server
 bundles for database URLs using verified TLS. The build command also runs the
 Payload migrations against the configured database.
 
+For `DATABASE_URL`, copy the **Session pooler** URI (port `5432`) from
+Supabase's **Connect** dialog, fill in the database password, and preserve the
+project-specific host and username (`postgres.<project-ref>`). Use the session
+pooler because the build runs migrations with the same connection. Preserve
+the TLS parameters described in `.env.example`.
+
+If Vercel reports `connect ENETUNREACH` with an IPv6 address during migrations,
+replace the direct database URI in the applicable Vercel environment with the
+session pooler URI and create a new deployment. Supabase's direct database host
+uses IPv6 by default; the shared session pooler supports IPv4. See
+[Supabase's network compatibility guide](https://supabase.com/docs/guides/troubleshooting/supabase--your-network-ipv4-and-ipv6-compatibility-cHe3BP).
+
 ## Content / asset sourcing
 
 Current navigation, mission copy, team roster, mentor roster, awards, individual sponsor names, blog titles and dates, 2026 blog copy, PayPal link, application link, robot image, favicon mark, team portraits, sponsor artwork, and blog covers were mapped from the original site and its CMS. All site-owned media is stored locally in this project.
