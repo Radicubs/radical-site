@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   for (const [key, value] of form) if (typeof value === "string") body.append(key, value);
 
   try {
-    const upstream = await fetch(CONTACT_API_URL, { method: "POST", body, redirect: "manual", cache: "no-store" });
+    const upstream = await fetch(CONTACT_API_URL, { method: "POST", body, redirect: "manual", cache: "no-store", signal: AbortSignal.timeout(15000) });
     const location = upstream.headers.get("location");
     const result = location ? new URL(location, CONTACT_API_URL).searchParams : null;
     const success = result ? result.get("success") === "true" : upstream.ok;

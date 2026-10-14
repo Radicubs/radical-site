@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata, seoPages } from "@/lib/seo";
 import { OutreachBody } from "@/components/outreach/outreach-body";
 import { OutreachHero } from "@/components/outreach/outreach-hero";
 import { FinalCtaSection } from "@/components/sections/final-cta-section";
@@ -6,10 +6,7 @@ import { Footer } from "@/components/sections/footer";
 import { Navbar } from "@/components/sections/navbar";
 import { getOutreach, getSiteSettings } from "@/lib/cms";
 
-export const metadata: Metadata = {
-  title: "Outreach | Radicubs",
-  description: "How Radicubs FRC Team 7503 brings STEM to the community through RadiCamp, library tech nights, workshops and robot demos."
-};
+export const metadata = pageMetadata("/outreach", seoPages["/outreach"]);
 
 export default async function OutreachPage() {
   const [settings, outreach] = await Promise.all([getSiteSettings(), getOutreach()]);

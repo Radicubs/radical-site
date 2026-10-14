@@ -35,6 +35,12 @@ and connect it to `Radicubs/radical-site`. Root Directory is a dashboard setting
 it cannot be overridden by `vercel.json`.
 
 Add the required variables from `.env.example` to the deployment environment.
+The contact form's Turnstile widget must authorize `radicubs.vercel.app` in
+Cloudflare → Turnstile → the widget matching `TURNSTILE_SITE_KEY` → Hostname
+Management. Add other deployed hostnames there as needed. Cloudflare error
+`110200` means the current hostname is not authorized and prevents email
+submission. Keep the widget's site key paired with the secret used by the
+contact service; a hostname change does not require replacing the keys.
 The Supabase certificate in `cms/certs/supabase-ca.crt` is included in server
 bundles for database URLs using verified TLS. The build command also runs the
 Payload migrations against the configured database.
@@ -107,3 +113,14 @@ The dark and green values are consistent with Radicubs' prior public stylesheet;
 Run `npx tsc --noEmit --incremental false` for TypeScript validation and
 `npm run build` for migrations and the production build. To build without applying
 migrations, use `NEXT_DIST_DIR=.next-build npx next build`.
+
+
+## Search engine optimization
+
+`lib/seo.ts` owns public-page titles, descriptions, canonical URLs, and social metadata. `SITE_URL` defaults to `https://radicubs.com`; set it only to the permanent production origin, including the preferred www/non-www form. Temporary Vercel deployments use production canonicals and receive `X-Robots-Tag: noindex, nofollow` when `VERCEL_ENV` is not `production`.
+
+`/sitemap.xml` reads published blog posts from the CMS on each request and includes all public content pages. Redirects, the calibration tool, admin, auth, and API routes are excluded. `/robots.txt` advertises the sitemap; admin/auth/API responses also carry noindex headers, and the calibration page has noindex metadata. These are crawler instructions, not access controls.
+
+The homepage includes Organization and WebSite JSON-LD. Blog pages include BlogPosting JSON-LD, article social metadata, and CMS publication/modification timestamps. Keep CMS excerpts descriptive and media alt text specific to each image. The default sharing image is `public/social-card.png` (1200 × 630); posts use their own cover when available.
+
+After deploying, add the property in Google Search Console and Bing Webmaster Tools, optionally set `GOOGLE_SITE_VERIFICATION` and `BING_SITE_VERIFICATION` to their supplied tokens, and submit `https://radicubs.com/sitemap.xml`. Check representative URLs with URL Inspection and Google's Rich Results Test. Monitor indexing, search queries, and Core Web Vitals after real traffic arrives; metadata and structured data do not guarantee rankings or enhanced results.

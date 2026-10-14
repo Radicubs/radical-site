@@ -20,6 +20,7 @@ import { SiteLoader } from "@/components/ui/site-loader";
 import { NavProgress } from "@/components/ui/nav-progress";
 import { StarsBackground } from "@/components/animate-ui/components/backgrounds/stars";
 import { getSiteSettings } from "@/lib/cms";
+import { siteUrl, socialImage } from "@/lib/seo";
 
 // CMS content and media must be read at request time, never frozen during a build.
 export const dynamic = "force-dynamic";
@@ -27,8 +28,17 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   return {
+    metadataBase: new URL(siteUrl),
     title: "Radicubs | FRC Team 7503",
     description: settings.description,
+    applicationName: "Radicubs",
+    category: "education",
+    robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
+    verification: {
+      google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+      other: process.env.BING_SITE_VERIFICATION ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION } : undefined
+    },
+    twitter: { card: "summary_large_image", title: "Radicubs | FRC Team 7503", description: settings.description, images: [socialImage.url] },
     manifest: "/site.webmanifest",
     icons: {
       icon: [
@@ -42,7 +52,10 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: "Radicubs | FRC Team 7503",
       description: settings.description,
-      type: "website"
+      type: "website",
+      siteName: "Radicubs",
+      locale: "en_US",
+      images: [socialImage]
     }
   };
 }

@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+import { pageMetadata, seoPages } from "@/lib/seo";
 import { Navbar } from "@/components/sections/navbar";
 import { Footer } from "@/components/sections/footer";
 import { PostCard } from "@/components/blog/post-card";
 import { AnimatedSection } from "@/components/ui/animated-section";
 import { getBlogPosts, getSiteSettings } from "@/lib/cms";
 
-export const metadata: Metadata = { title: "Blog | Radicubs" };
+export const metadata = pageMetadata("/blog", seoPages["/blog"]);
 export const dynamic = "force-dynamic";
 
 export default async function BlogPage() {

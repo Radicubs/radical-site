@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata, seoPages } from "@/lib/seo";
 import type { CSSProperties } from "react";
 import Link from "@/components/ui/intent-link";
 import { ArrowUpRight, Bus, Megaphone, Package, Trophy, Warehouse, Wrench } from "lucide-react";
@@ -11,10 +11,7 @@ import { ContinueButton } from "@/components/ui/continue-button";
 import { DonateLink } from "@/components/ui/donate-link";
 import "./sponsors.css";
 
-export const metadata: Metadata = {
-  title: "Sponsors | Radicubs",
-  description: "Meet the companies, foundations, and families who help Radicubs build and compete."
-};
+export const metadata = pageMetadata("/sponsors", seoPages["/sponsors"]);
 
 const funds = [
   { icon: Trophy, title: "Competition fees", copy: "Entry fees for the FIRST Robotics Competition events we attend each season." },

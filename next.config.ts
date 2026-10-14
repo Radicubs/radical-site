@@ -39,6 +39,24 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // Preview deployments can be crawled to discover this noindex directive,
+      // while canonical URLs continue to point at the production site.
+      ...(process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production" ? [{
+        source: "/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }]
+      }] : []),
+      {
+        source: "/admin/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }]
+      },
+      {
+        source: "/api/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }]
+      },
+      {
+        source: "/auth/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }]
+      },
       {
         source: "/:all*(\\.avif|\\.webp|\\.png|\\.jpg|\\.jpeg|\\.JPG|\\.PNG|\\.gif|\\.svg|\\.ico|\\.mp4|\\.webm|\\.glb)",
         headers: [{ key: "Cache-Control", value: STATIC_MEDIA_CACHE }]

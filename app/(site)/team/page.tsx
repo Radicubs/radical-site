@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata, seoPages } from "@/lib/seo";
 import Link from "@/components/ui/intent-link";
 import { Navbar } from "@/components/sections/navbar";
 import { Footer } from "@/components/sections/footer";
@@ -6,7 +6,7 @@ import { TeamRosters } from "@/components/team/team-rosters";
 import { AnimatedSection } from "@/components/ui/animated-section";
 import { getSiteSettings, getTeamRosters } from "@/lib/cms";
 
-export const metadata: Metadata = { title: "Team | Radicubs" };
+export const metadata = pageMetadata("/team", seoPages["/team"]);
 
 export default async function TeamPage() {
   const [rosters, settings] = await Promise.all([getTeamRosters(), getSiteSettings()]);

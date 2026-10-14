@@ -1,13 +1,10 @@
-import type { Metadata } from "next";
+import { pageMetadata, seoPages } from "@/lib/seo";
 import { Navbar } from "@/components/sections/navbar";
 import { GalleryArchive } from "@/components/gallery/gallery-archive";
 import { Footer } from "@/components/sections/footer";
 import { getPhotoAlbums, getSiteSettings } from "@/lib/cms";
 
-export const metadata: Metadata = {
-  title: "Gallery | Radicubs",
-  description: "Photos from Team 7503's build seasons, competitions, and events."
-};
+export const metadata = pageMetadata("/gallery", seoPages["/gallery"]);
 
 export default async function GalleryPage() {
   const [settings, albums] = await Promise.all([getSiteSettings(), getPhotoAlbums()]);

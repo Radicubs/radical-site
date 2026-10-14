@@ -208,6 +208,8 @@ export const getBlogPosts = cache(async (): Promise<BlogPost[]> => {
       return {
         slug: post.slug || "",
         date: formatDate(post.date),
+        publishedAt: post.date || undefined,
+        updatedAt: post.updatedAt || undefined,
         title: post.title,
         excerpt: post.excerpt || "",
         cover: cover ? variant(cover, ["large", "medium", "small"])?.url : undefined,

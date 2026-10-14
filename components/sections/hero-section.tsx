@@ -18,7 +18,7 @@ export function HeroSection({ settings, photos }: { settings: SiteSettings; phot
         <DriftWall items={items} decorative columns={7} tileWidth={245} tileHeight={178} gap={15} radius={12} tilt={1} turn={0} perspective={850} depth={200} scale={1.05} curve={700} speed={12} variance={0.22} parallax={0.45} lift={70} dim={1} fade={0.08} overlayColor="transparent" />
       </div>
       <div className="home-hero-content">
-        <h1 id="home-title"><span className="sr-only">Radicubs</span><HeroElectricWordmark /></h1>
+        <h1 id="home-title"><span className="sr-only">Radicubs — FRC Team 7503 in Frisco, Texas</span><HeroElectricWordmark /></h1>
         <p className="home-hero-description">We build robots, compete, and figure things out together in Frisco, Texas.</p>
         <div className="home-hero-actions">
           <PixelArrowButton href={settings.applyUrl} external>Join the team</PixelArrowButton>

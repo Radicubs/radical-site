@@ -3,6 +3,7 @@ import { RobotCalibrationStudio } from "@/components/robot/robot-calibration-stu
 import "./calibrate.css";
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: false },
   title: "Robot alignment bench | Radicubs 7503",
   description: "Calibrate the robot CAD model against the competition-field plate.",
 };

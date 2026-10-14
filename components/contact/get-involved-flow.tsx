@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { KeyboardEvent, ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -32,7 +32,7 @@ declare global {
       callback: (token: string) => void;
       "response-field": boolean;
       "expired-callback": () => void;
-      "error-callback": () => void;
+      "error-callback": (code: string) => void;
       "timeout-callback": () => void;
     }) => string;
     remove: (id: string) => void;
@@ -40,29 +40,41 @@ declare global {
 }
 
 /** Turnstile rendered on demand, since the widget only appears on the last step. */
-function Turnstile({ siteKey, onToken }: { siteKey: string; onToken: (token: string) => void }) {
+function Turnstile({ siteKey, onToken, onError }: { siteKey: string; onToken: (token: string) => void; onError: (message: string) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     let id: string | undefined;
     let timer = 0;
     onToken("");
+    const fail = () => {
+      onToken("");
+      onError("Verification couldn't load or failed. Retry verification, and check that your browser allows challenges.cloudflare.com.");
+    };
+    const loadTimeout = window.setTimeout(fail, 15000);
     const mount = () => {
       if (!ref.current) return;
       if (!window.turnstile) { timer = window.setTimeout(mount, 200); return; }
-      id = window.turnstile.render(ref.current, {
-        sitekey: siteKey,
-        theme: document.documentElement.dataset.theme === "light" ? "light" : "dark",
-        // The form owns one response field, populated only after verification.
-        "response-field": false,
-        callback: onToken,
-        "expired-callback": () => onToken(""),
-        "error-callback": () => onToken(""),
-        "timeout-callback": () => onToken("")
-      });
+      window.clearTimeout(loadTimeout);
+      try {
+        id = window.turnstile.render(ref.current, {
+          sitekey: siteKey,
+          theme: document.documentElement.dataset.theme === "light" ? "light" : "dark",
+          // The form owns one response field, populated only after verification.
+          "response-field": false,
+          callback: onToken,
+          "expired-callback": () => { onToken(""); onError("Verification expired. Please verify again before sending."); },
+          "error-callback": (code) => {
+            if (code !== "110200") { fail(); return; }
+            onToken("");
+            onError("Verification isn't configured for this website address. Please email us directly while we fix it.");
+          },
+          "timeout-callback": fail
+        });
+      } catch { fail(); }
     };
     mount();
-    return () => { window.clearTimeout(timer); if (id !== undefined) window.turnstile?.remove(id); onToken(""); };
-  }, [siteKey, onToken]);
+    return () => { window.clearTimeout(timer); window.clearTimeout(loadTimeout); if (id !== undefined) window.turnstile?.remove(id); onToken(""); };
+  }, [siteKey, onToken, onError]);
   return <div ref={ref} className="gi-turnstile" />;
 }
 
@@ -90,6 +102,16 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
   // Turnstile tokens are single-use, so a failed send remounts the widget for a new one.
   const [attempt, setAttempt] = useState(0);
   const [captchaToken, setCaptchaToken] = useState("");
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+  const onToken = useCallback((token: string) => {
+    setCaptchaToken(token);
+    if (token) setVerificationError(null);
+  }, []);
+  const retryVerification = () => {
+    setVerificationError(null);
+    setCaptchaToken("");
+    setAttempt((n) => n + 1);
+  };
   const panel = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
 
@@ -124,13 +146,13 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
 
   const send = async (formEl: HTMLFormElement) => {
     if (!captchaToken) {
-      setError("Please complete the verification before sending.");
+      setVerificationError("Please complete the verification before sending. If it isn't visible, retry verification.");
       return false;
     }
     try {
-      const response = await fetch("/api/contact", { method: "POST", body: new FormData(formEl) });
+      const response = await fetch("/api/contact", { method: "POST", body: new FormData(formEl), signal: AbortSignal.timeout(20000) });
       const data = (await response.json()) as { success: boolean; message: string | null };
-      if (data.success) { setError(null); go("sent"); return true; }
+      if (response.ok && data.success) { setError(null); go("sent"); return true; }
       setError(data.message ?? "Your message didn't go through.");
     } catch {
       setError("Your message didn't go through.");
@@ -258,9 +280,15 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
             <textarea rows={5} maxLength={1400} value={form.note} onChange={set("note")} required={step === "ask"} placeholder={step === "note" ? "Timeline, budget, questions…" : "How can we help?"} />
           </label>
           <div className="gi-send">
-            <Turnstile key={attempt} siteKey={turnstileSiteKey} onToken={setCaptchaToken} />
-            <PaperPlaneButton onSend={send} disabled={!captchaToken} />
+            <Turnstile key={attempt} siteKey={turnstileSiteKey} onToken={onToken} onError={setVerificationError} />
+            <PaperPlaneButton onSend={send} />
           </div>
+          {verificationError && (
+            <div className="gi-verification-error">
+              <p role="alert">{verificationError} You can also email <a href={`mailto:${email}`}>{email}</a>.</p>
+              <button type="button" className="gi-quiet" onClick={retryVerification}>Retry verification</button>
+            </div>
+          )}
         </>
       );
       break;

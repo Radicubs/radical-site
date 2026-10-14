@@ -197,6 +197,10 @@ html[data-theme="light"] .gi {
 
 .gi-send { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; }
 .gi-turnstile:empty { display: none; }
+.gi-verification-error { margin-top: 16px; color: var(--gi-copy); font-size: 14px; line-height: 1.5; }
+.gi-verification-error p { margin: 0; }
+.gi-verification-error a { text-decoration: underline; }
+.gi-verification-error .gi-quiet { margin-top: 10px; }
 
 .gi-error {
   margin: -10px 0 20px;

@@ -8,6 +8,8 @@ export type BlogSection = { heading: string; paragraphs: string[]; images?: Blog
 export type BlogPost = {
   slug: string;
   date: string;
+  publishedAt?: string;
+  updatedAt?: string;
   title: string;
   excerpt: string;
   cover?: string;

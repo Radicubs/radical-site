@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata, seoPages } from "@/lib/seo";
 import { Suspense } from "react";
 import Script from "next/script";
 import { AnimatedSection } from "@/components/ui/animated-section";
@@ -8,10 +8,7 @@ import { getSiteSettings } from "@/lib/cms";
 import { GetInvolvedFlow } from "@/components/contact/get-involved-flow";
 import "./contact.css";
 
-export const metadata: Metadata = {
-  title: "Get Involved | Radicubs",
-  description: "Want to join, support, or ask something about Radicubs? Get in touch with the team."
-};
+export const metadata = pageMetadata("/contact", seoPages["/contact"]);
 
 export default async function ContactPage() {
   const settings = await getSiteSettings();

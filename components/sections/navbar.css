@@ -281,7 +281,10 @@
 }
 
 @media (max-width: 1024px) {
-  .rnav { padding: 0 12px; }
+  /* Float over the hero instead of reserving a blank row above it. */
+  .rnav { position: fixed; inset: 0 0 auto; padding: 0 12px; }
+  /* Text-led pages still need room for their first heading. */
+  .rnav + :not(.home-hero) { margin-top: 64px; }
   .rnav-bar { grid-template-columns: auto 1fr; min-height: 64px; padding: 0 8px 0 14px; }
   .rnav-links, .rnav-secondary, .rnav-bar .rnav-cta { display: none; }
   .rnav-logo { justify-self: start; }

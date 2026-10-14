@@ -1,14 +1,11 @@
-import type { Metadata } from "next";
+import { pageMetadata, seoPages } from "@/lib/seo";
 import { ArrowUpRight } from "lucide-react";
 import { Navbar } from "@/components/sections/navbar";
 import { Footer } from "@/components/sections/footer";
 import { AnimatedSection } from "@/components/ui/animated-section";
 import { getJourneySeasons } from "@/lib/cms";
 
-export const metadata: Metadata = {
-  title: "Journey | Radicubs",
-  description: "See how Radicubs has grown, one robot and one season at a time, since 2019."
-};
+export const metadata = pageMetadata("/journey", seoPages["/journey"]);
 
 export default async function JourneyPage() {
   const journeySeasons = await getJourneySeasons();
