@@ -13,6 +13,7 @@ import "./globals.css";
 import "./refresh.css";
 import "./home-reference.css";
 import "./theme-light.css";
+import "./responsive.css";
 import { MotionSystem } from "@/components/ui/motion-system";
 import ClickSpark from "@/components/ClickSpark";
 import { SmoothScroll } from "@/components/ui/smooth-scroll";

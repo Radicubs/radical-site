@@ -11,7 +11,9 @@ function CountUp({ value, suffix = "", plain }: { value: number; suffix?: string
   const reduce = useReducedMotion();
   // Years count up over their last few values so they don't spin through 0–2000.
   const from = plain ? value - 5 : 0;
-  const [shown, setShown] = useState(reduce ? value : from);
+  // Render the same readable value on the server and during hydration.
+  // The motion preference is only applied by the effect after mounting.
+  const [shown, setShown] = useState(value);
 
   useEffect(() => {
     if (!inView || reduce) { setShown(value); return; }
