@@ -26,7 +26,6 @@
 }
 
 
-html[data-skip-loader] .site-loader{display:none!important}
 
 /* React Bits DotGrid page background */
 body{position:relative;background:linear-gradient(180deg,#070809 0%,#0a0c0d 48%,#0e1012 100%)}

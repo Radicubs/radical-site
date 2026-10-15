@@ -186,6 +186,8 @@ const DriftWall = ({
   );
 
   useEffect(() => {
+    let visible = true;
+    const shouldAnimate = () => visible && !document.hidden && !reduced;
     const animate = (ts: number) => {
       if (lastTsRef.current === null) lastTsRef.current = ts;
       const dt = Math.min(0.05, Math.max(0, ts - lastTsRef.current) / 1000);
@@ -224,11 +226,38 @@ const DriftWall = ({
         }
       }
 
-      rafRef.current = requestAnimationFrame(animate);
+      rafRef.current = shouldAnimate() ? requestAnimationFrame(animate) : null;
     };
 
-    rafRef.current = requestAnimationFrame(animate);
+    // Keep the hero's composition even with reduced motion, but stop running
+    // its animation loop once it scrolls away or the browser tab is hidden.
+    applyPlaneTransform(0, 0);
+    for (let c = 0; c < trackRefs.current.length; c++) {
+      const track = trackRefs.current[c];
+      if (track) track.style.transform = `translate3d(0, ${-(offsetsRef.current[c] ?? 0)}px, 0)`;
+    }
+    const syncAnimation = () => {
+      if (shouldAnimate()) {
+        if (rafRef.current === null) {
+          lastTsRef.current = null;
+          rafRef.current = requestAnimationFrame(animate);
+        }
+      } else {
+        if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+        lastTsRef.current = null;
+      }
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      syncAnimation();
+    });
+    if (containerRef.current) observer.observe(containerRef.current);
+    document.addEventListener('visibilitychange', syncAnimation);
+    syncAnimation();
     return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', syncAnimation);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
       lastTsRef.current = null;

@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { getPayload } from "payload";
 import config from "@payload-config";
-import type { Album, Media } from "@/cms/payload-types";
+import type { Album, Media, BlogPost as CmsBlogPost } from "@/cms/payload-types";
 import { blogPosts as fallbackBlogPosts, type BlogBlock, type BlogPost, type BlogSection } from "@/data/blog";
 import { disciplines as fallbackDisciplines } from "@/data/disciplines";
 import { journeySeasons as fallbackJourney, type JourneySeason } from "@/data/journey";
@@ -75,6 +75,8 @@ function cmsRead<T>(key: string, load: () => Promise<T>, fallback: T): () => Pro
   });
 }
 
+const loadSettings = cache(async () => (await payloadClient()).findGlobal({ slug: "site-settings", depth: 0 }));
+
 const loadHome = cache(async () => (await payloadClient()).findGlobal({ slug: "home-page", depth: 1 }));
 
 const asMedia = (value: unknown): Media | undefined =>
@@ -122,8 +124,7 @@ const formatDate = (value?: string | null) => value
 // Site settings
 
 export const getSiteSettings = cmsRead("site-settings", async (): Promise<SiteSettings> => {
-  const payload = await payloadClient();
-  const settings = await payload.findGlobal({ slug: "site-settings", depth: 0 });
+  const settings = await loadSettings();
   return {
     ...site,
     name: settings.name || site.name,
@@ -196,40 +197,57 @@ function lexicalToSections(content: unknown): BlogSection[] | undefined {
   return sections.length ? sections : undefined;
 }
 
-// Blog publishing must not reuse a build-time snapshot of posts or media.
-// React cache deduplicates metadata/page reads within one request only.
-export const getBlogPosts = cache(async (): Promise<BlogPost[]> => {
-  if (!process.env.DATABASE_URL) return fallbackBlogPosts;
+// Lists only need card fields. Never load and deserialize every article's
+// rich text (and all its uploaded images) just to render a few cards.
+function mapBlogPost(post: Pick<CmsBlogPost, "slug" | "date" | "updatedAt" | "title" | "excerpt" | "cover" | "content" | "youtubeVideo">): BlogPost {
+  const cover = asMedia(post.cover);
+  return {
+    slug: post.slug || "",
+    date: formatDate(post.date),
+    publishedAt: post.date || undefined,
+    updatedAt: post.updatedAt || undefined,
+    title: post.title,
+    excerpt: post.excerpt || "",
+    cover: cover ? variant(cover, ["large", "medium", "small"])?.url : undefined,
+    coverSrcSet: cover ? srcSet(cover) : undefined,
+    sections: lexicalToSections(post.content),
+    sourceUrl: post.youtubeVideo || undefined,
+    external: Boolean(post.youtubeVideo)
+  };
+}
+
+// Request-scoped caching keeps publishing and deletions immediately visible.
+export const getBlogPosts = cache(async (limit = 1000): Promise<BlogPost[]> => {
+  if (!process.env.DATABASE_URL) return fallbackBlogPosts.slice(0, limit);
   try {
     const payload = await payloadClient();
-    const { docs } = await payload.find({ collection: "blog-posts", sort: "-date", limit: 1000, depth: 2, overrideAccess: false, draft: false });
-    return docs.map((post) => {
-      const cover = asMedia(post.cover);
-      return {
-        slug: post.slug || "",
-        date: formatDate(post.date),
-        publishedAt: post.date || undefined,
-        updatedAt: post.updatedAt || undefined,
-        title: post.title,
-        excerpt: post.excerpt || "",
-        cover: cover ? variant(cover, ["large", "medium", "small"])?.url : undefined,
-        coverSrcSet: cover ? srcSet(cover) : undefined,
-        sections: lexicalToSections(post.content),
-        sourceUrl: post.youtubeVideo || undefined,
-        external: Boolean(post.youtubeVideo)
-      } satisfies BlogPost;
+    const { docs } = await payload.find({
+      collection: "blog-posts", sort: "-date", limit, depth: 1,
+      overrideAccess: false, draft: false,
+      select: { slug: true, date: true, updatedAt: true, title: true, excerpt: true, cover: true, youtubeVideo: true }
     });
+    return docs.map(mapBlogPost);
   } catch (error) {
     console.error("CMS read failed for blog-posts:", error instanceof Error ? error.message : error);
-    // A configured CMS is authoritative, even when empty or temporarily offline.
-    // Restoring the bundled archive would bring back unpublished/deleted posts.
-    return process.env.DATABASE_URL ? [] : fallbackBlogPosts;
+    // Do not restore unpublished/deleted posts when the configured CMS is offline.
+    return [];
   }
 });
 
-export async function getBlogPost(slug: string): Promise<BlogPost | undefined> {
-  return (await getBlogPosts()).find((post) => post.slug === slug);
-}
+export const getBlogPost = cache(async (slug: string): Promise<BlogPost | undefined> => {
+  if (!process.env.DATABASE_URL) return fallbackBlogPosts.find((post) => post.slug === slug);
+  try {
+    const payload = await payloadClient();
+    const { docs } = await payload.find({
+      collection: "blog-posts", where: { slug: { equals: slug } },
+      limit: 1, depth: 1, overrideAccess: false, draft: false
+    });
+    return docs[0] ? mapBlogPost(docs[0]) : undefined;
+  } catch (error) {
+    console.error("CMS read failed for blog-post:", error instanceof Error ? error.message : error);
+    return undefined;
+  }
+});
 
 // ---------------------------------------------------------------------------
 // People
@@ -285,7 +303,7 @@ export const getSponsors = cmsRead("sponsors", async (): Promise<{ corporate: Sp
   const payload = await payloadClient();
   const [{ docs }, settings] = await Promise.all([
     payload.find({ collection: "sponsors", sort: "_order", limit: 1000, depth: 1 }),
-    payload.findGlobal({ slug: "site-settings", depth: 0 })
+    loadSettings()
   ]);
   const logo = (value: unknown) => imageUrl(value, ["medium", "small", "thumbnail"]);
   const wide = (value: unknown) => imageUrl(value, ["large", "medium", "small"]);
@@ -328,9 +346,12 @@ function galleryPhoto(media: Media, id: string, alt: string): GalleryPhoto | nul
   };
 }
 
-const loadAlbums = cache(async (): Promise<Album[]> => {
+const loadAlbums = cache(async (homepageOnly = false): Promise<Album[]> => {
   const payload = await payloadClient();
-  const { docs } = await payload.find({ collection: "albums", sort: "-year", limit: 1000, depth: 1 });
+  const { docs } = await payload.find({
+    collection: "albums", sort: "-year", limit: 1000, depth: 1,
+    ...(homepageOnly ? { where: { or: [{ showOnHomepage: { equals: true } }, { showOnHomepage: { exists: false } }] } } : {})
+  });
   return docs;
 });
 
@@ -355,7 +376,7 @@ export async function getPhotoAlbum(): Promise<GalleryPhoto[]> {
 // The homepage wall alternates the chosen wall photos with a spread of photos
 // from albums marked "Include on the homepage".
 export const getHomeWallPhotos = cmsRead("home-wall", async (): Promise<GalleryPhoto[]> => {
-  const [home, albums] = await Promise.all([loadHome(), loadAlbums()]);
+  const [home, albums] = await Promise.all([loadHome(), loadAlbums(true)]);
   const wall = (home.wallPhotos ?? []).flatMap((value, index) => {
     const media = asMedia(value);
     const photo = media && galleryPhoto(media, `wall-${media.id}`, `Radicubs gallery photo ${index + 1}`);
@@ -375,9 +396,10 @@ export const getHomeWallPhotos = cmsRead("home-wall", async (): Promise<GalleryP
   const seen = new Set<string>();
   for (let index = 0; index < Math.max(wall.length, eventPhotos.length); index++) {
     for (const photo of [wall[index], eventPhotos[index]]) {
-      const key = photo?.src;
-      if (photo && key && !seen.has(key)) {
-        result.push(photo);
+      const heroPhoto = photo && { ...photo, src: photo.thumbSrc };
+      const key = heroPhoto?.src;
+      if (heroPhoto && key && !seen.has(key)) {
+        result.push(heroPhoto);
         seen.add(key);
       }
       if (result.length === 20) return result;

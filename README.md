@@ -124,3 +124,12 @@ migrations, use `NEXT_DIST_DIR=.next-build npx next build`.
 The homepage includes Organization and WebSite JSON-LD. Blog pages include BlogPosting JSON-LD, article social metadata, and CMS publication/modification timestamps. Keep CMS excerpts descriptive and media alt text specific to each image. The default sharing image is `public/social-card.png` (1200 × 630); posts use their own cover when available.
 
 After deploying, add the property in Google Search Console and Bing Webmaster Tools, optionally set `GOOGLE_SITE_VERIFICATION` and `BING_SITE_VERIFICATION` to their supplied tokens, and submit `https://radicubs.com/sitemap.xml`. Check representative URLs with URL Inspection and Google's Rich Results Test. Monitor indexing, search queries, and Core Web Vitals after real traffic arrives; metadata and structured data do not guarantee rankings or enhanced results.
+
+
+## Loading performance
+
+The site renders content without a boot-screen overlay. The homepage streams its photo wall and lower sections independently; an external awards request does not delay the header, hero, or other sections. Homepage blog reads are limited to three summaries, blog lists omit rich text, and individual posts query their slug directly. CMS reads stay fresh per request, with shared settings reads deduplicated within the request.
+
+Smooth-scroll libraries load after initial rendering; native scrolling works while they load. The photo wall pauses outside the viewport and in hidden tabs, and remains static with reduced motion. Fontsource imports use Latin subsets for the site's English typography.
+
+For performance comparisons, use a production build and the same browser, viewport, network, and CPU throttling before and after changes. Tests without `DATABASE_URL` measure the bundled content path; verify real database latency separately on the deployed site.
