@@ -10,18 +10,17 @@ import { HowItWorksSection } from "@/components/sections/how-it-works-section";
 import { Navbar } from "@/components/sections/navbar";
 import { SponsorsPreviewSection } from "@/components/sections/sponsors-preview-section";
 import { ShowcaseSection } from "@/components/sections/showcase-section";
-import { VideoStorySection } from "@/components/sections/video-story-section";
-import { getBlogPosts, getDisciplines, getHomeVideos, getHomeWallPhotos, getJourneySeasons, getSiteSettings, getSponsors } from "@/lib/cms";
+import { getBlogPosts, getDisciplines, getHomeWallPhotos, getJourneySeasons, getSiteSettings, getSponsors } from "@/lib/cms";
 import { getAwards } from "@/lib/tba";
 
 export const metadata = pageMetadata("/", seoPages["/"]);
 
 async function loadHomeContent() {
   const awards = getAwards();
-  const [posts, sponsors, disciplines, videos, seasons] = await Promise.all([
-    getBlogPosts(3), getSponsors(), getDisciplines(), getHomeVideos(), getJourneySeasons()
+  const [posts, sponsors, disciplines, seasons] = await Promise.all([
+    getBlogPosts(3), getSponsors(), getDisciplines(), getJourneySeasons()
   ]);
-  return { posts, sponsors, awards, disciplines, videos, games: Object.fromEntries(seasons.map((season) => [season.year, season.game])) };
+  return { posts, sponsors, awards, disciplines, games: Object.fromEntries(seasons.map((season) => [season.year, season.game])) };
 }
 
 async function HomeWall({ photos }: { photos: ReturnType<typeof getHomeWallPhotos> }) {
@@ -36,8 +35,8 @@ async function HomeContent({ settings, content }: {
   settings: Awaited<ReturnType<typeof getSiteSettings>>;
   content: ReturnType<typeof loadHomeContent>;
 }) {
-  const { posts, sponsors, awards, disciplines, videos, games } = await content;
-  return <><SponsorsPreviewSection sponsors={sponsors.corporate} /><DisciplineCardsSection disciplines={disciplines} /><VideoStorySection videos={videos} /><ShowcaseSection posts={posts} /><Suspense fallback={<section className="section" style={{ minHeight: 800 }} aria-hidden="true" />}><HomeAwards awards={awards} games={games} /></Suspense><FinalCtaSection settings={settings} /><Footer /></>;
+  const { posts, sponsors, awards, disciplines, games } = await content;
+  return <><ShowcaseSection posts={posts} /><Suspense fallback={<section className="section" style={{ minHeight: 800 }} aria-hidden="true" />}><HomeAwards awards={awards} games={games} /></Suspense><SponsorsPreviewSection sponsors={sponsors.corporate} /><DisciplineCardsSection disciplines={disciplines} /><FinalCtaSection settings={settings} /><Footer /></>;
 }
 
 export default async function Home() {
