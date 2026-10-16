@@ -8,14 +8,18 @@
   font-display: swap;
 }
 
+/* Registered so scripts can read it resolved to px (the navbar notch, which is drawn in JS). */
+@property --u { syntax: "<length>"; inherits: true; initial-value: 1px; }
+
 /*
   Shared fluid canvas; individual text blocks retain their reading measure.
-  --u is one pixel of the reference laptop width (1470px). Above it every size grows with
-  the window width, and gutters and canvases are fractions of the width, so each element
-  keeps the same distance from the window edges, as a share of the width, as on the laptop.
+  --u is one pixel of the reference laptop window (1470x820). Above it, sizes grow with the
+  window width, but never faster than its height, so an ultrawide gets laptop-proportioned
+  type and cards instead of oversized ones. Gutters and canvases stay fractions of the width,
+  so each element keeps the laptop's distance from the window edges as a share of the width.
 */
 :root {
-  --u: clamp(1px, 100vw / 1470, 4px);
+  --u: clamp(1px, min(100vw / 1470, 100svh / 820), 4px);
   --site-gutter: clamp(16px, 1.667vw, 80px);
   --site-width: max(1280px, 92vw);
   --site-nav-height: clamp(76px, 5.28vw, 120px);
@@ -194,7 +198,9 @@ body { min-width: 0; }
   .site-content .home-page .home-disciplines .wrap { max-width: var(--site-width); padding-inline: var(--site-gutter); }
   .site-content .home-page .home-disciplines h2 { font-size: calc(45.6 * var(--u)); }
   .site-content .home-page .home-disciplines .section-copy { font-size: calc(15.4 * var(--u)); }
-  .site-content .disc-card.flip-card { max-height: none; }
+  /* Keep the laptop's 4-over-4 grid on one screen: cards take the laptop height scaled by --u
+     and widen with the edges instead of growing taller on ultrawide windows. */
+  .site-content .disc-card.flip-card { aspect-ratio: auto; height: calc(338 * var(--u)); min-height: 0; max-height: none; }
   .site-content .disc-head-row h3 { font-size: calc(18.4 * var(--u)); }
   .site-content .disc-face--back h3 { font-size: calc(21.3 * var(--u)); }
   .site-content .disc-face--back p { font-size: calc(13.8 * var(--u)); }
@@ -212,7 +218,10 @@ body { min-width: 0; }
   .site-content .section-heading .type-meta { font-size: calc(12 * var(--u)); margin-bottom: calc(12 * var(--u)); }
   .site-content .section-heading-body { max-width: calc(672 * var(--u)); margin-top: calc(16 * var(--u)); font-size: calc(18 * var(--u)); line-height: calc(28 * var(--u)); }
   .site-content .page-hero .hover-arrow { margin-top: calc(24 * var(--u)); font-size: calc(14 * var(--u)); gap: calc(8 * var(--u)); }
-  .site-content .page-hero .hover-arrow svg { width: calc(16 * var(--u)); height: calc(16 * var(--u)); }
+  .site-content .page-hero .hover-arrow svg { width: calc(16 * var(--u)); height: calc(16 * var(--u)); } /* Tailwind h-4 w-4 */
+  /* BorderGlow cards draw their corners from --border-radius (already scaled inline); keep the
+     generated rules for .footer-glow/.cta from overriding it, as on the laptop. */
+  .site-content .border-glow-card { border-radius: var(--border-radius); }
   /* LogoLoop sets these inline from its props; it re-measures through a ResizeObserver. */
   .site-content .sponsor-loop .logoloop { --logoloop-logoHeight: calc(150 * var(--u)) !important; --logoloop-gap: calc(112 * var(--u)) !important; }
   .site-content .film-story-heading { padding-top: calc(93.9 * var(--u)); }

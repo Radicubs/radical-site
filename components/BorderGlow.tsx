@@ -224,8 +224,8 @@ const BorderGlow: React.FC<BorderGlowProps> = ({
         {
           "--card-bg": backgroundColor,
           "--edge-sensitivity": edgeSensitivity,
-          "--border-radius": `${borderRadius}px`,
-          "--glow-padding": `${glowRadius}px`,
+          "--border-radius": `calc(${borderRadius} * var(--u, 1px))`,
+          "--glow-padding": `calc(${glowRadius} * var(--u, 1px))`,
           "--cone-spread": coneSpread,
           "--fill-opacity": fillOpacity,
           ...glowVars,

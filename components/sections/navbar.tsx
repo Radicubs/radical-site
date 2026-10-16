@@ -44,6 +44,14 @@ export function Navbar({settings}:{settings?:SiteSettings}){
   const [menuOpen,setMenuOpen]=useState(false);
   const [openMenu,setOpenMenu]=useState<string|null>(null);
   const [mounted,setMounted]=useState(false);
+  // --u is registered as a <length>, so it resolves to px: 1 up to laptop size, larger beyond.
+  const [scale,setScale]=useState(1);
+  useEffect(()=>{
+    const read=()=>setScale(parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u"))||1);
+    read();
+    window.addEventListener("resize",read);
+    return ()=>window.removeEventListener("resize",read);
+  },[]);
   const toggleRef=useRef<HTMLButtonElement>(null);
   const closeRef=useRef<HTMLButtonElement>(null);
   const wasOpen=useRef(false);
@@ -96,7 +104,7 @@ export function Navbar({settings}:{settings?:SiteSettings}){
 
   return <header className="rnav" data-open={menuOpen||undefined}>
     <div className="rnav-card">
-      <GlassSurface className="rnav-glass" width="100%" height="100%" notch={EAR} borderRadius={26} backgroundOpacity={0.32} saturation={1.5} brightness={55} blur={10} distortionScale={-160} />
+      <GlassSurface className="rnav-glass" width="100%" height="100%" notch={EAR*scale} borderRadius={26*scale} backgroundOpacity={0.32} saturation={1.5} brightness={55} blur={10} distortionScale={-160} />
       <div className="rnav-bar">
         <nav className="rnav-links" aria-label="Main navigation">
           {menuGroups.map((g)=>{

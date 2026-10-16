@@ -2,8 +2,8 @@
 Generates app/(site)/large-screens.css: a copy of every pixel size in the site's stylesheets,
 rescaled by --u (one pixel of the 1470px-wide reference laptop, defined in responsive.css).
 
-Above the laptop width (1470px) the site then renders as the laptop layout enlarged in proportion
-to the window width. Width-relative values (%, plain vw) and hairlines are left alone, so canvases
+Above the laptop width (1470px) the site then renders as the laptop layout enlarged with the
+window width, capped by its height so ultrawide windows don't get oversized type. Width-relative values (%, plain vw) and hairlines are left alone, so canvases
 and gutters keep the same share of the width from each edge. Clamps that mix in vh/svh are
 evaluated at a 1470x820 window. Re-run after editing any listed stylesheet:
 
@@ -91,6 +91,10 @@ def convert(tokens):
                 changed |= inner_changed
             else:
                 out.append(text)
+        elif tok.type == "() block":
+            inner, inner_changed = convert(tok.content)
+            out.append(f"({inner})")
+            changed |= inner_changed
         else:
             out.append(tinycss2.serialize([tok]))
     return "".join(out), changed
@@ -163,6 +167,12 @@ def main():
         if body:
             out.append(f"  /* {src} */")
             out.extend(body)
+    # Icons sized by their width/height attributes (lucide size={N}, inline SVGs) ignore CSS
+    # pixel rules. Zero specificity: any stylesheet rule that sizes an icon still wins.
+    out.append("  /* SVG icons sized by attribute */")
+    for n in range(8, 65):
+        out.append(f'  :where(.site-content svg[width="{n}"]) {{ width: calc({n} * var(--u)); }}')
+        out.append(f'  :where(.site-content svg[height="{n}"]) {{ height: calc({n} * var(--u)); }}')
     out.append("}")
     OUT.write_text("\n".join(out) + "\n")
     print(f"wrote {OUT.relative_to(ROOT)}: {len(out)} lines from {len(SOURCES)} stylesheets")

@@ -459,7 +459,7 @@
   html .home-page .home-disciplines { padding: calc(21.32 * var(--u)) 0 calc(24.6 * var(--u)); }
   html .home-page .home-disciplines .disc-head { column-gap: calc(44.1 * var(--u)); }
   html .home-page .home-disciplines h2 { font-size: calc(45.57 * var(--u)); }
-  html .disc-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, max(calc(224 * var(--u)), calc((100% - 54px) / 4))), 1fr)); gap: calc(13.12 * var(--u)) calc(18 * var(--u)); margin: calc(24.6 * var(--u)) 0 0; }
+  html .disc-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, max(calc(224 * var(--u)), calc((100% - calc(54 * var(--u))) / 4))), 1fr)); gap: calc(13.12 * var(--u)) calc(18 * var(--u)); margin: calc(24.6 * var(--u)) 0 0; }
   html .disc-card.flip-card { min-height: calc(320 * var(--u)); max-height: calc(400 * var(--u)); }
   html .disc-face { padding: calc(14 * var(--u)); }
   html .disc-ticks { --t: calc(12 * var(--u)); }
@@ -545,4 +545,119 @@
   html .wavy-dots i { width: calc(6 * var(--u)); height: calc(6 * var(--u)); }
   html .wavy-done { gap: calc(8 * var(--u)); }
   html .wavy-done svg { width: calc(16 * var(--u)); height: calc(16 * var(--u)); }
+  /* SVG icons sized by attribute */
+  :where(.site-content svg[width="8"]) { width: calc(8 * var(--u)); }
+  :where(.site-content svg[height="8"]) { height: calc(8 * var(--u)); }
+  :where(.site-content svg[width="9"]) { width: calc(9 * var(--u)); }
+  :where(.site-content svg[height="9"]) { height: calc(9 * var(--u)); }
+  :where(.site-content svg[width="10"]) { width: calc(10 * var(--u)); }
+  :where(.site-content svg[height="10"]) { height: calc(10 * var(--u)); }
+  :where(.site-content svg[width="11"]) { width: calc(11 * var(--u)); }
+  :where(.site-content svg[height="11"]) { height: calc(11 * var(--u)); }
+  :where(.site-content svg[width="12"]) { width: calc(12 * var(--u)); }
+  :where(.site-content svg[height="12"]) { height: calc(12 * var(--u)); }
+  :where(.site-content svg[width="13"]) { width: calc(13 * var(--u)); }
+  :where(.site-content svg[height="13"]) { height: calc(13 * var(--u)); }
+  :where(.site-content svg[width="14"]) { width: calc(14 * var(--u)); }
+  :where(.site-content svg[height="14"]) { height: calc(14 * var(--u)); }
+  :where(.site-content svg[width="15"]) { width: calc(15 * var(--u)); }
+  :where(.site-content svg[height="15"]) { height: calc(15 * var(--u)); }
+  :where(.site-content svg[width="16"]) { width: calc(16 * var(--u)); }
+  :where(.site-content svg[height="16"]) { height: calc(16 * var(--u)); }
+  :where(.site-content svg[width="17"]) { width: calc(17 * var(--u)); }
+  :where(.site-content svg[height="17"]) { height: calc(17 * var(--u)); }
+  :where(.site-content svg[width="18"]) { width: calc(18 * var(--u)); }
+  :where(.site-content svg[height="18"]) { height: calc(18 * var(--u)); }
+  :where(.site-content svg[width="19"]) { width: calc(19 * var(--u)); }
+  :where(.site-content svg[height="19"]) { height: calc(19 * var(--u)); }
+  :where(.site-content svg[width="20"]) { width: calc(20 * var(--u)); }
+  :where(.site-content svg[height="20"]) { height: calc(20 * var(--u)); }
+  :where(.site-content svg[width="21"]) { width: calc(21 * var(--u)); }
+  :where(.site-content svg[height="21"]) { height: calc(21 * var(--u)); }
+  :where(.site-content svg[width="22"]) { width: calc(22 * var(--u)); }
+  :where(.site-content svg[height="22"]) { height: calc(22 * var(--u)); }
+  :where(.site-content svg[width="23"]) { width: calc(23 * var(--u)); }
+  :where(.site-content svg[height="23"]) { height: calc(23 * var(--u)); }
+  :where(.site-content svg[width="24"]) { width: calc(24 * var(--u)); }
+  :where(.site-content svg[height="24"]) { height: calc(24 * var(--u)); }
+  :where(.site-content svg[width="25"]) { width: calc(25 * var(--u)); }
+  :where(.site-content svg[height="25"]) { height: calc(25 * var(--u)); }
+  :where(.site-content svg[width="26"]) { width: calc(26 * var(--u)); }
+  :where(.site-content svg[height="26"]) { height: calc(26 * var(--u)); }
+  :where(.site-content svg[width="27"]) { width: calc(27 * var(--u)); }
+  :where(.site-content svg[height="27"]) { height: calc(27 * var(--u)); }
+  :where(.site-content svg[width="28"]) { width: calc(28 * var(--u)); }
+  :where(.site-content svg[height="28"]) { height: calc(28 * var(--u)); }
+  :where(.site-content svg[width="29"]) { width: calc(29 * var(--u)); }
+  :where(.site-content svg[height="29"]) { height: calc(29 * var(--u)); }
+  :where(.site-content svg[width="30"]) { width: calc(30 * var(--u)); }
+  :where(.site-content svg[height="30"]) { height: calc(30 * var(--u)); }
+  :where(.site-content svg[width="31"]) { width: calc(31 * var(--u)); }
+  :where(.site-content svg[height="31"]) { height: calc(31 * var(--u)); }
+  :where(.site-content svg[width="32"]) { width: calc(32 * var(--u)); }
+  :where(.site-content svg[height="32"]) { height: calc(32 * var(--u)); }
+  :where(.site-content svg[width="33"]) { width: calc(33 * var(--u)); }
+  :where(.site-content svg[height="33"]) { height: calc(33 * var(--u)); }
+  :where(.site-content svg[width="34"]) { width: calc(34 * var(--u)); }
+  :where(.site-content svg[height="34"]) { height: calc(34 * var(--u)); }
+  :where(.site-content svg[width="35"]) { width: calc(35 * var(--u)); }
+  :where(.site-content svg[height="35"]) { height: calc(35 * var(--u)); }
+  :where(.site-content svg[width="36"]) { width: calc(36 * var(--u)); }
+  :where(.site-content svg[height="36"]) { height: calc(36 * var(--u)); }
+  :where(.site-content svg[width="37"]) { width: calc(37 * var(--u)); }
+  :where(.site-content svg[height="37"]) { height: calc(37 * var(--u)); }
+  :where(.site-content svg[width="38"]) { width: calc(38 * var(--u)); }
+  :where(.site-content svg[height="38"]) { height: calc(38 * var(--u)); }
+  :where(.site-content svg[width="39"]) { width: calc(39 * var(--u)); }
+  :where(.site-content svg[height="39"]) { height: calc(39 * var(--u)); }
+  :where(.site-content svg[width="40"]) { width: calc(40 * var(--u)); }
+  :where(.site-content svg[height="40"]) { height: calc(40 * var(--u)); }
+  :where(.site-content svg[width="41"]) { width: calc(41 * var(--u)); }
+  :where(.site-content svg[height="41"]) { height: calc(41 * var(--u)); }
+  :where(.site-content svg[width="42"]) { width: calc(42 * var(--u)); }
+  :where(.site-content svg[height="42"]) { height: calc(42 * var(--u)); }
+  :where(.site-content svg[width="43"]) { width: calc(43 * var(--u)); }
+  :where(.site-content svg[height="43"]) { height: calc(43 * var(--u)); }
+  :where(.site-content svg[width="44"]) { width: calc(44 * var(--u)); }
+  :where(.site-content svg[height="44"]) { height: calc(44 * var(--u)); }
+  :where(.site-content svg[width="45"]) { width: calc(45 * var(--u)); }
+  :where(.site-content svg[height="45"]) { height: calc(45 * var(--u)); }
+  :where(.site-content svg[width="46"]) { width: calc(46 * var(--u)); }
+  :where(.site-content svg[height="46"]) { height: calc(46 * var(--u)); }
+  :where(.site-content svg[width="47"]) { width: calc(47 * var(--u)); }
+  :where(.site-content svg[height="47"]) { height: calc(47 * var(--u)); }
+  :where(.site-content svg[width="48"]) { width: calc(48 * var(--u)); }
+  :where(.site-content svg[height="48"]) { height: calc(48 * var(--u)); }
+  :where(.site-content svg[width="49"]) { width: calc(49 * var(--u)); }
+  :where(.site-content svg[height="49"]) { height: calc(49 * var(--u)); }
+  :where(.site-content svg[width="50"]) { width: calc(50 * var(--u)); }
+  :where(.site-content svg[height="50"]) { height: calc(50 * var(--u)); }
+  :where(.site-content svg[width="51"]) { width: calc(51 * var(--u)); }
+  :where(.site-content svg[height="51"]) { height: calc(51 * var(--u)); }
+  :where(.site-content svg[width="52"]) { width: calc(52 * var(--u)); }
+  :where(.site-content svg[height="52"]) { height: calc(52 * var(--u)); }
+  :where(.site-content svg[width="53"]) { width: calc(53 * var(--u)); }
+  :where(.site-content svg[height="53"]) { height: calc(53 * var(--u)); }
+  :where(.site-content svg[width="54"]) { width: calc(54 * var(--u)); }
+  :where(.site-content svg[height="54"]) { height: calc(54 * var(--u)); }
+  :where(.site-content svg[width="55"]) { width: calc(55 * var(--u)); }
+  :where(.site-content svg[height="55"]) { height: calc(55 * var(--u)); }
+  :where(.site-content svg[width="56"]) { width: calc(56 * var(--u)); }
+  :where(.site-content svg[height="56"]) { height: calc(56 * var(--u)); }
+  :where(.site-content svg[width="57"]) { width: calc(57 * var(--u)); }
+  :where(.site-content svg[height="57"]) { height: calc(57 * var(--u)); }
+  :where(.site-content svg[width="58"]) { width: calc(58 * var(--u)); }
+  :where(.site-content svg[height="58"]) { height: calc(58 * var(--u)); }
+  :where(.site-content svg[width="59"]) { width: calc(59 * var(--u)); }
+  :where(.site-content svg[height="59"]) { height: calc(59 * var(--u)); }
+  :where(.site-content svg[width="60"]) { width: calc(60 * var(--u)); }
+  :where(.site-content svg[height="60"]) { height: calc(60 * var(--u)); }
+  :where(.site-content svg[width="61"]) { width: calc(61 * var(--u)); }
+  :where(.site-content svg[height="61"]) { height: calc(61 * var(--u)); }
+  :where(.site-content svg[width="62"]) { width: calc(62 * var(--u)); }
+  :where(.site-content svg[height="62"]) { height: calc(62 * var(--u)); }
+  :where(.site-content svg[width="63"]) { width: calc(63 * var(--u)); }
+  :where(.site-content svg[height="63"]) { height: calc(63 * var(--u)); }
+  :where(.site-content svg[width="64"]) { width: calc(64 * var(--u)); }
+  :where(.site-content svg[height="64"]) { height: calc(64 * var(--u)); }
 }

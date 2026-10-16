@@ -113,16 +113,17 @@ const DriftWall = ({
 
   const [containerHeight, setContainerHeight] = useState(600);
   const [containerWidth, setContainerWidth] = useState(1280);
-  const [viewportWidth, setViewportWidth] = useState(1280);
+  const [viewport, setViewport] = useState({ width: 1280, height: 720 });
   const [activeId, setActiveId] = useState<string | null>(null);
   const activeIdRef = useRef<string | null>(null);
   const [reduced, setReduced] = useState(false);
 
   // Grow tiles with the screen, then add symmetric columns on wide/short displays.
   // Scale every 3D length together so perspective keeps the same proportions.
-  // Past the 1470px reference laptop, lay the wall out as it would be at laptop width and
-  // enlarge it with the window, so it keeps the laptop's edge spacing and tile proportions.
-  const enlarge = responsive ? Math.max(1, viewportWidth / 1470) : 1;
+  // Past the 1470x820 reference laptop, lay the wall out at laptop scale and enlarge it with the
+  // site's --u (width ratio, capped by height ratio). Wide-short screens then gain columns
+  // instead of oversized tiles, and the wall still runs edge to edge.
+  const enlarge = responsive ? Math.max(1, Math.min(viewport.width / 1470, viewport.height / 820)) : 1;
   const fit = responsive ? enlarge * Math.max(1, Math.min(containerWidth / enlarge / 1280, containerHeight / enlarge / 720)) : 1;
   const extraColumns = responsive ? Math.max(0, Math.ceil((columns * (containerWidth / (1280 * fit) - 1)) / 2) * 2) : 0;
   const columnCount = columns + extraColumns;
@@ -174,7 +175,7 @@ const DriftWall = ({
     const ro = new ResizeObserver(([entry]) => {
       setContainerHeight(entry.contentRect.height || 600);
       setContainerWidth(entry.contentRect.width || 1280);
-      setViewportWidth(window.innerWidth);
+      setViewport({ width: window.innerWidth, height: window.innerHeight });
     });
     ro.observe(containerRef.current);
     return () => ro.disconnect();

@@ -291,9 +291,9 @@ const FlipCard: React.FC<FlipCardProps> = ({
       onDragStart={e => e.preventDefault()}
       style={
         {
-          '--fc-w': `${width}px`,
-          '--fc-h': `${height}px`,
-          '--fc-radius': `${radius}px`,
+          '--fc-w': `calc(${width} * var(--u, 1px))`,
+          '--fc-h': `calc(${height} * var(--u, 1px))`,
+          '--fc-radius': `calc(${radius} * var(--u, 1px))`,
           '--fc-bg': background,
           '--fc-ink': color,
           '--fc-shadow': shadowColor,
