@@ -13,7 +13,7 @@ export function HeroPhotoWall({ photos }: { photos: GalleryPhoto[] }) {
     ? photos.map((photo) => ({ image: photo.src, srcSet: photo.srcSet, title: photo.alt }))
     : localMoments;
 
-  return <DriftWall items={items} decorative columns={7} tileWidth={245} tileHeight={178} gap={15} radius={12} tilt={1} turn={0} perspective={850} depth={200} scale={1.05} curve={700} speed={12} variance={0.22} parallax={0.45} lift={70} dim={1} fade={0.08} overlayColor="transparent" />;
+  return <DriftWall items={items} decorative responsive columns={7} tileWidth={245} tileHeight={178} gap={15} radius={12} tilt={1} turn={0} perspective={850} depth={200} scale={1.05} curve={700} speed={12} variance={0.22} parallax={0.45} lift={70} dim={1} fade={0.08} overlayColor="transparent" />;
 }
 
 export function HeroSection({ settings, photos = [], wall }: { settings: SiteSettings; photos?: GalleryPhoto[]; wall?: ReactNode }) {

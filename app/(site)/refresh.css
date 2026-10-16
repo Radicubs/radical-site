@@ -60,10 +60,8 @@ html, body, * { scrollbar-width: none !important; }
   .awards-section h2 { font-size: 38px; }
 
 }
-@media (prefers-reduced-motion: reduce) {
-  .home-hero-wall .drift-wall__plane, .home-hero-wall .drift-wall__track, .home-hero-wall .drift-wall__col { transform: none !important; }
-
-}
+/* DriftWall freezes its animation loop for reduced motion while retaining
+   the positioning transforms that keep every photo column filled. */
 
 /* Blog index: the hero already spaces the title; cards follow closely. */
 .blog-index{padding-top:0}

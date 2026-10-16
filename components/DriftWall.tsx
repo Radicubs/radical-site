@@ -16,6 +16,8 @@ export interface DriftWallProps {
   items?: DriftWallItem[];
   onItemClick?: (item: DriftWallItem, index: number) => void;
   decorative?: boolean;
+  /** Fill wide heroes while preserving tile proportions and curvature. */
+  responsive?: boolean;
   columns?: number;
   tileWidth?: number;
   tileHeight?: number;
@@ -70,6 +72,7 @@ const DriftWall = ({
   items = DEFAULT_ITEMS,
   onItemClick,
   decorative = false,
+  responsive = false,
   columns = 5,
   tileWidth = 200,
   tileHeight = 132,
@@ -109,9 +112,24 @@ const DriftWall = ({
   const lastTsRef = useRef<number | null>(null);
 
   const [containerHeight, setContainerHeight] = useState(600);
+  const [containerWidth, setContainerWidth] = useState(1280);
+  const [viewportWidth, setViewportWidth] = useState(1280);
   const [activeId, setActiveId] = useState<string | null>(null);
   const activeIdRef = useRef<string | null>(null);
   const [reduced, setReduced] = useState(false);
+
+  // Grow tiles with the screen, then add symmetric columns on wide/short displays.
+  // Scale every 3D length together so perspective keeps the same proportions.
+  // Past the 1470px reference laptop, lay the wall out as it would be at laptop width and
+  // enlarge it with the window, so it keeps the laptop's edge spacing and tile proportions.
+  const enlarge = responsive ? Math.max(1, viewportWidth / 1470) : 1;
+  const fit = responsive ? enlarge * Math.max(1, Math.min(containerWidth / enlarge / 1280, containerHeight / enlarge / 720)) : 1;
+  const extraColumns = responsive ? Math.max(0, Math.ceil((columns * (containerWidth / (1280 * fit) - 1)) / 2) * 2) : 0;
+  const columnCount = columns + extraColumns;
+  const fittedTileWidth = tileWidth * fit;
+  const fittedTileHeight = tileHeight * fit;
+  const fittedGap = gap * fit;
+  const fittedCurve = curve * fit * (columnCount / columns);
 
   useEffect(() => {
     setReduced(prefersReducedMotion());
@@ -122,39 +140,41 @@ const DriftWall = ({
   }, []);
 
   const columnItems = useMemo<DriftWallItem[][]>(() => {
-    const cols: DriftWallItem[][] = Array.from({ length: columns }, () => []);
-    items.forEach((item, i) => cols[i % columns].push(item));
+    const cols: DriftWallItem[][] = Array.from({ length: columnCount }, () => []);
+    items.forEach((item, i) => cols[i % columnCount].push(item));
     return cols.map(col => (col.length ? col : items.slice(0, 1)));
-  }, [items, columns]);
+  }, [items, columnCount]);
 
   const columnMeta = useMemo<ColumnMeta[]>(() => {
-    const unit = tileHeight + gap;
+    const unit = fittedTileHeight + fittedGap;
     return columnItems.map(col => {
       const copyHeight = Math.max(unit, col.length * unit);
       const copies = Math.max(2, Math.ceil((containerHeight * 1.6) / copyHeight) + 1);
       return { copyHeight, copies };
     });
-  }, [columnItems, tileHeight, gap, containerHeight]);
+  }, [columnItems, fittedTileHeight, fittedGap, containerHeight]);
 
   // Curved layout: `curve` is the radius (px) of a cylinder wrapping around the viewer. Columns sit
   // at equal arc spacing, the edges come forward and each column turns to face the axis, so gaps stay
   // proportional to their tiles while the wall visibly bends toward the center.
   const columnTransforms = useMemo<(string | undefined)[]>(() => {
-    if (!curve) return Array.from({ length: columns }, () => undefined);
-    const mid = (columns - 1) / 2;
-    const colW = tileWidth + gap;
-    return Array.from({ length: columns }, (_, c) => {
-      const phi = ((c - mid) * colW) / curve;
-      const shift = curve * Math.sin(phi) - (c - mid) * colW;
-      const z = curve * (1 - Math.cos(phi));
+    if (!fittedCurve) return Array.from({ length: columnCount }, () => undefined);
+    const mid = (columnCount - 1) / 2;
+    const colW = fittedTileWidth + fittedGap;
+    return Array.from({ length: columnCount }, (_, c) => {
+      const phi = ((c - mid) * colW) / fittedCurve;
+      const shift = fittedCurve * Math.sin(phi) - (c - mid) * colW;
+      const z = fittedCurve * (1 - Math.cos(phi));
       return `translateX(${shift.toFixed(2)}px) translateZ(${z.toFixed(2)}px) rotateY(${((-phi * 180) / Math.PI).toFixed(2)}deg)`;
     });
-  }, [curve, columns, tileWidth, gap]);
+  }, [fittedCurve, columnCount, fittedTileWidth, fittedGap]);
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
     const ro = new ResizeObserver(([entry]) => {
       setContainerHeight(entry.contentRect.height || 600);
+      setContainerWidth(entry.contentRect.width || 1280);
+      setViewportWidth(window.innerWidth);
     });
     ro.observe(containerRef.current);
     return () => ro.disconnect();
@@ -164,9 +184,9 @@ const DriftWall = ({
     const dirSign = direction === 'up' ? 1 : -1;
     return columnItems.map((_, c) => {
       const altSign = c % 2 === 0 ? 1 : -1;
-      return speed * columnFactor(c, variance) * dirSign * altSign;
+      return speed * fit * columnFactor(c, variance) * dirSign * altSign;
     });
-  }, [columnItems, speed, direction, variance]);
+  }, [columnItems, speed, direction, variance, fit]);
 
   useEffect(() => {
     offsetsRef.current = columnMeta.map((meta, c) => meta.copyHeight * ((c * 0.37) % 1));
@@ -180,9 +200,9 @@ const DriftWall = ({
       plane.style.transform =
         `translate(-50%, -50%) scale(${scale}) ` +
         `rotateX(${tilt + py}deg) rotateY(${turn + px}deg) rotateZ(${roll}deg) ` +
-        `translateZ(${-depth}px)`;
+        `translateZ(${-depth * fit}px)`;
     },
-    [tilt, turn, roll, depth, scale]
+    [tilt, turn, roll, depth, scale, fit]
   );
 
   useEffect(() => {
@@ -306,19 +326,19 @@ const DriftWall = ({
   const cssVars = useMemo<CSSProperties>(
     () =>
       ({
-        '--dw-tile-w': `${tileWidth}px`,
-        '--dw-tile-h': `${tileHeight}px`,
-        '--dw-gap': `${gap}px`,
-        '--dw-radius': `${radius}px`,
-        '--dw-perspective': `${perspective}px`,
-        '--dw-lift': `${lift}px`,
+        '--dw-tile-w': `${fittedTileWidth}px`,
+        '--dw-tile-h': `${fittedTileHeight}px`,
+        '--dw-gap': `${fittedGap}px`,
+        '--dw-radius': `${radius * fit}px`,
+        '--dw-perspective': `${perspective * fit}px`,
+        '--dw-lift': `${lift * fit}px`,
         '--dw-dim': dim,
         '--dw-gray': grayscale ? 1 : 0,
         '--dw-overlay': overlayColor,
         '--dw-edge': `${Math.max(0, (1 - fade) * 100)}%`,
         ...style
       }) as CSSProperties,
-    [tileWidth, tileHeight, gap, radius, perspective, lift, dim, grayscale, overlayColor, fade, style]
+    [fittedTileWidth, fittedTileHeight, fittedGap, fit, radius, perspective, lift, dim, grayscale, overlayColor, fade, style]
   );
 
   const renderTile = (item: DriftWallItem, id: string, colIndex: number) => {
@@ -327,7 +347,7 @@ const DriftWall = ({
         <img
           src={item.previewImage ?? item.image}
           srcSet={item.srcSet ?? (item.previewImage ? `${item.previewImage} 245w, ${item.image} 750w` : undefined)}
-          sizes={`${tileWidth}px`}
+          sizes={`${Math.ceil(fittedTileWidth * scale)}px`}
           alt={item.title ?? ''}
           loading={decorative ? "eager" : "lazy"}
           decoding="async"
@@ -376,7 +396,9 @@ const DriftWall = ({
       aria-label={decorative ? undefined : "Drifting wall of tiles"}
       aria-hidden={decorative ? true : undefined}
     >
-      <div ref={planeRef} className="drift-wall__plane">
+      {/* Anchor tracks to the viewport, rather than the tallest repeated column.
+          This keeps shorter columns filled even when animation is frozen. */}
+      <div ref={planeRef} className="drift-wall__plane" style={responsive ? { height: "100%" } : undefined}>
         {columnItems.map((col, c) => {
           const meta = columnMeta[c];
           const copies = Array.from({ length: meta.copies });

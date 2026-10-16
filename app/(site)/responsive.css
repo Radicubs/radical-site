@@ -8,10 +8,17 @@
   font-display: swap;
 }
 
-/* Keep the desktop composition while letting real content, rather than the
-   monitor's height, determine section size. No viewport zoom or fixed canvas. */
+/*
+  Shared fluid canvas; individual text blocks retain their reading measure.
+  --u is one pixel of the reference laptop width (1470px). Above it every size grows with
+  the window width, and gutters and canvases are fractions of the width, so each element
+  keeps the same distance from the window edges, as a share of the width, as on the laptop.
+*/
 :root {
-  --site-gutter: clamp(16px, 1.667vw, 24px);
+  --u: clamp(1px, 100vw / 1470, 4px);
+  --site-gutter: clamp(16px, 1.667vw, 80px);
+  --site-width: max(1280px, 92vw);
+  --site-nav-height: clamp(76px, 5.28vw, 120px);
 }
 
 /* Glow halos may extend beyond their cards, but must not widen the document.
@@ -35,8 +42,8 @@ body { min-width: 0; }
 .blog-figures { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
 
 .home-page .home-hero {
-  min-height: clamp(460px, 72svh, 770px);
-  max-width: 1920px;
+  min-height: clamp(500px, 78svh, 830px);
+  max-width: none;
   margin-inline: auto;
 }
 .home-page .home-hero-content { padding-top: clamp(150px, 24svh, 215px); }
@@ -49,7 +56,7 @@ body { min-width: 0; }
 }
 
 @media (max-width: 700px) {
-  .home-page .home-hero { min-height: clamp(560px, 80svh, 640px); }
+  .home-page .home-hero { min-height: clamp(600px, 86svh, 690px); }
   .home-page .home-hero-content { padding: 180px 20px 55px; }
   .home-page .home-hero-actions { gap: 12px; }
   .section-head-row { align-items: flex-start; gap: 18px; }
@@ -73,4 +80,141 @@ body { min-width: 0; }
 }
 @media (max-height: 450px) {
   .home-page .home-hero-content { padding-top: 96px; padding-bottom: 24px; }
+}
+
+/* Desktop canvases keep the laptop's relative margins on larger monitors.
+   Apply to the shared shell so every content page and the footer can grow. */
+@media (min-width: 1281px) {
+  .site-content .wrap, .site-content .footer-shell { width: 100%; max-width: var(--site-width); }
+  .site-content .rnav { padding-inline: var(--site-gutter); }
+  .site-content .rnav-card { max-width: max(1204px, 94vw); }
+  .site-content .rnav-bar { min-height: var(--site-nav-height); gap: clamp(24px, 1.67vw, 64px); }
+  .site-content .rnav-links { gap: clamp(28px, 1.95vw, 64px); }
+  .site-content .rnav-link { font-size: clamp(16px, 1.11vw, 25px); }
+  .site-content .rnav-logo img { width: clamp(150px, 10.42vw, 240px); }
+  .site-content .rnav-actions { gap: clamp(16px, 1.11vw, 32px); }
+  .site-content .rnav .glow-btn-link { height: clamp(48px, 3.34vw, 76px); font-size: clamp(15px, 1.05vw, 24px); }
+  .site-content .rnav .glow-btn-icon { width: clamp(34px, 2.37vw, 54px); height: clamp(34px, 2.37vw, 54px); }
+
+  .site-content .home-page .home-hero {
+    /* Runs just past the fold so the hero reads as the full first screen. */
+    min-height: max(640px, calc(106svh - var(--site-nav-height) - 28px));
+  }
+  .site-content .home-page .home-hero-content {
+    max-width: none;
+    padding: clamp(150px, 24svh, 360px) var(--site-gutter) clamp(45px, 8svh, 140px);
+  }
+  .site-content .home-page .home-hero h1 { width: clamp(385px, min(28vw, 52svh), 760px); }
+  .site-content .home-page .home-hero-description { font-size: clamp(23px, min(1.75vw, 3.2svh), 38px); }
+  .site-content .home-page .home-hero-actions { margin-top: clamp(22px, 1.53vw, 42px); gap: clamp(12px, .84vw, 24px); }
+  .site-content .home-hero-actions .pab {
+    --pab-h: clamp(54px, min(3.75vw, 7.5svh), 88px);
+    --pab-panel-w: clamp(56px, min(3.89vw, 7.8svh), 92px);
+    font-size: clamp(16px, min(1.11vw, 2.22svh), 26px);
+    padding-right: clamp(24px, 1.67vw, 40px);
+  }
+
+  .site-content .section { padding-block: clamp(74px, 5.14vw, 140px); }
+  .site-content .page-hero { padding-top: clamp(70px, 4.87vw, 130px); }
+  .site-content .section h2, .site-content .page-title { font-size: clamp(54px, 3.75vw, 88px); }
+  .site-content .page-hero h1, .site-content .ct-hero h1 { font-size: clamp(72px, 5vw, 112px); }
+  .site-content .section-copy, .site-content .lead, .site-content .cta-grid p { font-size: clamp(17px, 1.18vw, 26px); }
+  .site-content .text-link { font-size: clamp(16px, 1.11vw, 24px); }
+  .site-content .post-grid, .site-content .blog-grid, .site-content .team-grid, .site-content .corp-grid { gap: clamp(22px, 1.53vw, 44px); }
+  .site-content .post-body, .site-content .team-body { padding: clamp(24px, 1.67vw, 40px); }
+  .site-content .post-title { font-size: clamp(24px, 1.67vw, 36px); }
+  .site-content .post-excerpt, .site-content .team-role, .site-content .footer-links a, .site-content .micro { font-size: clamp(14px, .98vw, 21px); }
+  .site-content .team-name { font-size: clamp(20px, 1.39vw, 30px); }
+  .site-content .home-page .home-disciplines .wrap { max-width: var(--site-width); padding-inline: var(--site-gutter); }
+  .site-content .home-page .home-disciplines h2 { font-size: clamp(44px, 3.1vw, 80px); }
+  .site-content .home-page .home-disciplines .section-copy { font-size: clamp(15px, 1.05vw, 24px); }
+  .site-content .disc-card.flip-card { max-height: none; }
+  .site-content .disc-head-row h3 { font-size: clamp(18px, 1.25vw, 30px); }
+  .site-content .disc-face--back h3 { font-size: clamp(21px, 1.45vw, 34px); }
+  .site-content .disc-face--back p { font-size: clamp(13.5px, .94vw, 22px); }
+  .site-content .disc-skills li, .site-content .disc-hint { font-size: clamp(11px, .77vw, 17px); }
+  .site-content .btn { font-size: clamp(14px, .98vw, 22px); padding: clamp(14px, .98vw, 22px) clamp(24px, 1.67vw, 38px); }
+  .site-content .eyebrow, .site-content .post-date { font-size: clamp(11px, .77vw, 17px); }
+  .site-content .gallery-archive-intro h1, .site-content .sp-hero h1 { font-size: clamp(54px, 4.1vw, 96px); }
+  .site-content .footer-grid { gap: clamp(32px, 2.23vw, 64px); }
+  .site-content .footer-bottom { font-size: clamp(12px, .84vw, 18px); }
+  .site-content .footer-brand .brand-wordmark { width: clamp(170px, 11.81vw, 300px); }
+  .site-content .cta-grid { padding: clamp(60px, 4.17vw, 110px); }
+  .site-content .sponsor-loop { height: clamp(210px, 14.59vw, 360px); }
+  .site-content .film-story-heading { padding-top: clamp(92px, 6.39vw, 160px); }
+  .site-content .film-story-intro > p:last-child { font-size: clamp(17px, 1.18vw, 26px); }
+}
+
+/*
+  Above the reference laptop width everything scales by --u instead of capped vw clamps.
+  Each value is the clamp above evaluated at 1470x820, so the two blocks meet at the laptop.
+*/
+@media (min-width: 1471px) {
+  :root { --site-nav-height: calc(77.6 * var(--u)); }
+  .site-content .wrap, .site-content .footer-shell { width: 100%; max-width: var(--site-width); }
+  .site-content .rnav { padding-inline: var(--site-gutter); }
+  .site-content .rnav-card { max-width: max(1204px, 94vw); }
+  .site-content .rnav-bar { min-height: var(--site-nav-height); gap: calc(24.5 * var(--u)); }
+  .site-content .rnav-links { gap: calc(28.7 * var(--u)); }
+  .site-content .rnav-link { font-size: calc(16.3 * var(--u)); }
+  .site-content .rnav-logo img { width: calc(153.2 * var(--u)); }
+  .site-content .rnav-actions { gap: calc(16.3 * var(--u)); }
+  .site-content .rnav .glow-btn-link { height: calc(49.1 * var(--u)); font-size: calc(15.4 * var(--u)); }
+  .site-content .rnav .glow-btn-icon { width: calc(34.8 * var(--u)); height: calc(34.8 * var(--u)); }
+
+  .site-content .home-page .home-hero {
+    /* Runs just past the fold so the hero reads as the full first screen. */
+    min-height: max(640px, calc(106svh - var(--site-nav-height) - 28px));
+  }
+  .site-content .home-page .home-hero-content {
+    max-width: none;
+    padding: calc(196.8 * var(--u)) var(--site-gutter) calc(65.6 * var(--u));
+  }
+  .site-content .home-page .home-hero h1 { width: calc(411.6 * var(--u)); }
+  .site-content .home-page .home-hero-description { font-size: calc(25.7 * var(--u)); }
+  .site-content .home-page .home-hero-actions { margin-top: calc(22.5 * var(--u)); gap: calc(12.3 * var(--u)); }
+  .site-content .home-hero-actions .pab {
+    --pab-h: calc(55.1 * var(--u));
+    --pab-panel-w: calc(57.2 * var(--u));
+    font-size: calc(16.3 * var(--u));
+    padding-right: calc(24.5 * var(--u));
+  }
+
+  .site-content .section { padding-block: calc(75.6 * var(--u)); }
+  .site-content .page-hero { padding-top: calc(71.6 * var(--u)); }
+  .site-content .section h2, .site-content .page-title { font-size: calc(55.1 * var(--u)); }
+  .site-content .page-hero h1, .site-content .ct-hero h1 { font-size: calc(73.5 * var(--u)); }
+  .site-content .section-copy, .site-content .lead, .site-content .cta-grid p { font-size: calc(17.3 * var(--u)); }
+  .site-content .text-link { font-size: calc(16.3 * var(--u)); }
+  .site-content .post-grid, .site-content .blog-grid, .site-content .team-grid, .site-content .corp-grid { gap: calc(22.5 * var(--u)); }
+  .site-content .post-body, .site-content .team-body { padding: calc(24.5 * var(--u)); }
+  .site-content .post-title { font-size: calc(24.5 * var(--u)); }
+  .site-content .post-excerpt, .site-content .team-role, .site-content .footer-links a, .site-content .micro { font-size: calc(14.4 * var(--u)); }
+  .site-content .team-name { font-size: calc(20.4 * var(--u)); }
+  .site-content .home-page .home-disciplines .wrap { max-width: var(--site-width); padding-inline: var(--site-gutter); }
+  .site-content .home-page .home-disciplines h2 { font-size: calc(45.6 * var(--u)); }
+  .site-content .home-page .home-disciplines .section-copy { font-size: calc(15.4 * var(--u)); }
+  .site-content .disc-card.flip-card { max-height: none; }
+  .site-content .disc-head-row h3 { font-size: calc(18.4 * var(--u)); }
+  .site-content .disc-face--back h3 { font-size: calc(21.3 * var(--u)); }
+  .site-content .disc-face--back p { font-size: calc(13.8 * var(--u)); }
+  .site-content .disc-skills li, .site-content .disc-hint { font-size: calc(11.3 * var(--u)); }
+  .site-content .btn { font-size: calc(14.4 * var(--u)); padding: calc(14.4 * var(--u)) calc(24.5 * var(--u)); }
+  .site-content .eyebrow, .site-content .post-date { font-size: calc(11.3 * var(--u)); }
+  .site-content .gallery-archive-intro h1, .site-content .sp-hero h1 { font-size: calc(60.3 * var(--u)); }
+  .site-content .footer-grid { gap: calc(32.8 * var(--u)); }
+  .site-content .footer-bottom { font-size: calc(12.3 * var(--u)); }
+  .site-content .footer-brand .brand-wordmark { width: calc(173.6 * var(--u)); }
+  .site-content .cta-grid { padding: calc(61.3 * var(--u)); }
+  .site-content .sponsor-loop { height: calc(214.5 * var(--u)); }
+  /* SectionHeading and its neighbours are sized with Tailwind rem classes. */
+  .site-content .section-heading { max-width: calc(768 * var(--u)); }
+  .site-content .section-heading .type-meta { font-size: calc(12 * var(--u)); margin-bottom: calc(12 * var(--u)); }
+  .site-content .section-heading-body { max-width: calc(672 * var(--u)); margin-top: calc(16 * var(--u)); font-size: calc(18 * var(--u)); line-height: calc(28 * var(--u)); }
+  .site-content .page-hero .hover-arrow { margin-top: calc(24 * var(--u)); font-size: calc(14 * var(--u)); gap: calc(8 * var(--u)); }
+  .site-content .page-hero .hover-arrow svg { width: calc(16 * var(--u)); height: calc(16 * var(--u)); }
+  /* LogoLoop sets these inline from its props; it re-measures through a ResizeObserver. */
+  .site-content .sponsor-loop .logoloop { --logoloop-logoHeight: calc(150 * var(--u)) !important; --logoloop-gap: calc(112 * var(--u)) !important; }
+  .site-content .film-story-heading { padding-top: calc(93.9 * var(--u)); }
+  .site-content .film-story-intro > p:last-child { font-size: calc(17.3 * var(--u)); }
 }

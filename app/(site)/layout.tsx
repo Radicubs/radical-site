@@ -14,9 +14,11 @@ import "./refresh.css";
 import "./home-reference.css";
 import "./theme-light.css";
 import "./responsive.css";
+import "./large-screens.css";
 import { MotionSystem } from "@/components/ui/motion-system";
 import ClickSpark from "@/components/ClickSpark";
 import { SmoothScroll } from "@/components/ui/smooth-scroll";
+import { SiteLoader } from "@/components/ui/site-loader";
 import { NavProgress } from "@/components/ui/nav-progress";
 import { StarsBackground } from "@/components/animate-ui/components/backgrounds/stars";
 import { getSiteSettings } from "@/lib/cms";
@@ -63,7 +65,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`dark ${GeistSans.variable}`} data-theme="dark" suppressHydrationWarning>
-      <body suppressHydrationWarning><NavProgress /><StarsBackground className="site-stars" starColor="var(--stars-color)" pointerEvents={false} aria-hidden="true" /><ClickSpark sparkColor="#66ff55" sparkCount={7} sparkRadius={20} sparkSize={7}><div className="site-content">{children}</div></ClickSpark><MotionSystem /><SmoothScroll /></body>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: 'try{if(sessionStorage.getItem("radicubs-loaded-v2")){document.documentElement.setAttribute("data-skip-loader","")}}catch(e){}' }} />
+        <noscript><style>{".site-loader{display:none!important}"}</style></noscript>
+      </head>
+      <body suppressHydrationWarning><SiteLoader /><NavProgress /><StarsBackground className="site-stars" starColor="var(--stars-color)" pointerEvents={false} aria-hidden="true" /><ClickSpark sparkColor="#66ff55" sparkCount={7} sparkRadius={20} sparkSize={7}><div className="site-content">{children}</div></ClickSpark><MotionSystem /><SmoothScroll /></body>
     </html>
   );
 }
