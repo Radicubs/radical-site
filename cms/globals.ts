@@ -102,8 +102,8 @@ export const HomePage: GlobalConfig = {
         {
           label: "Season video",
           fields: [
-            upload("seasonVideo", "Season preview video", "Needs the scroll-optimised encode (frequent keyframes), or scrolling through it will stutter."),
-            upload("seasonVideoMobile", "Smaller copy for phones"),
+            upload("seasonVideo", "Season preview video", "Run it through scripts/encode-scroll-video.sh first (every frame a keyframe), or scrolling through it will stutter."),
+            upload("seasonVideoMobile", "Smaller copy for phones", "Encode with scripts/encode-scroll-video.sh --mobile."),
             upload("seasonPoster", "Still image shown before the video loads")
           ]
         }

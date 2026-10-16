@@ -45,6 +45,7 @@ const storage = process.env.S3_BUCKET
 // deployment's own address, so preview deployments work too.
 const allowedOrigins = [
   "https://radicubs.com",
+  "https://admin.radicubs.com",
   "https://www.radicubs.com",
   "https://radicubs.vercel.app",
   "http://localhost:3000",

@@ -62,11 +62,38 @@ uses IPv6 by default; the shared session pooler supports IPv4. See
 
 ## Editing content
 
-Open `/admin` to manage blog posts, photo albums, team members, mentors,
+Open `https://admin.radicubs.com` in production (or `/admin` locally) to manage
+blog posts, photo albums, team members, mentors,
 sponsors, journey seasons, outreach events, and the homepage/outreach/settings
 pages. Public pages read fresh CMS content on each request; repeated reads in the
 same request are deduplicated. Bundled data is used only when no database is
 configured, so removing CMS records does not restore old content.
+
+### Admin subdomain setup
+
+The editor shares this deployment and database with the public site. The admin
+subdomain's root renders the Payload dashboard; Payload's own editor links remain
+under `/admin` on that subdomain. Production `/admin` bookmarks redirect to the
+admin subdomain, preserving nested paths and query strings. Localhost and preview
+URLs retain their existing `/admin` access.
+
+Before deploying this routing change:
+
+1. Add `admin.radicubs.com` to the **same Vercel project** under Settings → Domains
+   as a domain serving the app, not a redirect to the public domain.
+2. In the DNS provider for `radicubs.com`, create the `admin` record using the
+   exact target Vercel shows, then wait for domain verification and HTTPS.
+3. If Google login is enabled, add
+   `https://admin.radicubs.com/auth/callback` to Supabase Authentication → URL
+   Configuration → Redirect URLs. Keep local/preview callbacks as needed.
+4. Deploy the code, then check email/password login, Google login if enabled,
+   editing, media uploads, logout, and an old `radicubs.com/admin` bookmark.
+
+The new origin is allowed for Payload CORS and CSRF. Auth cookies stay on the
+hostname where the editor is opened, so editors must sign in again on the new
+subdomain. The admin hostname serves a crawler exclusion and noindex headers;
+Payload's existing authentication and collection access controls still protect
+content. DNS and hosting changes are separate from the code in this repository.
 
 Under **People**, create **Team seasons** using the starting year (2025 means
 2025–2026) and **Team roles** using the names you want in the role dropdown.

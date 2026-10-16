@@ -46,6 +46,11 @@ const nextConfig: NextConfig = {
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }]
       }] : []),
       {
+        source: "/:path*",
+        has: [{ type: "host", value: "admin.radicubs.com" }],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }]
+      },
+      {
         source: "/admin/:path*",
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }]
       },
