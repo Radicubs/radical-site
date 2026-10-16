@@ -478,7 +478,7 @@
   html .disc-skills li::before { width: calc(6 * var(--u)); height: calc(6 * var(--u)); }
   html .disc-face--back .disc-hint { padding-top: calc(10 * var(--u)); }
   /* components/sections/footer-tech-text.css */
-  html .footer-tech-text { height: calc(279.3 * var(--u)); margin-top: calc(28 * var(--u)); }
+  html .footer-tech-text { margin-top: calc(28 * var(--u)); }
   /* components/sections/navbar.css */
   html .rnav { --rnav-ear: calc(22 * var(--u)); padding: 0 calc(24 * var(--u)); }
   html .rnav-card { max-width: calc(calc(1160 * var(--u)) + var(--rnav-ear) * 2); }

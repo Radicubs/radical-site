@@ -13,7 +13,7 @@ export const socialImage = {
 
 export const seoPages = {
   "/": {
-    title: "Radicubs | FRC Team 7503 in Frisco, Texas",
+    title: "Radicubs | FRC Team 7503",
     description: "Meet Radicubs, student-run FIRST Robotics Competition Team 7503 in Frisco, Texas. Explore our robots, STEM outreach, team updates, and ways to get involved."
   },
   "/team": {

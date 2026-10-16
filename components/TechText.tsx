@@ -17,7 +17,7 @@ type Glyph = Shape & {
   fill: Art;
   dashes: Art;
 };
-type Word = { size: number; baseline: number; left: number; right: number; top: number; bottom: number };
+type Word = { size: number; spacing: number; baseline: number; left: number; right: number; top: number; bottom: number };
 
 export interface TechTextProps {
   text?: string;
@@ -25,6 +25,12 @@ export interface TechTextProps {
   fontWeight?: number;
   fontSize?: number;
   letterSpacing?: number;
+  /**
+   * 'contain' fits inside the box up to fontSize. 'width' spans the box's full width: the letters
+   * grow until they fill it or reach 66% of the box height, and any width left over goes into
+   * even letter spacing.
+   */
+  fit?: 'contain' | 'width';
   color?: string;
   accentColor?: string;
   reach?: number;
@@ -85,6 +91,7 @@ const TechText = ({
   fontWeight = 600,
   fontSize = 150,
   letterSpacing = -0.05,
+  fit = 'contain',
   color = '#ffffff',
   accentColor = '#ffffff',
   reach = 200,
@@ -115,6 +122,7 @@ const TechText = ({
       fontWeight,
       fontSize,
       letterSpacing,
+      fit,
       color,
       accentColor,
       reach,
@@ -172,9 +180,9 @@ const TechText = ({
     const family = (s: Settings) => s.fontFamily || getComputedStyle(container).fontFamily || 'sans-serif';
     const fontFor = (s: Settings, size: number) => `${s.fontWeight} ${size}px ${family(s)}`;
 
-    const setFont = (target: CanvasRenderingContext2D, s: Settings, size: number) => {
+    const setFont = (target: CanvasRenderingContext2D, s: Settings, size: number, spacing = s.letterSpacing * size) => {
       target.font = fontFor(s, size);
-      if ('letterSpacing' in target) target.letterSpacing = `${s.letterSpacing * size}px`;
+      if ('letterSpacing' in target) target.letterSpacing = `${spacing}px`;
       target.textAlign = 'left';
       target.textBaseline = 'alphabetic';
     };
@@ -191,7 +199,7 @@ const TechText = ({
       const c = image.getContext('2d');
       if (!c) return { image, left, top };
       c.setTransform(dpr, 0, 0, dpr, -left * dpr, -top * dpr);
-      setFont(c, s, view.size);
+      setFont(c, s, view.size, view.spacing);
       if (stroke) {
         c.lineJoin = 'round';
         c.lineWidth = s.strokeWidth * 2;
@@ -218,6 +226,7 @@ const TechText = ({
         s.fontWeight,
         s.fontSize,
         s.letterSpacing,
+        s.fit,
         s.color,
         s.dashLength,
         s.dashGap,
@@ -238,20 +247,34 @@ const TechText = ({
       const probe = scratchCtx;
       setFont(probe, s, s.fontSize);
       let m = probe.measureText(s.text);
-      const fit = Math.min(
-        1,
-        (width * 0.9) / Math.max(m.actualBoundingBoxLeft + m.actualBoundingBoxRight, 1),
-        (height * 0.66) / Math.max(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent, 1)
-      );
-      const size = s.fontSize * fit;
-      setFont(probe, s, size);
+      const inkSpan = Math.max(m.actualBoundingBoxLeft + m.actualBoundingBoxRight, 1);
+      const heightFit = (height * 0.66) / Math.max(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent, 1);
+      // 'width' leaves a few px each side so the selection handles on the end letters stay visible.
+      const span = width - 24;
+      const scale = s.fit === 'width'
+        ? Math.min(span / inkSpan, heightFit)
+        : Math.min(1, (width * 0.9) / inkSpan, heightFit);
+      const size = s.fontSize * scale;
+      let spacing = s.letterSpacing * size;
+      setFont(probe, s, size, spacing);
       m = probe.measureText(s.text);
+      const gaps = Array.from(s.text).length - 1;
+      if (s.fit === 'width' && gaps > 0) {
+        // Height-limited: spread the remaining width evenly between the letters.
+        const short = span - (m.actualBoundingBoxLeft + m.actualBoundingBoxRight);
+        if (short > 0.5) {
+          spacing += short / gaps;
+          setFont(probe, s, size, spacing);
+          m = probe.measureText(s.text);
+        }
+      }
       const inkWidth = m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
       const inkHeight = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
       const x = (width - inkWidth) / 2 + m.actualBoundingBoxLeft;
       const baseline = (height - inkHeight) / 2 + m.actualBoundingBoxAscent;
       const next = {
         size,
+        spacing,
         baseline,
         left: x - m.actualBoundingBoxLeft,
         right: x + m.actualBoundingBoxRight,

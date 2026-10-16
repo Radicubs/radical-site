@@ -1,5 +1,12 @@
-/* Oversized interactive team number under the footer card. */
+/* Oversized interactive team number under the footer card, as wide as the card.
+   The text's ink is 0.16x as tall as it is wide; at 66% of the box height that makes
+   the box 24% of its width, leaving room above and below for the labels and specks.
+   The height is capped at the laptop height scaled by --u (which follows the window height
+   on wide screens); past the cap TechText widens the letter spacing to keep the full width. */
+/* The footer shell is the size container, so the text box's height can follow its width
+   (cqw) without aspect-ratio, which would turn the height cap into a width cap. */
+.footer-shell:has(> .footer-tech-text) { container-type: inline-size; }
 .footer-tech-text {
-  height: clamp(120px, 19vw, 290px);
+  height: min(24cqw, calc(325 * var(--u, 1px)));
   margin-top: 28px;
 }

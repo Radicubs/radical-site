@@ -31,6 +31,7 @@ export function FooterTechText() {
         fontWeight={600}
         fontSize={220}
         letterSpacing={-0.02}
+        fit="width"
         color={color}
         accentColor={accent}
         reach={220}
