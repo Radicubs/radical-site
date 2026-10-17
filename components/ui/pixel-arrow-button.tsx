@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, MouseEventHandler, ReactNode } from "react";
 import "./pixel-arrow-button.css";
 
 // A chunky pixel chevron on a 4×5 grid, lit column by column.
@@ -29,14 +29,16 @@ type PixelArrowButtonProps = {
   direction?: "right" | "down";
   external?: boolean;
   className?: string;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
 };
 
 /** Split button: a pixel-arrow panel that sweeps across the label on hover and runs a wave of arrows. */
-export function PixelArrowButton({ href, children, variant = "primary", direction = "right", external, className }: PixelArrowButtonProps) {
+export function PixelArrowButton({ href, children, variant = "primary", direction = "right", external, className, onClick }: PixelArrowButtonProps) {
   return (
     <a
       className={["pab", `pab--${variant}`, direction === "down" && "pab--down", className].filter(Boolean).join(" ")}
       href={href}
+      onClick={onClick}
       {...(external ? { target: "_blank", rel: "noreferrer" } : null)}
     >
       <span className="pab-panel" aria-hidden="true">

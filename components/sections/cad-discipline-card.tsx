@@ -62,10 +62,14 @@ export function CadDisciplineCard({ discipline, index }: { discipline: Disciplin
   // don't download the model at all. Data-saver visitors only load it on approach.
   useEffect(() => {
     if ((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData) return;
-    const start = () => setInView(true);
-    const options = { once: true, passive: true };
-    window.addEventListener("scroll", start, options);
-    return () => window.removeEventListener("scroll", start);
+    // Wait for a quiet moment so parsing the model can't stall a scroll in progress.
+    let idle: number | undefined;
+    const start = () => { idle = window.requestIdleCallback?.(() => setInView(true), { timeout: 2000 }) ?? window.setTimeout(() => setInView(true), 1000); };
+    window.addEventListener("scroll", start, { once: true, passive: true });
+    return () => {
+      window.removeEventListener("scroll", start);
+      if (idle !== undefined) { window.cancelIdleCallback?.(idle); window.clearTimeout(idle); }
+    };
   }, []);
 
   useEffect(() => {

@@ -318,6 +318,29 @@ const TechText = ({
       return next;
     };
 
+    // Where the idle sweep sits at u ∈ [0, 1]. The path runs across the letters and counts
+    // each gap only at its unspread size, so letter spacing widened to fill a wide box
+    // doesn't leave the sweep drifting through empty space between them.
+    const sweepX = (u: number, view: Word, s: Settings) => {
+      if (!glyphs.length) return view.left + (view.right - view.left) * u;
+      const extra = Math.max(0, view.spacing - s.letterSpacing * view.size);
+      const pieces: Array<[from: number, to: number, length: number]> = [];
+      glyphs.forEach((glyph, i) => {
+        const previous = glyphs[i - 1];
+        if (previous) {
+          const gap = glyph.box.x1 - previous.box.x2;
+          pieces.push([previous.box.x2, glyph.box.x1, Math.max(0, gap - extra * (glyph.index - previous.index))]);
+        }
+        pieces.push([glyph.box.x1, glyph.box.x2, glyph.box.x2 - glyph.box.x1]);
+      });
+      let distance = u * pieces.reduce((sum, [, , length]) => sum + length, 0);
+      for (const [from, to, length] of pieces) {
+        if (distance <= length) return length > 0 ? from + (to - from) * (distance / length) : to;
+        distance -= length;
+      }
+      return pieces[pieces.length - 1][1];
+    };
+
     const glyphAt = (x: number, y: number) => {
       if (!word || y < word.top - 24 || y > word.bottom + 24) return -1;
       let best = -1;
@@ -546,7 +569,7 @@ const TechText = ({
       let targetX = pointer.x;
       let targetY = pointer.y;
       if (sweeping) {
-        targetX = view.left + (view.right - view.left) * (0.5 - 0.5 * Math.cos(clock * 0.45));
+        targetX = sweepX(0.5 - 0.5 * Math.cos(clock * 0.45), view, s);
         targetY = view.top + (view.bottom - view.top) * (0.45 + 0.1 * Math.sin(clock * 0.8));
       }
       const active = pointer.inside || sweeping || dragging >= 0;

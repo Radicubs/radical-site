@@ -33,8 +33,9 @@ const primaryLinks = [
 // Radius of the inverted corners where the bar meets the top edge; mirrored in navbar.css.
 const EAR = 22;
 
-// Scroll distance over which the pinned hero wordmark shrinks into the logo slot.
+// Scroll distance over which the hero wordmark shrinks into the logo slot.
 const HANDOFF_DISTANCE = 120;
+
 
 // Full-screen mobile drawer: the desktop dropdown groups, then everything else.
 const mobileSections = [
@@ -85,7 +86,6 @@ export function Navbar({settings,handoff=false}:{settings?:SiteSettings;handoff?
     const mark=title?.querySelector<HTMLElement>(".hero-electric");
     const logo=headerRef.current?.querySelector<HTMLElement>(".rnav-logo img");
     const floating=handoffMarkRef.current;
-    const hero=title?.closest<HTMLElement>(".home-hero");
     if(!title||!mark||!logo||!floating){ setRevealed(true); return; }
     const reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame=0;
@@ -93,21 +93,26 @@ export function Navbar({settings,handoff=false}:{settings?:SiteSettings;handoff?
       frame=0;
       const from=title.getBoundingClientRect();
       const to=logo.getBoundingClientRect();
-      const p=Math.min(Math.max((to.top+HANDOFF_DISTANCE-from.top)/HANDOFF_DISTANCE,0),1);
+      // The wordmark rides with the page until it's HANDOFF_DISTANCE below the logo slot,
+      // then shrinks into it. Smoothstep leaves at the page's own speed and lands at rest.
+      const raw=Math.min(Math.max((to.top+HANDOFF_DISTANCE-from.top)/HANDOFF_DISTANCE,0),1);
+      const p=raw>.995?1:raw;
       const moving=p>0&&p<1&&!reduced.matches;
-      const blend=p*p*(3-2*p);
+      const e=p*p*(3-2*p);
       floating.style.visibility=moving?"visible":"hidden";
-      floating.style.width=`${from.width+(to.width-from.width)*blend}px`;
-      floating.style.transform=`translate(${from.left+(to.left-from.left)*blend}px,${from.top+(to.top-from.top)*blend}px)`;
+      floating.style.width=`${from.width}px`;
+      floating.style.transform=`translate(${from.left+(to.left-from.left)*e}px,${from.top+(to.top-from.top)*e}px) scale(${1+(to.width/from.width-1)*e})`;
+      // Carry the hero's drop shadow over so the swap doesn't pop, then fade it as it
+      // docks, since the bar's logo has none.
+      floating.style.filter=`drop-shadow(0 5px 18px rgba(0,0,0,${(.45*(1-e*e)).toFixed(3)}))`;
       mark.style.visibility=(moving||p>=1)?"hidden":"";
-      if(hero) hero.dataset.scrolled=String(window.scrollY>16);
       setRevealed(p>=1);
     };
     const schedule=()=>{ if(!frame) frame=requestAnimationFrame(update); };
     update();
     window.addEventListener("scroll",schedule,{passive:true});
     window.addEventListener("resize",schedule);
-    return ()=>{ cancelAnimationFrame(frame); window.removeEventListener("scroll",schedule); window.removeEventListener("resize",schedule); mark.style.visibility=""; floating.style.visibility="hidden"; if(hero) delete hero.dataset.scrolled; };
+    return ()=>{ cancelAnimationFrame(frame); window.removeEventListener("scroll",schedule); window.removeEventListener("resize",schedule); mark.style.visibility=""; floating.style.visibility="hidden"; };
   },[handoff]);
 
   // While the drawer is open the page underneath must not scroll, and focus

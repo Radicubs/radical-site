@@ -1,10 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ArrowDown } from "lucide-react";
 import DriftWall, { type DriftWallItem } from "@/components/DriftWall";
 import { HeroElectricWordmark } from "@/components/sections/hero-electric-wordmark";
 import { PixelArrowButton } from "@/components/ui/pixel-arrow-button";
+import { glideTo } from "@/components/ui/glide-to";
 import type { GalleryPhoto, SiteSettings } from "@/lib/cms";
 
 const localMoments = [{ image: "/radicubs-2026-hero.webp", title: "Radicubs robot on the competition field" }];
@@ -15,6 +15,15 @@ export function HeroPhotoWall({ photos }: { photos: GalleryPhoto[] }) {
     : localMoments;
 
   return <DriftWall items={items} decorative responsive columns={7} tileWidth={245} tileHeight={178} gap={15} radius={12} tilt={1} turn={0} perspective={850} depth={200} scale={1.05} curve={700} speed={12} variance={0.22} parallax={0.45} lift={70} dim={1} fade={0.08} overlayColor="transparent" />;
+}
+
+// Take over from Lenis's anchor handling, which measures the target only once.
+function scrollToUpdates(event: React.MouseEvent<HTMLAnchorElement>) {
+  const target = document.getElementById("home-updates");
+  if (!target || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+  event.preventDefault();
+  event.nativeEvent.stopPropagation();
+  glideTo(target);
 }
 
 export function HeroSection({ settings, photos = [], wall }: { settings: SiteSettings; photos?: GalleryPhoto[]; wall?: ReactNode }) {
@@ -28,9 +37,8 @@ export function HeroSection({ settings, photos = [], wall }: { settings: SiteSet
         <p className="home-hero-description">We build robots, compete, and figure things out together in Frisco, Texas.</p>
         <div className="home-hero-actions">
           <PixelArrowButton href={settings.applyUrl} external>Join the team</PixelArrowButton>
-          <PixelArrowButton href="#explore-disciplines" variant="secondary" direction="down">Explore what we do</PixelArrowButton>
+          <PixelArrowButton href="#home-updates" variant="secondary" direction="down" onClick={scrollToUpdates}>Scroll to explore</PixelArrowButton>
         </div>
-        <a className="home-scroll-cue" href="#home-updates">Scroll to explore <ArrowDown size={16} aria-hidden="true" /></a>
       </div>
     </section>
   );
