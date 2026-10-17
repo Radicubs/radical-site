@@ -1,5 +1,6 @@
 "use client";
 
+import { LinkArrow } from "@/components/ui/link-arrow";
 import Link from "@/components/ui/intent-link";
 import FlipCard from "@/components/FlipCard";
 import type { DisciplineCard } from "@/lib/cms";
@@ -24,7 +25,7 @@ export function DisciplineCardsSection({ disciplines }: { disciplines: Disciplin
   return <section id="explore-disciplines" className="section home-disciplines"><div className="wrap disc-wrap">
     <div className="section-head-row disc-head">
       <h2>Find where you <em>fit in.</em></h2>
-      <Link className="home-disciplines-link" href="/team">Meet the team <span aria-hidden="true">↗</span></Link>
+      <Link className="home-disciplines-link" href="/team">Meet the team <span aria-hidden="true"><LinkArrow /></span></Link>
     </div>
     <ul className="disc-grid">{disciplines.map(({ key, title, copy, tags, alt, image }, i) => {
       const index = `${pad(i + 1)} / ${pad(disciplines.length)}`;

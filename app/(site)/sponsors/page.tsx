@@ -1,3 +1,4 @@
+import { LinkArrow } from "@/components/ui/link-arrow";
 import { pageMetadata, seoPages } from "@/lib/seo";
 import type { CSSProperties } from "react";
 import Link from "@/components/ui/intent-link";
@@ -83,7 +84,7 @@ export default async function SponsorsPage() {
             ))}
             <li className="sp-logo-open" style={fillStyle}>
               <Link className="sp-logo-tile sp-logo-tile--open" href="/contact?topic=sponsor">
-                <span className="sp-open-copy"><strong>Your logo here</strong><span>Partner with Team {settings.teamNumber} →</span></span>
+                <span className="sp-open-copy"><strong>Your logo here</strong><span>Partner with Team {settings.teamNumber} <LinkArrow direction="right" /></span></span>
               </Link>
             </li>
           </ul>

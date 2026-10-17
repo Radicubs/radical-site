@@ -1,3 +1,4 @@
+import { LinkArrow } from "@/components/ui/link-arrow";
 import Link from "@/components/ui/intent-link";
 import { NotFoundScene } from "@/components/NotFoundScene";
 
@@ -13,7 +14,7 @@ export default function NotFound() {
         <p className="notfound-copy">Even our best builds need a fix now and then. Let's get you back to the team.</p>
         <p className="notfound-hint">Hold the click to hit hyperspeed.</p>
         <div className="notfound-actions">
-          <Link className="btn btn-dark" href="/">Back to home →</Link>
+          <Link className="btn btn-dark" href="/">Back to home <LinkArrow direction="right" /></Link>
           <Link className="btn btn-light" href="/journey">See our journey</Link>
         </div>
       </div>

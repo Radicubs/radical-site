@@ -1,3 +1,4 @@
+import { LinkArrow } from "@/components/ui/link-arrow";
 import Link from "@/components/ui/intent-link";
 import { AnimatedSection } from "@/components/ui/animated-section";
 import type { Sponsor } from "@/data/sponsors";
@@ -19,5 +20,5 @@ export function SponsorsPreviewSection({sponsors}:{sponsors:Sponsor[]}){
       ariaLabel:s.name
     };
   });
-  return <section className="section"><div className="wrap"><div className="sponsor-panel"><AnimatedSection><div className="section-head-row"><div><p className="eyebrow">Sponsors</p><p className="section-copy">From our first box of parts to the trip to competition, our sponsors help make each season possible.</p></div><Link className="text-link" href="/sponsors">Meet our sponsors →</Link></div></AnimatedSection><div className="sponsor-loop"><LogoLoop logos={logos} speed={52} logoHeight={150} gap={112} pauseOnHover scaleOnHover ariaLabel="Radicubs corporate sponsors"/></div></div></div></section>
+  return <section className="section"><div className="wrap"><div className="sponsor-panel"><AnimatedSection><div className="section-head-row"><div><p className="eyebrow">Sponsors</p><p className="section-copy">From our first box of parts to the trip to competition, our sponsors help make each season possible.</p></div><Link className="text-link" href="/sponsors">Meet our sponsors <LinkArrow direction="right" /></Link></div></AnimatedSection><div className="sponsor-loop"><LogoLoop logos={logos} speed={52} logoHeight={150} gap={112} pauseOnHover scaleOnHover ariaLabel="Radicubs corporate sponsors"/></div></div></div></section>
 }

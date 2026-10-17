@@ -60,8 +60,10 @@ body { min-width: 0; }
 }
 
 @media (max-width: 700px) {
-  .home-page .home-hero { min-height: clamp(600px, 86svh, 690px); }
-  .home-page .home-hero-content { padding: 180px 20px 55px; }
+  /* Let short phones fit the content naturally, without a 600px floor or
+     excessive trailing space before the next section's own top padding. */
+  .home-page .home-hero { min-height: min(640px, 78svh); }
+  .home-page .home-hero-content { padding: 180px 20px 24px; }
   .home-page .home-hero-actions { gap: 12px; }
   .section-head-row { align-items: flex-start; gap: 18px; }
   .footer-grid { grid-template-columns: minmax(0, 1fr); }

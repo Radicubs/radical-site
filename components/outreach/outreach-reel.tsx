@@ -1,5 +1,6 @@
 "use client";
 
+import { LinkArrow } from "@/components/ui/link-arrow";
 import Link from "@/components/ui/intent-link";
 import { motion, type MotionValue, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { useEffect, useRef, useState } from "react";
@@ -76,7 +77,7 @@ function ReelCard({ event, image, index, imageShift }: { event: OutreachReelEven
       <span className="outreach-reel-year">{event.year} <span>· {pad(index + 1)}</span></span>
       <strong>{event.title}</strong>
       <span className="outreach-reel-place">{event.place}</span>
-      {event.source && <span className="outreach-reel-read" aria-hidden="true">Read the post ↗</span>}
+      {event.source && <span className="outreach-reel-read" aria-hidden="true">Read the post <LinkArrow /></span>}
     </span>
   </>;
 
