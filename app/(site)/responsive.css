@@ -86,10 +86,10 @@ body { min-width: 0; }
 }
 
 @media (max-width: 1024px) {
-  /* The mobile navbar floats over the hero, so no header height is subtracted.
-     Track the visible viewport as browser controls expand or collapse. Content
-     can still grow beyond it on short screens or with enlarged text. */
-  .home-page .home-hero { min-height: 100svh; min-height: 100dvh; }
+  /* Fill the initial viewport beneath the floating navbar. The small viewport
+     stays stable as browser controls hide, keeping the bottom-aligned logo and
+     text from shifting during scroll. Content can grow when it needs to. */
+  .home-page .home-hero { min-height: 100svh; }
   .home-page .home-hero-content { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
 }
 
