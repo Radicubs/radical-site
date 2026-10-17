@@ -172,8 +172,9 @@ const measure = (object: THREE.Object3D): Bounds => {
   return bounds;
 };
 
+// The site's models are meshopt-compressed, so skip Draco and its decoder download.
 const GltfModel = ({ url, children }: ModelProps) => {
-  const { scene } = useGLTF(url, true, true);
+  const { scene } = useGLTF(url, false, true);
   const object = useMemo(() => scene.clone(true), [scene]);
   return children(object);
 };
@@ -238,15 +239,18 @@ const Stage = ({
   settingsRef,
   visibleRef,
   resetRef,
+  lit,
   onReady
 }: {
   object: THREE.Object3D;
   settingsRef: RefObject<Settings>;
   visibleRef: RefObject<boolean>;
   resetRef: RefObject<(() => void) | null>;
+  lit: boolean;
   onReady?: () => void;
 }) => {
-  const { camera, gl, size, invalidate } = useThree();
+  const { camera, gl, scene, size, invalidate } = useThree();
+  const [compiled, setCompiled] = useState(false);
   const placeRef = useRef<THREE.Group>(null);
   const floatRef = useRef<THREE.Group>(null);
   const tiltRef = useRef<THREE.Group>(null);
@@ -298,11 +302,30 @@ const Stage = ({
     return () => { resetRef.current = null; };
   }, [motion, settingsRef, resetRef, invalidate]);
 
+  // Linking every shader on the first frame blocks the main thread for most of a second.
+  // Keep the model hidden while the driver compiles them in parallel, then show it. Waits
+  // for the environment map first, since it changes which shader variants are needed.
   useEffect(() => {
-    if (announced.has(object)) return;
+    let cancelled = false;
+    let timer = 0;
+    const compile = () => {
+      if (cancelled) return;
+      if (lit && !scene.environment) { timer = window.setTimeout(compile, 30); return; }
+      gl.compileAsync(object, camera, scene).catch(() => {}).then(() => {
+        if (cancelled) return;
+        setCompiled(true);
+        invalidate();
+      });
+    };
+    compile();
+    return () => { cancelled = true; window.clearTimeout(timer); };
+  }, [object, lit, gl, camera, scene, invalidate]);
+
+  useEffect(() => {
+    if (!compiled || announced.has(object)) return;
     announced.add(object);
     onReady?.();
-  }, [object, onReady]);
+  }, [compiled, object, onReady]);
 
   useEffect(() => {
     const element = gl.domElement;
@@ -528,7 +551,7 @@ const Stage = ({
                 -bounds.center.z * bounds.scale
               ]}
             >
-              <primitive object={object} />
+              <primitive object={object} visible={compiled} />
             </group>
           </group>
         </group>
@@ -671,7 +694,7 @@ const ModelViewer = ({
               {object => {
                 object.rotation.set(...modelRotation);
                 object.updateMatrixWorld(true);
-                return <Stage object={object} settingsRef={settingsRef} visibleRef={visibleRef} resetRef={resetRef} onReady={handleReady} />;
+                return <Stage object={object} settingsRef={settingsRef} visibleRef={visibleRef} resetRef={resetRef} lit={!!environmentFiles || environment !== 'none'} onReady={handleReady} />;
               }}
             </Model>
           )}

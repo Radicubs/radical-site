@@ -7,6 +7,7 @@ import type { ModelViewerHandle } from "@/components/ModelViewer";
 import type { DisciplineCard } from "@/lib/cms";
 
 const MODEL_URL = "/models/2026-robot-viewer-v2.glb";
+const ENVIRONMENT_URL = "/models/studio-small-03-256.hdr";
 const ModelViewer = dynamic(() => import("@/components/ModelViewer"), { ssr: false });
 const faceAngle = (back: boolean, current: number) => {
   const base = back ? 180 : 0;
@@ -56,6 +57,26 @@ export function CadDisciplineCard({ discipline, index }: { discipline: Disciplin
     if (next !== details) setDetails(next);
     else if (!reduceMotion) spin.current = animate(turn, faceAngle(details, turn.get()), { type: "spring", stiffness: 170, damping: 20 });
   };
+
+  // Mount the viewer once the page settles, so the code, model, lighting and shaders are
+  // all ready before anyone scrolls this far. Data-saver visitors still load on approach.
+  useEffect(() => {
+    if ((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData) return;
+    const start = () => setInView(true);
+    let idle: number | undefined;
+    let timer: number | undefined;
+    const schedule = () => {
+      idle = window.requestIdleCallback?.(start, { timeout: 2500 });
+      if (idle === undefined) timer = window.setTimeout(start, 600);
+    };
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+    return () => {
+      window.removeEventListener("load", schedule);
+      if (idle !== undefined) window.cancelIdleCallback(idle);
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -133,7 +154,7 @@ export function CadDisciplineCard({ discipline, index }: { discipline: Disciplin
               url={MODEL_URL}
               width="100%"
               height="100%"
-              environmentFiles="/models/studio-small-03-256.hdr"
+              environmentFiles={ENVIRONMENT_URL}
               environmentIntensity={1.6}
               exposure={1.15}
               modelRotation={[-Math.PI / 2, 0, 0]}

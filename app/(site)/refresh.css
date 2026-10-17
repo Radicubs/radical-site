@@ -30,6 +30,8 @@ html, body, * { scrollbar-width: none !important; }
 .home-hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 25px; }
 
 .home-disciplines { background: #101112; padding-top: 92px; }
+/* Lay this section out off-screen too, so the CAD viewer can finish loading before it's reached. */
+.home-disciplines { content-visibility: visible; contain-intrinsic-size: none; }
 .home-disciplines .section-head-row { align-items: end; }
 .home-disciplines h2 { max-width: none; font-family: "IBM Plex Sans", sans-serif; font-size: clamp(38px,4.1vw,58px); font-weight: 600; line-height: 1.05; letter-spacing: -.03em; text-transform: none; }
 .home-disciplines .section-copy { margin: 0; max-width: 33ch; }

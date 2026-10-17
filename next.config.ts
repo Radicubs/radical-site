@@ -63,7 +63,7 @@ const nextConfig: NextConfig = {
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }]
       },
       {
-        source: "/:all*(\\.avif|\\.webp|\\.png|\\.jpg|\\.jpeg|\\.JPG|\\.PNG|\\.gif|\\.svg|\\.ico|\\.mp4|\\.webm|\\.glb)",
+        source: "/:all*(\\.avif|\\.webp|\\.png|\\.jpg|\\.jpeg|\\.JPG|\\.PNG|\\.gif|\\.svg|\\.ico|\\.mp4|\\.webm|\\.glb|\\.hdr)",
         headers: [{ key: "Cache-Control", value: STATIC_MEDIA_CACHE }]
       },
       {
