@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 import { getBlogPosts } from "@/lib/cms";
 import { absoluteUrl, seoPages } from "@/lib/seo";
 
-// Read the same published CMS content as /blog at request time.
-export const dynamic = "force-dynamic";
+// Cached like the pages; CMS saves clear it along with them.
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await getBlogPosts();

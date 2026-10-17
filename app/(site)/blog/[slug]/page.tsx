@@ -7,7 +7,9 @@ import { Navbar } from "@/components/sections/navbar";
 import { Footer } from "@/components/sections/footer";
 import { getBlogPost, getSiteSettings } from "@/lib/cms";
 
-export const dynamic = "force-dynamic";
+// Each post is rendered on its first visit and then cached like the other pages.
+export async function generateStaticParams() { return []; }
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const post = await getBlogPost(slug);

@@ -183,8 +183,9 @@ export const getBlogPosts = cache(async (limit = 1000): Promise<BlogPost[]> => {
     return docs.map(mapBlogPost);
   } catch (error) {
     console.error("CMS read failed for blog-posts:", error instanceof Error ? error.message : error);
-    // Do not restore unpublished/deleted posts when the configured CMS is offline.
-    return [];
+    // Throw rather than return an empty list: pages are cached, and a failed render keeps
+    // serving the last good copy instead of caching a page with no posts.
+    throw error;
   }
 });
 
@@ -199,7 +200,8 @@ export const getBlogPost = cache(async (slug: string): Promise<BlogPost | undefi
     return docs[0] ? mapBlogPost(docs[0]) : undefined;
   } catch (error) {
     console.error("CMS read failed for blog-post:", error instanceof Error ? error.message : error);
-    return undefined;
+    // Throw rather than report "not found", which would be cached as a 404.
+    throw error;
   }
 });
 

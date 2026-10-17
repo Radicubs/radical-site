@@ -62,4 +62,13 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
-export const config = { matcher: ["/", "/admin/:path*", "/api/:path*", "/robots.txt"] };
+// The front door and robots.txt only need the middleware on the admin subdomain, so
+// public homepage visits skip it (and stay servable straight from the CDN cache).
+export const config = {
+  matcher: [
+    { source: "/", has: [{ type: "host", value: "admin.radicubs.com" }] },
+    { source: "/robots.txt", has: [{ type: "host", value: "admin.radicubs.com" }] },
+    "/admin/:path*",
+    "/api/:path*"
+  ]
+};

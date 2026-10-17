@@ -1,9 +1,20 @@
-import type { CollectionConfig } from "payload";
+import type { CollectionBeforeOperationHook, CollectionConfig } from "payload";
 import { contentAccess, contentHooks } from "../access";
 
 // Resized copies are made on upload, so visitors download the smallest image
 // that fills its slot (the site builds an <img srcset> from these).
 const webp = { format: "webp" as const, options: { quality: 80 } };
+
+// Media is cached at Vercel's edge and in browsers, so every upload gets its own URL:
+// a replaced photo can never reuse the old file's name and keep showing the old image.
+// Names that already carry a content hash (from the upload scripts) are left alone.
+const uniqueFilename: CollectionBeforeOperationHook = ({ operation, req }) => {
+  const file = req.file;
+  if ((operation !== "create" && operation !== "update") || !file?.name || /-[0-9a-f]{12}\./i.test(file.name)) return;
+  const dot = file.name.indexOf(".");
+  const [base, extension] = dot > 0 ? [file.name.slice(0, dot), file.name.slice(dot)] : [file.name, ""];
+  file.name = `${base}-${Date.now().toString(36)}${extension}`;
+};
 
 export const Media: CollectionConfig = {
   slug: "media",
@@ -14,7 +25,7 @@ export const Media: CollectionConfig = {
     defaultColumns: ["filename", "alt", "updatedAt"]
   },
   access: contentAccess,
-  hooks: contentHooks,
+  hooks: { ...contentHooks, beforeOperation: [uniqueFilename] },
   upload: {
     staticDir: "media",
     // Images narrower than the thumbnail size get no resized copy, so preview those

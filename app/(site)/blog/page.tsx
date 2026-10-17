@@ -6,7 +6,6 @@ import { AnimatedSection } from "@/components/ui/animated-section";
 import { getBlogPosts, getSiteSettings } from "@/lib/cms";
 
 export const metadata = pageMetadata("/blog", seoPages["/blog"]);
-export const dynamic = "force-dynamic";
 
 export default async function BlogPage() {
   const [posts, settings] = await Promise.all([getBlogPosts(), getSiteSettings()]);

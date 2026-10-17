@@ -363,10 +363,9 @@ ol.blog-list li{list-style:decimal}
 .team-photo-fallback{position:absolute;inset:0;display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:34px;letter-spacing:.06em;color:#77ff66;background:linear-gradient(150deg,#101a13,#0b120e)}
 .gallery-page{position:relative;min-height:100vh;overflow:hidden}
 .gallery-page-bg{position:fixed;inset:0;z-index:0;background:#060707}
-
-/* components/ui/image-fade.tsx: images still downloading stay hidden, then fade in.
-   Visibility (not opacity) hides them, so site styles that set an image's opacity still apply,
-   and the keyframe only names a start, so the fade ends at whatever opacity the image has. */
-img[data-img="loading"]{visibility:hidden}
-img[data-img="in"]{animation:img-fade-in .45s ease-out}
-@keyframes img-fade-in{from{opacity:0}}
+/* Post cards in a row match the tallest one, with "Read post" pinned to the bottom,
+   however long each title and excerpt is. */
+:is(.post-grid,.blog-grid)>*{display:flex;flex-direction:column}
+.post-card{display:flex;flex-direction:column;flex:1}
+.post-body{display:flex;flex:1;flex-direction:column}
+.post-read{margin-top:auto;padding-top:18px}

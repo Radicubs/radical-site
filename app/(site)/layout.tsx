@@ -27,8 +27,10 @@ import { StarsBackground } from "@/components/animate-ui/components/backgrounds/
 import { getSiteSettings } from "@/lib/cms";
 import { siteUrl, socialImage } from "@/lib/seo";
 
-// CMS content and media must be read at request time, never frozen during a build.
-export const dynamic = "force-dynamic";
+// Pages are cached and served from Vercel's CDN, so a visit doesn't run a function or
+// query the database. Saving anything in the CMS clears every cached page at once
+// (cms/access.ts), so edits show on the next visit; the hourly refresh is a backstop.
+export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
