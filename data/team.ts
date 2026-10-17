@@ -1,4 +1,6 @@
-export type TeamMember = { name: string; role: string; image: string };
+import type { TeamGlowIcon } from "@/lib/team-glow-icons";
+
+export type TeamMember = { name: string; role: string; image: string; glowIcon?: TeamGlowIcon | null };
 
 export const teamMembers: TeamMember[] = [
   { name: "Airlia Vivekanand", role: "Senior Captain", image: "" },

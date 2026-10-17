@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "instrument serif",
+        "files": [
+          "app/(site)/home-reference.css"
+        ],
+        "createdAt": "2026-10-17T20:59:29.698Z",
+        "reason": "Agent: existing editorial heading font in home-reference.css predates this task; preserve the incumbent typography while changing only the scroll cue and navbar handoff."
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "app/(site)/globals.css"
+        ],
+        "createdAt": "2026-10-17T21:40:08.217Z",
+        "reason": "Codex review: line 331 is .team-season-select::after, an 8px dropdown chevron drawn with two 2px borders and rotate(45deg), not an accent border on a card. It predates the blog spacing changes."
+      }
+    ]
+  }
+}

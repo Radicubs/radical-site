@@ -308,11 +308,14 @@
   .rnav-actions { gap: 10px; }
 }
 
-/* Home page handoff: hidden until the hero wordmark docks into the logo slot.
-   The logo swaps instantly so the docked wordmark and the real logo never both show.
-   It floats over the hero so the hidden bar doesn't leave a blank row at the top. */
+/* The bar is always present. Only its logo slot waits for the hero wordmark. */
 .rnav[data-handoff] { position: fixed; inset: 0 0 auto; }
-.rnav[data-handoff] :is(.rnav-glass, .rnav-links, .rnav-actions) { transition: opacity .35s ease, transform .35s ease; }
-.rnav[data-handoff]:not([data-revealed]) { pointer-events: none; }
-.rnav[data-handoff]:not([data-revealed]) :is(.rnav-glass, .rnav-links, .rnav-actions) { opacity: 0; transform: translateY(-10px); }
+.rnav[data-handoff] .rnav-bar { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); padding-inline: 14px; }
 .rnav[data-handoff]:not([data-revealed]) .rnav-logo { visibility: hidden; }
+/* Travels above every layer of the bar, glass outline included. */
+.rnav-handoff-mark { position: fixed; top: 0; left: 0; z-index: 10; height: auto; visibility: hidden; pointer-events: none; }
+@media (max-width: 1024px) {
+  .rnav[data-handoff] .rnav-bar { grid-template-columns: 1fr auto 1fr; padding-inline: 8px; }
+  .rnav[data-handoff] .rnav-logo { grid-column: 2; grid-row: 1; justify-self: center; }
+  .rnav[data-handoff] .rnav-actions { grid-column: 3; grid-row: 1; }
+}

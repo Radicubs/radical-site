@@ -34,6 +34,10 @@
   letter-spacing: -.015em;
 }
 .home-page .home-hero-actions { margin-top: 22px; gap: 12px; }
+.home-scroll-cue { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; color: var(--home-soft); font-size: 12px; line-height: 1.5; }
+.home-scroll-cue:hover { color: var(--home-ink); }
+.home-scroll-cue:focus-visible { outline: 2px solid var(--home-sage); outline-offset: 5px; }
+.home-hero[data-scrolled="true"] .home-scroll-cue { visibility: hidden; }
 .home-page .home-disciplines {
   background: transparent;
   padding: 68px 0 98px;

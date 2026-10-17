@@ -95,7 +95,7 @@ export const HomePage: GlobalConfig = {
               { name: "title", type: "text", required: true },
               { name: "copy", label: "Back of the card", type: "textarea", required: true },
               { name: "tags", type: "array", maxRows: 3, fields: [{ name: "tag", type: "text", required: true }] },
-              upload("photo", "Photo")
+              upload("photo", "Photo or 3D model", "Choose an image, or upload a .glb file for an interactive 3D viewer. Replace the CAD model here just like a card photo.")
             ]
           }]
         },

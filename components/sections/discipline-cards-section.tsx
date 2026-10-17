@@ -28,9 +28,9 @@ export function DisciplineCardsSection({ disciplines }: { disciplines: Disciplin
       <h2>Find where you <em>fit in.</em></h2>
       <Link className="home-disciplines-link" href="/team">Meet the team <span aria-hidden="true"><LinkArrow /></span></Link>
     </div>
-    <ul className="disc-grid">{disciplines.map(({ key, title, copy, tags, alt, image }, i) => {
+    <ul className="disc-grid">{disciplines.map(({ key, title, copy, tags, alt, image, model }, i) => {
       const index = `${pad(i + 1)} / ${pad(disciplines.length)}`;
-      if (key === "cad" || title.trim().toLowerCase() === "cad") return <li key={key}><CadDisciplineCard discipline={{ key, title, copy, tags, alt, image }} index={i + 1} /></li>;
+      if (model) return <li key={key}><CadDisciplineCard key={model} discipline={{ key, title, copy, tags, alt, image, model }} index={i + 1} /></li>;
       return <li key={key}>
         <FlipCard
           className="disc-card"

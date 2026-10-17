@@ -56,6 +56,7 @@ export function Navbar({settings,handoff=false}:{settings?:SiteSettings;handoff?
     return ()=>window.removeEventListener("resize",read);
   },[]);
   const headerRef=useRef<HTMLElement>(null);
+  const handoffMarkRef=useRef<HTMLImageElement>(null);
   const [revealed,setRevealed]=useState(!handoff);
   const toggleRef=useRef<HTMLButtonElement>(null);
   const closeRef=useRef<HTMLButtonElement>(null);
@@ -77,33 +78,36 @@ export function Navbar({settings,handoff=false}:{settings?:SiteSettings;handoff?
   useEffect(()=>{ setMenuOpen(false); setOpenMenu(null); },[pathname]);
   useEffect(()=>{ setMounted(true); },[]);
 
-  // Home page: the bar stays hidden until the hero wordmark scrolls up to the logo slot,
-  // pins there, shrinks into it, and the rest of the bar takes over.
+  // Only the wordmark travels; navigation stays visible and usable throughout.
   useEffect(()=>{
     if(!handoff) return;
     const title=document.getElementById("home-title");
     const mark=title?.querySelector<HTMLElement>(".hero-electric");
     const logo=headerRef.current?.querySelector<HTMLElement>(".rnav-logo img");
-    if(!title||!mark||!logo){ setRevealed(true); return; }
+    const floating=handoffMarkRef.current;
+    const hero=title?.closest<HTMLElement>(".home-hero");
+    if(!title||!mark||!logo||!floating){ setRevealed(true); return; }
+    const reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame=0;
     const update=()=>{
       frame=0;
-      // The h1 is never transformed, so its box is where the wordmark would sit unpinned.
       const from=title.getBoundingClientRect();
       const to=logo.getBoundingClientRect();
-      const p=Math.min(Math.max((to.top-from.top)/HANDOFF_DISTANCE,0),1);
-      if(p>0){
-        const k=1+(to.width/from.width-1)*p;
-        mark.style.transform=`translate(${(to.left-from.left)*p}px,${to.top-from.top}px) scale(${k})`;
-      } else mark.style.transform="";
-      mark.style.visibility=p>=1?"hidden":"";
+      const p=Math.min(Math.max((to.top+HANDOFF_DISTANCE-from.top)/HANDOFF_DISTANCE,0),1);
+      const moving=p>0&&p<1&&!reduced.matches;
+      const blend=p*p*(3-2*p);
+      floating.style.visibility=moving?"visible":"hidden";
+      floating.style.width=`${from.width+(to.width-from.width)*blend}px`;
+      floating.style.transform=`translate(${from.left+(to.left-from.left)*blend}px,${from.top+(to.top-from.top)*blend}px)`;
+      mark.style.visibility=(moving||p>=1)?"hidden":"";
+      if(hero) hero.dataset.scrolled=String(window.scrollY>16);
       setRevealed(p>=1);
     };
     const schedule=()=>{ if(!frame) frame=requestAnimationFrame(update); };
     update();
     window.addEventListener("scroll",schedule,{passive:true});
     window.addEventListener("resize",schedule);
-    return ()=>{ cancelAnimationFrame(frame); window.removeEventListener("scroll",schedule); window.removeEventListener("resize",schedule); mark.style.transform=""; mark.style.visibility=""; };
+    return ()=>{ cancelAnimationFrame(frame); window.removeEventListener("scroll",schedule); window.removeEventListener("resize",schedule); mark.style.visibility=""; floating.style.visibility="hidden"; if(hero) delete hero.dataset.scrolled; };
   },[handoff]);
 
   // While the drawer is open the page underneath must not scroll, and focus
@@ -136,7 +140,7 @@ export function Navbar({settings,handoff=false}:{settings?:SiteSettings;handoff?
     return ()=>{ document.removeEventListener("keydown",onKey); document.removeEventListener("pointerdown",onPointer); };
   },[openMenu,menuOpen]);
 
-  return <header ref={headerRef} className="rnav" data-open={menuOpen||undefined} data-handoff={handoff||undefined} data-revealed={revealed||undefined} inert={!revealed}>
+  return <header ref={headerRef} className="rnav" data-open={menuOpen||undefined} data-handoff={handoff||undefined} data-revealed={revealed||undefined}>
     <div className="rnav-card">
       <GlassSurface className="rnav-glass" width="100%" height="100%" notch={EAR*scale} borderRadius={26*scale} backgroundOpacity={0.32} saturation={1.5} brightness={55} blur={10} distortionScale={-160} />
       <div className="rnav-bar">
@@ -171,6 +175,7 @@ export function Navbar({settings,handoff=false}:{settings?:SiteSettings;handoff?
       </div>
 
     </div>
+    {handoff&&<img ref={handoffMarkRef} className="rnav-handoff-mark" src="/radical-wordmark-green.svg" alt="" aria-hidden="true" />}
 
     {mounted&&createPortal(<div id="rnav-mobile" className="rnav-drawer" data-open={menuOpen||undefined} role="dialog" aria-modal="true" aria-label="Site menu" inert={!menuOpen}>
       <span className="rnav-drawer-sweep" aria-hidden="true" />

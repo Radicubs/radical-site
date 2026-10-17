@@ -7,6 +7,10 @@ import { withPayload } from "@payloadcms/next/withPayload";
 // for a week and refresh quietly after that. Replacing a file? Give it a new
 // name so visitors pick it up immediately.
 const STATIC_MEDIA_CACHE = "public, max-age=604800, stale-while-revalidate=2592000";
+// Vercel's edge copy of CMS media. Payload gives every upload a unique filename,
+// so the edge can hold files for a month and refresh in the background for a
+// year; each refresh is one more download from Supabase per region.
+const EDGE_MEDIA_CACHE = "public, max-age=2592000, stale-while-revalidate=31536000";
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
@@ -65,6 +69,15 @@ const nextConfig: NextConfig = {
       {
         source: "/:all*(\\.avif|\\.webp|\\.png|\\.jpg|\\.jpeg|\\.JPG|\\.PNG|\\.gif|\\.svg|\\.ico|\\.mp4|\\.webm|\\.glb|\\.hdr)",
         headers: [{ key: "Cache-Control", value: STATIC_MEDIA_CACHE }]
+      },
+      // Supabase answers with `no-cache`, so without an override Vercel's CDN
+      // proxies every /media request back to the bucket. Cache it at the edge.
+      {
+        source: "/media/:path*",
+        headers: [
+          { key: "x-vercel-enable-rewrite-caching", value: "1" },
+          { key: "CDN-Cache-Control", value: EDGE_MEDIA_CACHE }
+        ]
       },
       {
         source: "/robot/scrollcraft.js",

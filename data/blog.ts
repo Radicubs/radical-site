@@ -1,6 +1,6 @@
 export type BlogImage = { src: string; alt: string };
 export type BlogBlock =
-  | { kind: "text"; text: string }
+  | { kind: "text"; text: string; indent?: number }
   | { kind: "code"; code: string; lang?: string }
   | { kind: "list"; ordered: boolean; items: string[] }
   | { kind: "image"; src: string; srcSet?: string; alt: string };

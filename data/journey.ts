@@ -6,6 +6,7 @@ export type JourneySeason = {
   districtRank?: string;
   awards: string[];
   image?: string;
+  imageSrcSet?: string;
   imageNote?: string;
   tbaUrl: string;
 };

@@ -94,6 +94,22 @@ export default async function SponsorsPage() {
       <section className="section sp-section">
         <div className="wrap">
           <AnimatedSection className="sp-head">
+            <div><p className="eyebrow">Community</p><h2>Individual sponsors</h2></div>
+            <p className="section-copy">To the families and friends who have pitched in: thank you.</p>
+          </AnimatedSection>
+          <AnimatedSection>
+            <ol className="sp-names">
+              {individual.map((name, index) => (
+                <li key={name}><span className="sp-index">{pad(index + 1)}</span>{name}</li>
+              ))}
+            </ol>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      <section className="section sp-section">
+        <div className="wrap">
+          <AnimatedSection className="sp-head">
             <div><p className="eyebrow">Impact</p><h2>What your support builds</h2></div>
             <p className="section-copy">Your support goes straight into the work we do all season.</p>
           </AnimatedSection>
@@ -106,22 +122,6 @@ export default async function SponsorsPage() {
               </AnimatedSection>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="section sp-section">
-        <div className="wrap">
-          <AnimatedSection className="sp-head">
-            <div><p className="eyebrow">Community</p><h2>Individual sponsors</h2></div>
-            <p className="section-copy">To the families and friends who have pitched in: thank you.</p>
-          </AnimatedSection>
-          <AnimatedSection>
-            <ol className="sp-names">
-              {individual.map((name, index) => (
-                <li key={name}><span className="sp-index">{pad(index + 1)}</span>{name}</li>
-              ))}
-            </ol>
-          </AnimatedSection>
         </div>
       </section>
 

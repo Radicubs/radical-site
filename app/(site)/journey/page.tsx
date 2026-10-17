@@ -43,7 +43,7 @@ export default async function JourneyPage() {
                     </div>
                     <div className={`journey-media${image ? " journey-media-photo" : ""}`}>
                       {image ? (
-                        <img src={image} alt={`Radicubs ${season.year} robot`} loading="lazy" />
+                        <img src={image} srcSet={season.imageSrcSet} sizes="(max-width: 900px) calc(100vw - 64px), 560px" alt={`Radicubs ${season.year} robot`} loading="lazy" />
                       ) : (
                         <div className="journey-no-media"><div><strong>No robot photo for this season</strong><span>{season.imageNote}</span></div></div>
                       )}

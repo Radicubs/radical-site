@@ -349,6 +349,8 @@ h3,.journey-title,.post-title,.team-name,.mentor-name,.award-name{font-family:"I
 .socials .tba-social{width:13px;height:19px;display:block;background:currentColor;mask:url('/thebluealliance.svg') center/contain no-repeat;-webkit-mask:url('/thebluealliance.svg') center/contain no-repeat}
 
 /* Rich blog body: images, code blocks, and lists parsed out of the CMS content. */
+.prose-radicubs p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7;min-height:1.7em;margin:0 0 1em}
+.prose-radicubs .blog-list li{white-space:pre-wrap;overflow-wrap:anywhere}
 .blog-figures{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:24px 0 8px}
 .blog-figures img,.blog-figure{width:100%;height:auto;border-radius:14px;border:1px solid var(--line);background:#0c140f;display:block}
 .blog-figure{margin:22px 0}

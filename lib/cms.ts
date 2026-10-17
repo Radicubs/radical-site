@@ -1,9 +1,10 @@
 import "server-only";
+import { lexicalToSections } from "@/lib/blog-content";
 import { cache } from "react";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import type { Album, Media, BlogPost as CmsBlogPost } from "@/cms/payload-types";
-import { blogPosts as fallbackBlogPosts, type BlogBlock, type BlogPost, type BlogSection } from "@/data/blog";
+import { blogPosts as fallbackBlogPosts, type BlogPost } from "@/data/blog";
 import { disciplines as fallbackDisciplines } from "@/data/disciplines";
 import { journeySeasons as fallbackJourney, type JourneySeason } from "@/data/journey";
 import { outreachEvents as fallbackOutreachEvents, outreachPartners as fallbackPartners, outreachPrograms as fallbackPrograms, outreachStats as fallbackStats, type OutreachEvent, type OutreachProgram } from "@/data/outreach";
@@ -42,7 +43,7 @@ export type GalleryPhoto = {
 export type GalleryAlbum = { title: string; year: number | null; photos: GalleryPhoto[] };
 export type DisciplineImages = Partial<Record<"mechanical" | "cad" | "electrical" | "programming" | "business" | "grants" | "media" | "outreach", string>>;
 export type TeamRoster = { year: number; members: TeamMember[] };
-export type DisciplineCard = { key: string; title: string; copy: string; tags: string[]; alt: string; image?: CmsImage };
+export type DisciplineCard = { key: string; title: string; copy: string; tags: string[]; alt: string; image?: CmsImage; model?: string };
 export type OutreachStat = { value: number; suffix?: string; label: string; plain?: boolean };
 export type OutreachReelEvent = OutreachEvent & { photo?: CmsImage };
 export type OutreachContent = {
@@ -146,57 +147,6 @@ export const getSiteSettings = cmsRead("site-settings", async (): Promise<SiteSe
 // ---------------------------------------------------------------------------
 // Blog
 
-type LexicalNode = {
-  type?: string;
-  tag?: string;
-  text?: string;
-  listType?: string;
-  children?: LexicalNode[];
-  value?: unknown;
-  fields?: { blockType?: string; code?: string; language?: string };
-};
-
-const nodeText = (node: LexicalNode): string =>
-  node.type === "linebreak" ? "\n" : node.text ?? (node.children ?? []).map(nodeText).join("");
-
-const emptySection = (heading: string): BlogSection => ({ heading, paragraphs: [], blocks: [] });
-
-// The post template lays a post out as titled sections, so each Heading in the
-// editor starts a new section. Anything before the first heading goes under "Update".
-function lexicalToSections(content: unknown): BlogSection[] | undefined {
-  const nodes = (content as { root?: LexicalNode } | null)?.root?.children;
-  if (!nodes?.length) return undefined;
-
-  const sections: BlogSection[] = [];
-  let current = emptySection("Update");
-  const flush = () => { if (current.blocks!.length) sections.push(current); };
-  const push = (block: BlogBlock) => current.blocks!.push(block);
-
-  for (const node of nodes) {
-    if (node.type === "heading") {
-      const text = nodeText(node).trim();
-      if (!text) continue;
-      flush();
-      current = emptySection(text);
-    } else if (node.type === "list") {
-      const items = (node.children ?? []).map((item) => nodeText(item).trim()).filter(Boolean);
-      if (items.length) push({ kind: "list", ordered: node.listType === "number", items });
-    } else if (node.type === "upload") {
-      const media = asMedia(node.value);
-      const image = media && variant(media, ["large", "medium", "small"]);
-      if (media && image) push({ kind: "image", src: image.url, srcSet: srcSet(media), alt: media.alt ?? "" });
-    } else if (node.type === "block" && node.fields?.blockType === "Code") {
-      const code = node.fields.code?.replace(/\s+$/, "");
-      if (code) push({ kind: "code", code, lang: node.fields.language || undefined });
-    } else {
-      const text = nodeText(node).trim();
-      if (text) push({ kind: "text", text });
-    }
-  }
-  flush();
-  return sections.length ? sections : undefined;
-}
-
 // Lists only need card fields. Never load and deserialize every article's
 // rich text (and all its uploaded images) just to render a few cards.
 function mapBlogPost(post: Pick<CmsBlogPost, "slug" | "date" | "updatedAt" | "title" | "excerpt" | "cover" | "content" | "youtubeVideo">): BlogPost {
@@ -210,7 +160,11 @@ function mapBlogPost(post: Pick<CmsBlogPost, "slug" | "date" | "updatedAt" | "ti
     excerpt: post.excerpt || "",
     cover: cover ? variant(cover, ["large", "medium", "small"])?.url : undefined,
     coverSrcSet: cover ? srcSet(cover) : undefined,
-    sections: lexicalToSections(post.content),
+    sections: lexicalToSections(post.content, (value) => {
+      const media = asMedia(value);
+      const image = media && variant(media, ["large", "medium", "small"]);
+      return media && image ? { kind: "image", src: image.url, srcSet: srcSet(media), alt: media.alt ?? "" } : undefined;
+    }),
     sourceUrl: post.youtubeVideo || undefined,
     external: Boolean(post.youtubeVideo)
   };
@@ -264,7 +218,7 @@ const fallbackRosters: TeamRoster[] = [{ year: FALLBACK_TEAM_YEAR, members: sort
 export const getTeamRosters = cmsRead("team-rosters", async (): Promise<TeamRoster[]> => {
   const payload = await payloadClient();
   const [{ docs }, { docs: seasons }] = await Promise.all([
-    payload.find({ collection: "team-members", sort: "name", limit: 5000, depth: 1, select: { name: true, memberships: true } }),
+    payload.find({ collection: "team-members", sort: "name", limit: 5000, depth: 1, select: { name: true, memberships: true, glowIcon: true } }),
     payload.find({ collection: "team-seasons", sort: "-year", limit: 500, depth: 0, joins: { members: false } })
   ]);
   const byYear = new Map<number, TeamMember[]>(seasons.map((season) => [season.year, []]));
@@ -274,7 +228,7 @@ export const getTeamRosters = cmsRead("team-rosters", async (): Promise<TeamRost
       const role = typeof assignment.role === "object" ? assignment.role : undefined;
       if (!season || !role) continue;
       const roster = byYear.get(season.year) ?? [];
-      roster.push({ name: member.name, role: role.name, image: imageUrl(assignment.photo, ["medium", "small", "thumbnail"]) ?? "" });
+      roster.push({ name: member.name, role: role.name, glowIcon: member.glowIcon, image: imageUrl(assignment.photo, ["medium", "small", "thumbnail"]) ?? "" });
       byYear.set(season.year, roster);
     }
   }
@@ -415,14 +369,19 @@ const fallbackDisciplineCards: DisciplineCard[] = fallbackDisciplines.map(({ key
 
 export const getDisciplines = cmsRead("disciplines", async (): Promise<DisciplineCard[]> => {
   const home = await loadHome();
-  const cards = (home.disciplines ?? []).map((card) => ({
-    key: card.id || card.title,
-    title: card.title,
-    copy: card.copy,
-    tags: (card.tags ?? []).map((entry) => entry.tag),
-    alt: asMedia(card.photo)?.alt || card.title,
-    image: cmsImage(card.photo)
-  }));
+  const cards = (home.disciplines ?? []).map((card) => {
+    const media = asMedia(card.photo);
+    const isModel = media?.mimeType === "model/gltf-binary" || /\.glb$/i.test(media?.filename ?? "");
+    return {
+      key: card.id || card.title,
+      title: card.title,
+      copy: card.copy,
+      tags: (card.tags ?? []).map((entry) => entry.tag),
+      alt: media?.alt || card.title,
+      image: isModel ? undefined : cmsImage(card.photo),
+      model: isModel ? fileUrl(card.photo) : undefined
+    };
+  });
   return cards;
 }, fallbackDisciplineCards);
 
@@ -447,6 +406,7 @@ export const getJourneySeasons = cmsRead("journey", async (): Promise<JourneySea
     districtRank: season.districtRank || undefined,
     awards: (season.awards ?? []).map((entry) => entry.award),
     image: imageUrl(season.photo),
+    imageSrcSet: asMedia(season.photo) ? srcSet(asMedia(season.photo)!) : undefined,
     imageNote: season.photoNote || undefined,
     tbaUrl: season.tbaUrl
   }));

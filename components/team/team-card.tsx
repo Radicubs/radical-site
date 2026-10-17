@@ -1,24 +1,15 @@
 import { ProfilePhoto } from "@/components/team/profile-photo";
+import { teamGlowIcon, type TeamGlowIcon } from "@/lib/team-glow-icons";
 
 const initials = (name: string) =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("");
 
-const ROLE_ICONS: Array<{ match: RegExp; icon: string }> = [
-  { match: /program|software|code/i, icon: "/team/icons/code.webp" },
-  { match: /mechanical/i, icon: "/team/icons/mechanical.webp" },
-  { match: /\bcad\b/i, icon: "/team/icons/cad.webp" },
-  { match: /business/i, icon: "/team/icons/business.webp" },
-  { match: /media/i, icon: "/team/icons/media.webp" }
-];
-
-const iconForRole = (role: string) => ROLE_ICONS.find((r) => r.match.test(role))?.icon;
-
-export function TeamCard({ member }: { member: { name: string; role: string; image?: string } }) {
+export function TeamCard({ member }: { member: { name: string; role: string; image?: string; glowIcon?: TeamGlowIcon | null } }) {
   return (
     <article className="team-card" data-tilt-card>
       <div className="team-photo">
         {member.image ? (
-          <ProfilePhoto src={member.image} alt={member.name} icon={iconForRole(member.role)} />
+          <ProfilePhoto src={member.image} alt={member.name} icon={teamGlowIcon(member.glowIcon, member.role)} />
         ) : (
           <span className="team-photo-fallback" aria-hidden="true">{initials(member.name)}</span>
         )}

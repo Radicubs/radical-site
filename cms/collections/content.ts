@@ -1,6 +1,7 @@
 import { APIError, ValidationError, type CollectionBeforeDeleteHook, type CollectionBeforeValidateHook, type CollectionConfig, type FieldHook } from "payload";
 import { BlocksFeature, CodeBlock, FixedToolbarFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import { contentAccess, contentHooks } from "../access";
+import { teamGlowOptions } from "../../lib/team-glow-icons";
 
 export const slugify = (value: string) => value
   .toLowerCase()
@@ -151,6 +152,11 @@ export const TeamMembers: CollectionConfig = {
   fields: [
     { name: "name", type: "text", required: true },
     photo("photo", "Default profile photo", "Prefills new season assignments. Existing seasons keep their saved photos."),
+    {
+      name: "glowIcon", label: "Hover glow icon", type: "select", defaultValue: "auto",
+      options: [...teamGlowOptions],
+      admin: { description: "Choose the icon revealed when hovering over this person's photo. Applies across their seasons. Automatic matches each season's role." }
+    },
     {
       name: "memberships", label: "Season assignments", type: "array",
       labels: { singular: "Season assignment", plural: "Season assignments" },

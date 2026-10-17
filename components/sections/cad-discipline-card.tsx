@@ -6,7 +6,6 @@ import { animate, motion, useMotionValue, useReducedMotion, type AnimationPlayba
 import type { ModelViewerHandle } from "@/components/ModelViewer";
 import type { DisciplineCard } from "@/lib/cms";
 
-const MODEL_URL = "/models/2026-robot-viewer-v2.glb";
 const ENVIRONMENT_URL = "/models/studio-small-03-256.hdr";
 const ModelViewer = dynamic(() => import("@/components/ModelViewer"), { ssr: false });
 const faceAngle = (back: boolean, current: number) => {
@@ -14,17 +13,17 @@ const faceAngle = (back: boolean, current: number) => {
   return base + Math.round((current - base) / 360) * 360;
 };
 
-class ModelBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+class ModelBoundary extends Component<{ children: ReactNode; url: string }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
   render() {
     return this.state.failed
-      ? <p className="disc-model-status" role="status">The 3D preview couldn’t load. <a href={MODEL_URL} download>Download the model</a> to view it.</p>
+      ? <p className="disc-model-status" role="status">The 3D preview couldn’t load. <a href={this.props.url} download>Download the model</a> to view it.</p>
       : this.props.children;
   }
 }
 
-export function CadDisciplineCard({ discipline, index }: { discipline: DisciplineCard; index: number }) {
+export function CadDisciplineCard({ discipline, index }: { discipline: DisciplineCard & { model: string }; index: number }) {
   const [details, setDetails] = useState(false);
   const [inView, setInView] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -58,24 +57,15 @@ export function CadDisciplineCard({ discipline, index }: { discipline: Disciplin
     else if (!reduceMotion) spin.current = animate(turn, faceAngle(details, turn.get()), { type: "spring", stiffness: 170, damping: 20 });
   };
 
-  // Mount the viewer once the page settles, so the code, model, lighting and shaders are
-  // all ready before anyone scrolls this far. Data-saver visitors still load on approach.
+  // Mount the viewer the first time the visitor scrolls, so the code, model, lighting and
+  // shaders are ready by the time they reach it, while visitors who never leave the hero
+  // don't download the model at all. Data-saver visitors only load it on approach.
   useEffect(() => {
     if ((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData) return;
     const start = () => setInView(true);
-    let idle: number | undefined;
-    let timer: number | undefined;
-    const schedule = () => {
-      idle = window.requestIdleCallback?.(start, { timeout: 2500 });
-      if (idle === undefined) timer = window.setTimeout(start, 600);
-    };
-    if (document.readyState === "complete") schedule();
-    else window.addEventListener("load", schedule, { once: true });
-    return () => {
-      window.removeEventListener("load", schedule);
-      if (idle !== undefined) window.cancelIdleCallback(idle);
-      if (timer !== undefined) window.clearTimeout(timer);
-    };
+    const options = { once: true, passive: true };
+    window.addEventListener("scroll", start, options);
+    return () => window.removeEventListener("scroll", start);
   }, []);
 
   useEffect(() => {
@@ -147,11 +137,11 @@ export function CadDisciplineCard({ discipline, index }: { discipline: Disciplin
         <span className="disc-ticks" aria-hidden="true" />
         {header(false)}
         <div className="disc-photo disc-model">
-          <ModelBoundary>
+          <ModelBoundary url={discipline.model}>
             {!loaded && <p className="disc-model-status" role="status">Loading 3D model…</p>}
             {inView && <ModelViewer
               ref={viewer}
-              url={MODEL_URL}
+              url={discipline.model}
               width="100%"
               height="100%"
               environmentFiles={ENVIRONMENT_URL}

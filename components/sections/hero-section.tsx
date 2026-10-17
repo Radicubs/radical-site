@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { ArrowDown } from "lucide-react";
 import DriftWall, { type DriftWallItem } from "@/components/DriftWall";
 import { HeroElectricWordmark } from "@/components/sections/hero-electric-wordmark";
 import { PixelArrowButton } from "@/components/ui/pixel-arrow-button";
@@ -29,6 +30,7 @@ export function HeroSection({ settings, photos = [], wall }: { settings: SiteSet
           <PixelArrowButton href={settings.applyUrl} external>Join the team</PixelArrowButton>
           <PixelArrowButton href="#explore-disciplines" variant="secondary" direction="down">Explore what we do</PixelArrowButton>
         </div>
+        <a className="home-scroll-cue" href="#home-updates">Scroll to explore <ArrowDown size={16} aria-hidden="true" /></a>
       </div>
     </section>
   );

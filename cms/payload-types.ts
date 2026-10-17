@@ -339,6 +339,10 @@ export interface TeamMember {
    */
   photo?: (number | null) | Media;
   /**
+   * Choose the icon revealed when hovering over this person's photo. Applies across their seasons. Automatic matches each season's role.
+   */
+  glowIcon?: ('auto' | 'none' | 'code' | 'mechanical' | 'cad' | 'business' | 'media') | null;
+  /**
    * Returning member? Add a new row here and keep the old one. Edit a row to change only that season’s role or photo. The + buttons create seasons or roles.
    */
   memberships?:
@@ -655,6 +659,7 @@ export interface OutreachEventsSelect<T extends boolean = true> {
 export interface TeamMembersSelect<T extends boolean = true> {
   name?: T;
   photo?: T;
+  glowIcon?: T;
   memberships?:
     | T
     | {
@@ -869,6 +874,9 @@ export interface HomePage {
               id?: string | null;
             }[]
           | null;
+        /**
+         * Choose an image, or upload a .glb file for an interactive 3D viewer. Replace the CAD model here just like a card photo.
+         */
         photo?: (number | null) | Media;
         id?: string | null;
       }[]
