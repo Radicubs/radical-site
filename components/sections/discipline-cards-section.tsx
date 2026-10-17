@@ -3,6 +3,7 @@
 import { LinkArrow } from "@/components/ui/link-arrow";
 import Link from "@/components/ui/intent-link";
 import FlipCard from "@/components/FlipCard";
+import { CadDisciplineCard } from "./cad-discipline-card";
 import type { DisciplineCard } from "@/lib/cms";
 import "./discipline-cards.css";
 
@@ -29,6 +30,7 @@ export function DisciplineCardsSection({ disciplines }: { disciplines: Disciplin
     </div>
     <ul className="disc-grid">{disciplines.map(({ key, title, copy, tags, alt, image }, i) => {
       const index = `${pad(i + 1)} / ${pad(disciplines.length)}`;
+      if (key === "cad" || title.trim().toLowerCase() === "cad") return <li key={key}><CadDisciplineCard discipline={{ key, title, copy, tags, alt, image }} index={i + 1} /></li>;
       return <li key={key}>
         <FlipCard
           className="disc-card"

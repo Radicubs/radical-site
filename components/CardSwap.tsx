@@ -14,7 +14,7 @@ import React, {
   useMemo,
   useRef
 } from "react";
-import { lenisRef, scrollLockRef } from "@/components/ui/lenis-singleton";
+import { lenisRef, scrollLockRef, scrollRestoreRef } from "@/components/ui/lenis-singleton";
 import "./CardSwap.css";
 
 export interface CardSwapProps {
@@ -323,6 +323,10 @@ const CardSwap: React.FC<CardSwapProps> = ({
           if (!scrollLockRef.current?.holding) syncToScroll(self.progress);
         },
         onUpdate: self => {
+          if (scrollRestoreRef.current) {
+            if (stepFor(self.progress) !== step) syncToScroll(self.progress);
+            return;
+          }
           // A transition is already playing — SmoothScroll is clamping
           // scroll to holdPosition and swallowing wheel input for us, so
           // progress here is stale until that transition completes.

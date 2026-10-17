@@ -161,6 +161,19 @@ html[data-theme="light"] .home-disciplines-link:hover { color: var(--disc-ink); 
 }
 .disc-card:hover .disc-photo img { filter: none; transform: scale(1.04); }
 
+/* CAD uses its own details control so model gestures never flip the card. */
+.disc-model-card { --fc-radius: 4px; cursor: pointer; perspective: 1100px; }
+.disc-model-actions { display: flex; gap: 6px; margin-left: auto; }
+.disc-model-actions .disc-flip { margin-left: 0; }
+.disc-model-card:hover .disc-model-reset { transform: none; }
+.disc-model-toggle { padding: 0; background: transparent; cursor: pointer; width: 32px; height: 32px; }
+.disc-model-toggle:focus-visible, .disc-model canvas:focus-visible { outline: 2px solid var(--disc-accent); outline-offset: -2px; }
+.disc-model-card .disc-head-row { min-height: 45px; }
+.disc-model-card .disc-head-row h3 { margin: 0; font-size: clamp(15px, 1.25vw, 19px); }
+.disc-model-status { position: absolute; inset: 0; display: grid; place-content: center; margin: 0; padding: 16px; text-align: center; color: var(--disc-muted); font-size: 13px; }
+.disc-model-status a { color: var(--disc-accent); text-decoration: underline; }
+.disc-model-card .disc-hint { line-height: 1.5; letter-spacing: .03em; }
+
 .disc-hint {
   display: block;
   margin-top: 10px;

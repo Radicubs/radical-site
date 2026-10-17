@@ -18,6 +18,8 @@ import "./large-screens.css";
 import { MotionSystem } from "@/components/ui/motion-system";
 import ClickSpark from "@/components/ClickSpark";
 import { SmoothScroll } from "@/components/ui/smooth-scroll";
+import { ScrollRestoration } from "@/components/ui/scroll-restoration";
+import { reloadScrollScript } from "@/components/ui/scroll-restoration-script";
 import { SiteLoader } from "@/components/ui/site-loader";
 import { NavProgress } from "@/components/ui/nav-progress";
 import { StarsBackground } from "@/components/animate-ui/components/backgrounds/stars";
@@ -66,10 +68,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`dark ${GeistSans.variable}`} data-theme="dark" suppressHydrationWarning>
       <head>
+        <style>{"html[data-reload-scroll-top] body{visibility:hidden}"}</style>
+        <script dangerouslySetInnerHTML={{ __html: reloadScrollScript }} />
         <script dangerouslySetInnerHTML={{ __html: 'try{if(sessionStorage.getItem("radicubs-loaded-v2")){document.documentElement.setAttribute("data-skip-loader","")}}catch(e){}' }} />
         <noscript><style>{".site-loader{display:none!important}"}</style></noscript>
       </head>
-      <body suppressHydrationWarning><SiteLoader /><NavProgress /><StarsBackground className="site-stars" starColor="var(--stars-color)" pointerEvents={false} aria-hidden="true" /><ClickSpark sparkColor="#66ff55" sparkCount={7} sparkRadius={20} sparkSize={7}><div className="site-content">{children}</div></ClickSpark><MotionSystem /><SmoothScroll /></body>
+      <body suppressHydrationWarning><SiteLoader /><NavProgress /><StarsBackground className="site-stars" starColor="var(--stars-color)" pointerEvents={false} aria-hidden="true" /><ClickSpark sparkColor="#66ff55" sparkCount={7} sparkRadius={20} sparkSize={7}><div className="site-content">{children}</div></ClickSpark><MotionSystem /><SmoothScroll /><ScrollRestoration /></body>
     </html>
   );
 }
