@@ -874,9 +874,12 @@ export interface HomePage {
       }[]
     | null;
   /**
-   * Needs the scroll-optimised encode (frequent keyframes), or scrolling through it will stutter.
+   * Run it through scripts/encode-scroll-video.sh first (every frame a keyframe), or scrolling through it will stutter.
    */
   seasonVideo?: (number | null) | Media;
+  /**
+   * Encode with scripts/encode-scroll-video.sh --mobile.
+   */
   seasonVideoMobile?: (number | null) | Media;
   seasonPoster?: (number | null) | Media;
   updatedAt?: string | null;

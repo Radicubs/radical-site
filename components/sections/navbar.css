@@ -307,3 +307,12 @@
   .rnav-logo img { width: 130px; }
   .rnav-actions { gap: 10px; }
 }
+
+/* Home page handoff: hidden until the hero wordmark docks into the logo slot.
+   The logo swaps instantly so the docked wordmark and the real logo never both show.
+   It floats over the hero so the hidden bar doesn't leave a blank row at the top. */
+.rnav[data-handoff] { position: fixed; inset: 0 0 auto; }
+.rnav[data-handoff] :is(.rnav-glass, .rnav-links, .rnav-actions) { transition: opacity .35s ease, transform .35s ease; }
+.rnav[data-handoff]:not([data-revealed]) { pointer-events: none; }
+.rnav[data-handoff]:not([data-revealed]) :is(.rnav-glass, .rnav-links, .rnav-actions) { opacity: 0; transform: translateY(-10px); }
+.rnav[data-handoff]:not([data-revealed]) .rnav-logo { visibility: hidden; }

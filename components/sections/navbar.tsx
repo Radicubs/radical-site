@@ -33,13 +33,16 @@ const primaryLinks = [
 // Radius of the inverted corners where the bar meets the top edge; mirrored in navbar.css.
 const EAR = 22;
 
+// Scroll distance over which the pinned hero wordmark shrinks into the logo slot.
+const HANDOFF_DISTANCE = 120;
+
 // Full-screen mobile drawer: the desktop dropdown groups, then everything else.
 const mobileSections = [
   ...menuGroups.map((g)=>({ label: g.label, links: g.links })),
   { label: "Explore", links: [...primaryLinks, { label: "Contact", href: "/contact" }] }
 ];
 
-export function Navbar({settings}:{settings?:SiteSettings}){
+export function Navbar({settings,handoff=false}:{settings?:SiteSettings;handoff?:boolean}){
   const pathname=usePathname();
   const [menuOpen,setMenuOpen]=useState(false);
   const [openMenu,setOpenMenu]=useState<string|null>(null);
@@ -52,6 +55,8 @@ export function Navbar({settings}:{settings?:SiteSettings}){
     window.addEventListener("resize",read);
     return ()=>window.removeEventListener("resize",read);
   },[]);
+  const headerRef=useRef<HTMLElement>(null);
+  const [revealed,setRevealed]=useState(!handoff);
   const toggleRef=useRef<HTMLButtonElement>(null);
   const closeRef=useRef<HTMLButtonElement>(null);
   const wasOpen=useRef(false);
@@ -71,6 +76,35 @@ export function Navbar({settings}:{settings?:SiteSettings}){
 
   useEffect(()=>{ setMenuOpen(false); setOpenMenu(null); },[pathname]);
   useEffect(()=>{ setMounted(true); },[]);
+
+  // Home page: the bar stays hidden until the hero wordmark scrolls up to the logo slot,
+  // pins there, shrinks into it, and the rest of the bar takes over.
+  useEffect(()=>{
+    if(!handoff) return;
+    const title=document.getElementById("home-title");
+    const mark=title?.querySelector<HTMLElement>(".hero-electric");
+    const logo=headerRef.current?.querySelector<HTMLElement>(".rnav-logo img");
+    if(!title||!mark||!logo){ setRevealed(true); return; }
+    let frame=0;
+    const update=()=>{
+      frame=0;
+      // The h1 is never transformed, so its box is where the wordmark would sit unpinned.
+      const from=title.getBoundingClientRect();
+      const to=logo.getBoundingClientRect();
+      const p=Math.min(Math.max((to.top-from.top)/HANDOFF_DISTANCE,0),1);
+      if(p>0){
+        const k=1+(to.width/from.width-1)*p;
+        mark.style.transform=`translate(${(to.left-from.left)*p}px,${to.top-from.top}px) scale(${k})`;
+      } else mark.style.transform="";
+      mark.style.visibility=p>=1?"hidden":"";
+      setRevealed(p>=1);
+    };
+    const schedule=()=>{ if(!frame) frame=requestAnimationFrame(update); };
+    update();
+    window.addEventListener("scroll",schedule,{passive:true});
+    window.addEventListener("resize",schedule);
+    return ()=>{ cancelAnimationFrame(frame); window.removeEventListener("scroll",schedule); window.removeEventListener("resize",schedule); mark.style.transform=""; mark.style.visibility=""; };
+  },[handoff]);
 
   // While the drawer is open the page underneath must not scroll, and focus
   // moves into the drawer and back to the toggle when it closes.
@@ -102,7 +136,7 @@ export function Navbar({settings}:{settings?:SiteSettings}){
     return ()=>{ document.removeEventListener("keydown",onKey); document.removeEventListener("pointerdown",onPointer); };
   },[openMenu,menuOpen]);
 
-  return <header className="rnav" data-open={menuOpen||undefined}>
+  return <header ref={headerRef} className="rnav" data-open={menuOpen||undefined} data-handoff={handoff||undefined} data-revealed={revealed||undefined} inert={!revealed}>
     <div className="rnav-card">
       <GlassSurface className="rnav-glass" width="100%" height="100%" notch={EAR*scale} borderRadius={26*scale} backgroundOpacity={0.32} saturation={1.5} brightness={55} blur={10} distortionScale={-160} />
       <div className="rnav-bar">

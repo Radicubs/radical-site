@@ -70,7 +70,7 @@ export default async function Home() {
         publisher: { "@id": absoluteUrl("/#organization") }
       }
     ]
-  }) }} /><Navbar settings={settings} />
+  }) }} /><Navbar settings={settings} handoff />
     <HeroSection settings={settings} wall={
       <Suspense fallback={<HeroPhotoWall photos={[]} />}>
         <HomeWall photos={photos} />
