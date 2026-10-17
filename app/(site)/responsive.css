@@ -60,9 +60,6 @@ body { min-width: 0; }
 }
 
 @media (max-width: 700px) {
-  /* Let short phones fit the content naturally, without a 600px floor or
-     excessive trailing space before the next section's own top padding. */
-  .home-page .home-hero { min-height: min(640px, 78svh); }
   .home-page .home-hero-content { padding: 180px 20px 24px; }
   .home-page .home-hero-actions { gap: 12px; }
   .section-head-row { align-items: flex-start; gap: 18px; }
@@ -86,6 +83,14 @@ body { min-width: 0; }
 }
 @media (max-height: 450px) {
   .home-page .home-hero-content { padding-top: 96px; padding-bottom: 24px; }
+}
+
+@media (max-width: 1024px) {
+  /* The mobile navbar floats over the hero, so no header height is subtracted.
+     Track the visible viewport as browser controls expand or collapse. Content
+     can still grow beyond it on short screens or with enlarged text. */
+  .home-page .home-hero { min-height: 100svh; min-height: 100dvh; }
+  .home-page .home-hero-content { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
 }
 
 /* Desktop canvases keep the laptop's relative margins on larger monitors.
