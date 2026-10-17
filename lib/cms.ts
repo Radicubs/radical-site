@@ -371,7 +371,8 @@ export const getDisciplines = cmsRead("disciplines", async (): Promise<Disciplin
   const home = await loadHome();
   const cards = (home.disciplines ?? []).map((card) => {
     const media = asMedia(card.photo);
-    const isModel = media?.mimeType === "model/gltf-binary" || /\.glb$/i.test(media?.filename ?? "");
+    // Models may be stored gzipped (.glb.gz); the viewer unpacks them.
+    const isModel = media?.mimeType === "model/gltf-binary" || /\.glb(\.gz)?$/i.test(media?.filename ?? "");
     return {
       key: card.id || card.title,
       title: card.title,

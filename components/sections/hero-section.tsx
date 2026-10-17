@@ -7,12 +7,10 @@ import { PixelArrowButton } from "@/components/ui/pixel-arrow-button";
 import { glideTo } from "@/components/ui/glide-to";
 import type { GalleryPhoto, SiteSettings } from "@/lib/cms";
 
-const localMoments = [{ image: "/radicubs-2026-hero.webp", title: "Radicubs robot on the competition field" }];
-
+// No stand-in photo: while the gallery streams in (or if it's empty) the wall stays blank.
 export function HeroPhotoWall({ photos }: { photos: GalleryPhoto[] }) {
-  const items: DriftWallItem[] = photos.length
-    ? photos.map((photo) => ({ image: photo.src, srcSet: photo.srcSet, title: photo.alt }))
-    : localMoments;
+  if (!photos.length) return null;
+  const items: DriftWallItem[] = photos.map((photo) => ({ image: photo.src, srcSet: photo.srcSet, title: photo.alt }));
 
   return <DriftWall items={items} decorative responsive columns={7} tileWidth={245} tileHeight={178} gap={15} radius={12} tilt={1} turn={0} perspective={850} depth={200} scale={1.05} curve={700} speed={12} variance={0.22} parallax={0.45} lift={70} dim={1} fade={0.08} overlayColor="transparent" />;
 }

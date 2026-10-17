@@ -172,9 +172,31 @@ const measure = (object: THREE.Object3D): Bounds => {
   return bounds;
 };
 
+// Storage serves files exactly as uploaded, so the CAD model is stored gzipped
+// (.glb.gz) and unpacked here with the browser's built-in DecompressionStream.
+// Plain .glb files pass straight through.
+const gunzipIfNeeded = async (buffer: ArrayBuffer) => {
+  const bytes = new Uint8Array(buffer, 0, Math.min(2, buffer.byteLength));
+  if (bytes[0] !== 0x1f || bytes[1] !== 0x8b) return buffer;
+  return new Response(new Blob([buffer]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+};
+
+const loadGzippedGltf: NonNullable<Parameters<typeof useGLTF>[3]> = loader => {
+  loader.load = (url, onLoad, _onProgress, onError) => {
+    fetch(url)
+      .then(response => {
+        if (!response.ok) throw new Error(`Model request failed (${response.status})`);
+        return response.arrayBuffer();
+      })
+      .then(gunzipIfNeeded)
+      .then(buffer => loader.parse(buffer, THREE.LoaderUtils.extractUrlBase(url), onLoad, onError))
+      .catch(error => onError?.(error));
+  };
+};
+
 // The site's models are meshopt-compressed, so skip Draco and its decoder download.
 const GltfModel = ({ url, children }: ModelProps) => {
-  const { scene } = useGLTF(url, false, true);
+  const { scene } = useGLTF(url, false, true, loadGzippedGltf);
   const object = useMemo(() => scene.clone(true), [scene]);
   return children(object);
 };
@@ -192,7 +214,7 @@ const ObjModel = ({ url, children }: ModelProps) => {
 };
 
 const Model = ({ url, children }: ModelProps) => {
-  const extension = (url.split('?')[0].split('.').pop() ?? '').toLowerCase();
+  const extension = (url.split('?')[0].replace(/\.gz$/i, '').split('.').pop() ?? '').toLowerCase();
   if (extension === 'fbx') return <FbxModel url={url}>{children}</FbxModel>;
   if (extension === 'obj') return <ObjModel url={url}>{children}</ObjModel>;
   return <GltfModel url={url}>{children}</GltfModel>;

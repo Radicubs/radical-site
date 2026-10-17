@@ -35,6 +35,8 @@ const EAR = 22;
 
 // Scroll distance over which the hero wordmark shrinks into the logo slot.
 const HANDOFF_DISTANCE = 120;
+// Seconds the shown transition takes to catch up with a fast scroll.
+const HANDOFF_LAG = 0.07;
 
 
 // Full-screen mobile drawer: the desktop dropdown groups, then everything else.
@@ -89,27 +91,46 @@ export function Navbar({settings,handoff=false}:{settings?:SiteSettings;handoff?
     if(!title||!mark||!logo||!floating){ setRevealed(true); return; }
     const reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame=0;
-    const update=()=>{
+    // Shown progress chases the scroll-driven progress over a fraction of a second, so a fast
+    // flick still plays the transition instead of jumping across the 120px in one frame.
+    let shownProgress=-1;
+    let last=0;
+    const update=(now:number)=>{
       frame=0;
       const from=title.getBoundingClientRect();
       const to=logo.getBoundingClientRect();
       // The wordmark rides with the page until it's HANDOFF_DISTANCE below the logo slot,
       // then shrinks into it. Smoothstep leaves at the page's own speed and lands at rest.
       const raw=Math.min(Math.max((to.top+HANDOFF_DISTANCE-from.top)/HANDOFF_DISTANCE,0),1);
-      const p=raw>.995?1:raw;
-      const moving=p>0&&p<1&&!reduced.matches;
-      const e=p*p*(3-2*p);
-      floating.style.visibility=moving?"visible":"hidden";
-      floating.style.width=`${from.width}px`;
-      floating.style.transform=`translate(${from.left+(to.left-from.left)*e}px,${from.top+(to.top-from.top)*e}px) scale(${1+(to.width/from.width-1)*e})`;
-      // Carry the hero's drop shadow over so the swap doesn't pop, then fade it as it
-      // docks, since the bar's logo has none.
-      floating.style.filter=`drop-shadow(0 5px 18px rgba(0,0,0,${(.45*(1-e*e)).toFixed(3)}))`;
-      mark.style.visibility=(moving||p>=1)?"hidden":"";
+      const target=raw>.995?1:raw;
+      // A frame resuming from rest counts as one frame, so the mark moves on the very first one.
+      const dt=last?Math.min((now-last)/1000,.05):1/60;
+      last=now;
+      if(shownProgress<0||reduced.matches) shownProgress=target;
+      else shownProgress+=(target-shownProgress)*(1-Math.exp(-dt/HANDOFF_LAG));
+      if(Math.abs(target-shownProgress)<.002) shownProgress=target;
+      const p=shownProgress;
+      // Reduced motion skips the trip: the wordmark stays in the hero, then appears docked.
+      const e=reduced.matches?(p>=1?1:0):p*p*(3-2*p);
+      const shown=p>0&&(!reduced.matches||p>=1);
+      // Starting point is the hero wordmark, but never above the logo slot: after a fast
+      // flick the hero is already off the top, so the mark pins at the bar and shrinks in.
+      const startTop=Math.max(from.top,to.top);
+      // Once docked, the travelling wordmark simply stays on as the bar's logo, so there is
+      // no hand-over to a second image that could flash. Sizing by width (not scale) keeps
+      // the SVG redrawn crisp at every size, so the docked logo matches the real one.
+      floating.style.visibility=shown?"visible":"hidden";
+      floating.style.width=`${from.width+(to.width-from.width)*e}px`;
+      floating.style.transform=`translate(${from.left+(to.left-from.left)*e}px,${startTop+(to.top-startTop)*e}px)`;
+      // Carry the hero's drop shadow over, then fade it as it docks, since the bar has none.
+      floating.style.filter=e>=1?"none":`drop-shadow(0 5px 18px rgba(0,0,0,${(.45*(1-e*e)).toFixed(3)}))`;
+      mark.style.visibility=shown?"hidden":"";
       setRevealed(p>=1);
+      if(p!==target) frame=requestAnimationFrame(update);
+      else last=0;
     };
     const schedule=()=>{ if(!frame) frame=requestAnimationFrame(update); };
-    update();
+    update(performance.now());
     window.addEventListener("scroll",schedule,{passive:true});
     window.addEventListener("resize",schedule);
     return ()=>{ cancelAnimationFrame(frame); window.removeEventListener("scroll",schedule); window.removeEventListener("resize",schedule); mark.style.visibility=""; floating.style.visibility="hidden"; };
