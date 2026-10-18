@@ -10,11 +10,22 @@ import { Albums, BlogPosts, JourneySeasons, Mentors, OutreachEvents, Sponsors, T
 import { HomePage, OutreachPage, SiteSettings } from "./cms/globals";
 import { googleSignInEnabled } from "./cms/supabase-auth";
 import { databaseConnectionString } from "./cms/database-connection";
+import { removeUploadLeftovers } from "./cms/media-storage";
 
 const root = process.cwd();
 
 // Uploads go to a public Supabase Storage bucket when it's configured, and to
 // ./media on disk otherwise (local development without Supabase).
+const s3Config = {
+  endpoint: process.env.S3_ENDPOINT,
+  region: process.env.S3_REGION,
+  forcePathStyle: true,
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!
+  }
+};
+
 const storage = process.env.S3_BUCKET
   ? [s3Storage({
       bucket: process.env.S3_BUCKET,
@@ -29,16 +40,8 @@ const storage = process.env.S3_BUCKET
       // Browser uploads go straight to storage, so big videos aren't limited by
       // the hosting platform's request size.
       clientUploads: true,
-      config: {
-        endpoint: process.env.S3_ENDPOINT,
-        region: process.env.S3_REGION,
-        forcePathStyle: true,
-        credentials: {
-          accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!
-        }
-      }
-    })]
+      config: s3Config
+    }), removeUploadLeftovers(process.env.S3_BUCKET, s3Config)]
   : [];
 
 // Sites the editor can be used from. Vercel sets VERCEL_URL to the current
@@ -63,6 +66,7 @@ export default buildConfig({
     components: {
       graphics: { Logo: "/cms/admin-components#Logo", Icon: "/cms/admin-components#Icon" },
       beforeDashboard: ["/cms/admin-components#Welcome"],
+      providers: ["/cms/photo-editor#PhotoEditorProvider"],
       afterLogin: googleSignInEnabled ? ["/cms/google-login#GoogleLogin"] : [],
       logout: { Button: "/cms/google-login#LogoutButton" }
     },

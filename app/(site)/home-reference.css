@@ -18,6 +18,10 @@
 .home-page .home-hero-wall .drift-wall__tile:before { background: transparent; box-shadow: none; }
 .home-page .home-hero-wall .drift-wall__tile img { filter: none; }
 .home-page .home-hero-wall .drift-wall__overlay { opacity: 0; }
+/* The wall mounts after its client-side shuffle; ease it in rather than popping. */
+.home-hero-wall-in { animation: home-hero-wall-in .6s ease both; }
+@keyframes home-hero-wall-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .home-hero-wall-in { animation: none; } }
 .home-page .home-hero-content {
   justify-content: flex-end;
   padding: 215px 20px 45px;

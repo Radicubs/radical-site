@@ -37,6 +37,10 @@ export const Media: CollectionConfig = {
     },
     // Camera originals are shrunk on upload; nothing on the site is shown wider than this.
     resizeOptions: { width: 2560, height: 2560, fit: "inside", withoutEnlargement: true },
+    // Payload re-encodes every image original anyway, so store it as WebP (about half the
+    // size of a camera JPEG). Transparency is kept at full quality for logos. SVGs and
+    // non-images are left alone.
+    formatOptions: { format: "webp", options: { quality: 80, alphaQuality: 100, smartSubsample: true } },
     focalPoint: true,
     crop: true,
     imageSizes: [
@@ -47,6 +51,11 @@ export const Media: CollectionConfig = {
     ]
   },
   fields: [
+    {
+      name: "photoEditor",
+      type: "ui",
+      admin: { components: { Field: "/cms/photo-editor#PhotoEditorField" }, disableListColumn: true }
+    },
     {
       name: "alt",
       label: "Description",

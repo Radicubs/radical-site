@@ -26,12 +26,14 @@ import { BlockquoteFeatureClient as BlockquoteFeatureClient_e70f5e05f09f93e00b99
 import { UploadFeatureClient as UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { InlineToolbarFeatureClient as InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { PhotoEditorField as PhotoEditorField_1c87ed2626cf49c55151f0e06ce21b19 } from '../../../cms/photo-editor'
 import { LabelRowLabel as LabelRowLabel_12885fa8e1560742d90878698b0c6d23 } from '../../../cms/row-label'
 import { TitleRowLabel as TitleRowLabel_12885fa8e1560742d90878698b0c6d23 } from '../../../cms/row-label'
 import { LogoutButton as LogoutButton_f14a38ee439ae327c4cac6cda7d740c5 } from '../../../cms/google-login'
 import { Icon as Icon_f293b56943f4bd94c96f2751f62ed213 } from '../../../cms/admin-components'
 import { Logo as Logo_f293b56943f4bd94c96f2751f62ed213 } from '../../../cms/admin-components'
 import { Welcome as Welcome_f293b56943f4bd94c96f2751f62ed213 } from '../../../cms/admin-components'
+import { PhotoEditorProvider as PhotoEditorProvider_1c87ed2626cf49c55151f0e06ce21b19 } from '../../../cms/photo-editor'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -65,12 +67,14 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UploadFeatureClient": UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#InlineToolbarFeatureClient": InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "/cms/photo-editor#PhotoEditorField": PhotoEditorField_1c87ed2626cf49c55151f0e06ce21b19,
   "/cms/row-label#LabelRowLabel": LabelRowLabel_12885fa8e1560742d90878698b0c6d23,
   "/cms/row-label#TitleRowLabel": TitleRowLabel_12885fa8e1560742d90878698b0c6d23,
   "/cms/google-login#LogoutButton": LogoutButton_f14a38ee439ae327c4cac6cda7d740c5,
   "/cms/admin-components#Icon": Icon_f293b56943f4bd94c96f2751f62ed213,
   "/cms/admin-components#Logo": Logo_f293b56943f4bd94c96f2751f62ed213,
   "/cms/admin-components#Welcome": Welcome_f293b56943f4bd94c96f2751f62ed213,
+  "/cms/photo-editor#PhotoEditorProvider": PhotoEditorProvider_1c87ed2626cf49c55151f0e06ce21b19,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

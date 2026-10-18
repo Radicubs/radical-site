@@ -62,6 +62,30 @@ uses IPv6 by default; the shared session pooler supports IPv4. See
 
 ## Editing content
 
+### Database security
+
+Payload tables in `public` have row level security enabled by
+`20261018_120000_enable_payload_rls`, applied by `npm run payload -- migrate`
+or the normal build. They deliberately have no Supabase Data API policies:
+public content and editor operations go through Payload, which enforces its own
+access controls using a server-side database role that owns these tables or has
+`BYPASSRLS`. Supabase Auth and Storage use their own schemas and are unaffected.
+Do not add public read policies to CMS tables, especially users, sessions,
+preferences, locks, and draft versions. Do not enable `FORCE ROW LEVEL SECURITY`
+without first reviewing the Payload connection role.
+
+When a future migration creates a CMS table, include
+`ALTER TABLE public."table_name" ENABLE ROW LEVEL SECURITY` in the same migration.
+Verify new tables and role access after deployment. Rolling back the security
+migration disables RLS and restores the previous exposure; routine application
+rollbacks should retain it. Supabase may report “RLS enabled no policy” for these
+tables; denying direct Data API access is intentional.
+
+“Unused index” is an observation over the available database statistics, not
+proof an index can be removed. Keep Payload-generated indexes unless query plans
+and representative production usage justify a specific removal, preserving
+indexes required for uniqueness and relationships.
+
 Open `https://admin.radicubs.com` in production (or `/admin` locally) to manage
 blog posts, photo albums, team members, mentors,
 sponsors, journey seasons, outreach events, and the homepage/outreach/settings

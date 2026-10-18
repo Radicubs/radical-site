@@ -334,6 +334,16 @@ export async function getPhotoAlbum(): Promise<GalleryPhoto[]> {
 // from albums marked "Include on the homepage". Tiles load as they drift into view,
 // so a long wall doesn't cost a first visit much more than a short one.
 const HOME_WALL_LIMIT = 96;
+
+function shuffle<T>(items: T[]): T[] {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 export const getHomeWallPhotos = cmsRead("home-wall", async (): Promise<GalleryPhoto[]> => {
   const [home, albums] = await Promise.all([loadHome(), loadAlbums(true)]);
   const wall = (home.wallPhotos ?? []).flatMap((value, index) => {
@@ -342,25 +352,19 @@ export const getHomeWallPhotos = cmsRead("home-wall", async (): Promise<GalleryP
     return photo ? [photo] : [];
   });
 
-  // Take turns between albums so one big album doesn't fill a stretch of the wall.
-  const homeAlbums = albums.filter((album) => album.showOnHomepage !== false).map(albumPhotos).filter((photos) => photos.length);
-  const eventPhotos: GalleryPhoto[] = [];
-  for (let index = 0; index < Math.max(0, ...homeAlbums.map((photos) => photos.length)); index++) {
-    for (const album of homeAlbums) if (album[index]) eventPhotos.push(album[index]);
-  }
+  // Pinned wall photos always make the pool; a random draw from the homepage albums fills
+  // the rest. The browser reshuffles on every visit (see HeroPhotoWall), so this only has
+  // to keep the pool itself from going stale between cache revalidations.
+  const eventPhotos = shuffle(albums.filter((album) => album.showOnHomepage !== false).flatMap(albumPhotos));
 
   const result: GalleryPhoto[] = [];
   const seen = new Set<string>();
-  for (let index = 0; index < Math.max(wall.length, eventPhotos.length); index++) {
-    for (const photo of [wall[index], eventPhotos[index]]) {
-      const heroPhoto = photo && { ...photo, src: photo.thumbSrc };
-      const key = heroPhoto?.src;
-      if (heroPhoto && key && !seen.has(key)) {
-        result.push(heroPhoto);
-        seen.add(key);
-      }
-      if (result.length === HOME_WALL_LIMIT) return result;
-    }
+  for (const photo of [...wall, ...eventPhotos]) {
+    const heroPhoto = { ...photo, src: photo.thumbSrc };
+    if (!heroPhoto.src || seen.has(heroPhoto.src)) continue;
+    result.push(heroPhoto);
+    seen.add(heroPhoto.src);
+    if (result.length === HOME_WALL_LIMIT) break;
   }
   return result;
 }, []);

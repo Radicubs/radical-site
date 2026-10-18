@@ -8,3 +8,5 @@ node_modules
 # Payload: local uploads when Supabase Storage isn't configured
 /media
 .next-build
+media-backup/
+.DS_Store
