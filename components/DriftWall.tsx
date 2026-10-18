@@ -60,6 +60,10 @@ const DEFAULT_ITEMS: DriftWallItem[] = Array.from({ length: 15 }, (_, i) => {
   };
 });
 
+// Windows turns this on whenever "Animation effects" is off, which many laptops ship with, so
+// a frozen wall would look broken there. Reduced motion drifts at this fraction of the speed instead.
+const REDUCED_SPEED = 0.35;
+
 const prefersReducedMotion = (): boolean =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -208,7 +212,7 @@ const DriftWall = ({
 
   useEffect(() => {
     let visible = true;
-    const shouldAnimate = () => visible && !document.hidden && !reduced;
+    const shouldAnimate = () => visible && !document.hidden;
     const animate = (ts: number) => {
       if (lastTsRef.current === null) lastTsRef.current = ts;
       const dt = Math.min(0.05, Math.max(0, ts - lastTsRef.current) / 1000);
@@ -222,36 +226,27 @@ const DriftWall = ({
       pointerDampedRef.current.y += (targetY - pointerDampedRef.current.y) * damp;
       applyPlaneTransform(pointerDampedRef.current.x, pointerDampedRef.current.y);
 
-      if (!reduced) {
-        for (let c = 0; c < trackRefs.current.length; c++) {
-          const meta = columnMeta[c];
-          if (!meta) continue;
-          const paused = wallHoveredRef.current && pauseOnHover;
-          const factor = paused || hoveredColRef.current === c ? 0 : 1;
-          const target = baseVelocities[c] * factor;
+      for (let c = 0; c < trackRefs.current.length; c++) {
+        const meta = columnMeta[c];
+        if (!meta) continue;
+        const paused = wallHoveredRef.current && pauseOnHover;
+        const factor = paused || hoveredColRef.current === c ? 0 : reduced ? REDUCED_SPEED : 1;
+        const target = baseVelocities[c] * factor;
 
-          const ease = 1 - Math.exp(-dt / (target === 0 ? 0.16 : 0.28));
-          velocitiesRef.current[c] += (target - velocitiesRef.current[c]) * ease;
-          let next = (offsetsRef.current[c] ?? 0) + velocitiesRef.current[c] * dt;
-          next = ((next % meta.copyHeight) + meta.copyHeight) % meta.copyHeight;
-          offsetsRef.current[c] = next;
+        const ease = 1 - Math.exp(-dt / (target === 0 ? 0.16 : 0.28));
+        velocitiesRef.current[c] += (target - velocitiesRef.current[c]) * ease;
+        let next = (offsetsRef.current[c] ?? 0) + velocitiesRef.current[c] * dt;
+        next = ((next % meta.copyHeight) + meta.copyHeight) % meta.copyHeight;
+        offsetsRef.current[c] = next;
 
-          const el = trackRefs.current[c];
-          if (el) el.style.transform = `translate3d(0, ${-next}px, 0)`;
-        }
-      } else {
-        for (let c = 0; c < trackRefs.current.length; c++) {
-          const el = trackRefs.current[c];
-          const meta = columnMeta[c];
-          if (el && meta) el.style.transform = `translate3d(0, ${-(offsetsRef.current[c] ?? 0)}px, 0)`;
-        }
+        const el = trackRefs.current[c];
+        if (el) el.style.transform = `translate3d(0, ${-next}px, 0)`;
       }
 
       rafRef.current = shouldAnimate() ? requestAnimationFrame(animate) : null;
     };
 
-    // Keep the hero's composition even with reduced motion, but stop running
-    // its animation loop once it scrolls away or the browser tab is hidden.
+    // Stop the animation loop once the wall scrolls away or the browser tab is hidden.
     applyPlaneTransform(0, 0);
     for (let c = 0; c < trackRefs.current.length; c++) {
       const track = trackRefs.current[c];

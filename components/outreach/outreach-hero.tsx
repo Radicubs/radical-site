@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import "./outreach-hero.css";
 
-/** Full-bleed hero: the RadiCamp film loops behind a small caption. The only control is mute/unmute. */
-export function OutreachHero({ video, poster }: { video?: string; poster?: string }) {
+/** Full-bleed hero: the outreach film loops behind a small caption. The only control is mute/unmute. */
+export function OutreachHero({ video, poster, title, label, note }: { video?: string; poster?: string; title: string; label?: string; note?: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
 
@@ -42,8 +42,8 @@ export function OutreachHero({ video, poster }: { video?: string; poster?: strin
     </div>
     <div className="wrap outreach-hero-bar">
       <div className="outreach-hero-caption">
-        <h1 id="outreach-hero-title">Outreach</h1>
-        <p><span className="outreach-hero-dot" aria-hidden="true" />RadiCamp 2026<span className="outreach-hero-sub"><span className="outreach-hero-sep">·</span>Our summer robotics camp</span></p>
+        <h1 id="outreach-hero-title">{title}</h1>
+        {(label || note) && <p>{label}{note && (label ? <span className="outreach-hero-sub"><span className="outreach-hero-sep">·</span>{note}</span> : note)}</p>}
       </div>
       {video && <button type="button" className="outreach-hero-mute" data-muted={muted || undefined} onClick={toggleSound} aria-pressed={!muted} aria-label={muted ? "Unmute video" : "Mute video"}>
         <svg viewBox="0 0 28 24" width="28" height="24" aria-hidden="true">

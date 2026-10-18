@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, Check, GraduationCap, Handshake } from "lucide-r
 import { SparkleButton } from "@/components/ui/sparkle-button";
 import { ContinueButton } from "@/components/ui/continue-button";
 import { PaperPlaneButton } from "@/components/ui/paper-plane-button";
+import { plain, type PageText } from "@/lib/page-text";
 import "./get-involved-flow.css";
 
 type Step = "choose" | "apply" | "interests" | "who" | "note" | "ask" | "sent";
@@ -20,9 +21,7 @@ const PATHS: Record<Path, Step[]> = {
   other: ["choose", "ask"]
 };
 
-const INTERESTS = ["Financial sponsorship", "Parts or materials", "Tools or services", "Mentoring", "Not sure yet"];
-
-type Props = { applyUrl: string; season: string; email: string; turnstileSiteKey: string };
+type Props = { applyUrl: string; season: string; email: string; turnstileSiteKey: string; text: PageText["contact"] };
 
 declare global {
   interface Window { turnstile?: {
@@ -83,7 +82,9 @@ function Turnstile({ siteKey, onToken, onError }: { siteKey: string; onToken: (t
  * questions. Everything posts to the contact API (through /api/contact) as name, email
  * and message, so the answers are folded into the message text.
  */
-export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: Props) {
+export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey, text: t }: Props) {
+  // The sponsor choices, one per line in the CMS.
+  const INTERESTS = t.interestsOptions.split("\n").map((line) => line.trim()).filter(Boolean);
   const params = useSearchParams();
   const result = params.get("message");
   const succeeded = params.get("success") === "true";
@@ -195,21 +196,21 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
     case "choose":
       body = (
         <>
-          <h2 tabIndex={-1}>What brings you here?</h2>
-          <p className="gi-lead">Tell us what you're interested in and we'll help with the next step.</p>
+          <h2 tabIndex={-1}>{plain(t.chooseTitle)}</h2>
+          <p className="gi-lead">{t.chooseLead}</p>
           <div className="gi-choices">
             <button type="button" className="gi-choice" onClick={() => choose("student")}>
               <span className="gi-choice-icon"><GraduationCap size={22} strokeWidth={1.75} /></span>
-              <span className="gi-choice-text"><strong>I&apos;m a student</strong><span>I want to join the team</span></span>
+              <span className="gi-choice-text"><strong>{t.studentTitle}</strong><span>{t.studentNote}</span></span>
               <ArrowRight className="gi-choice-arrow" size={18} aria-hidden="true" />
             </button>
             <button type="button" className="gi-choice" onClick={() => choose("sponsor")}>
               <span className="gi-choice-icon"><Handshake size={22} strokeWidth={1.75} /></span>
-              <span className="gi-choice-text"><strong>I want to sponsor</strong><span>As a company, foundation or family</span></span>
+              <span className="gi-choice-text"><strong>{t.sponsorTitle}</strong><span>{t.sponsorNote}</span></span>
               <ArrowRight className="gi-choice-arrow" size={18} aria-hidden="true" />
             </button>
           </div>
-          <button type="button" className="gi-quiet" onClick={() => choose("other")}>Something else? Just send us a message</button>
+          <button type="button" className="gi-quiet" onClick={() => choose("other")}>{t.otherLink}</button>
         </>
       );
       break;
@@ -217,14 +218,14 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
     case "apply":
       body = (
         <>
-          <h2 tabIndex={-1}>Applications are open</h2>
-          <p className="gi-lead">We&apos;re accepting applications for {season}. The form opens in a new tab and gives you a chance to tell us what you&apos;d like to work on.</p>
+          <h2 tabIndex={-1}>{plain(t.applyTitle)}</h2>
+          <p className="gi-lead">{plain(t.applyLead, { season })}</p>
           <ul className="gi-notes">
-            <li><Check size={16} aria-hidden="true" />You can choose from mechanical, CAD, electrical, programming, business, grants, media, and outreach.</li>
+            <li><Check size={16} aria-hidden="true" />{t.applyNote}</li>
           </ul>
           <div className="gi-actions">
-            <SparkleButton href={applyUrl} external>Open the application</SparkleButton>
-            <button type="button" className="gi-quiet" onClick={() => go("ask")}>I have a question first</button>
+            <SparkleButton href={applyUrl} external>{t.applyButton}</SparkleButton>
+            <button type="button" className="gi-quiet" onClick={() => go("ask")}>{t.applyQuestion}</button>
           </div>
         </>
       );
@@ -233,8 +234,8 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
     case "interests":
       body = (
         <>
-          <h2 tabIndex={-1}>How would you like to help?</h2>
-          <p className="gi-lead">Pick as many as you like. We'll make sure the right person follows up.</p>
+          <h2 tabIndex={-1}>{plain(t.interestsTitle)}</h2>
+          <p className="gi-lead">{t.interestsLead}</p>
           <div className="gi-pills" role="group" aria-label="Ways to help">
             {INTERESTS.map((item) => {
               const on = interests.includes(item);
@@ -253,11 +254,11 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
     case "who":
       body = (
         <>
-          <h2 tabIndex={-1}>Who should we talk to?</h2>
+          <h2 tabIndex={-1}>{plain(t.whoTitle)}</h2>
           <div className="gi-fields">
-            <label>Your name<input value={form.name} onChange={set("name")} autoComplete="name" required /></label>
-            <label>Email<input type="email" value={form.email} onChange={set("email")} autoComplete="email" required /></label>
-            <label className="gi-span">Company or organization <em>optional</em><input value={form.org} onChange={set("org")} autoComplete="organization" /></label>
+            <label>{t.nameLabel}<input value={form.name} onChange={set("name")} autoComplete="name" required /></label>
+            <label>{t.emailLabel}<input type="email" value={form.email} onChange={set("email")} autoComplete="email" required /></label>
+            <label className="gi-span">{t.orgLabel} <em>optional</em><input value={form.org} onChange={set("org")} autoComplete="organization" /></label>
           </div>
           <div className="gi-actions"><ContinueButton onClick={next("note")} /></div>
         </>
@@ -268,16 +269,16 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
     case "ask":
       body = (
         <>
-          <h2 tabIndex={-1}>{step === "note" ? "Anything else we should know?" : path === "student" ? "What would you like to ask?" : "Send us a message"}</h2>
+          <h2 tabIndex={-1}>{plain(step === "note" ? t.noteTitle : path === "student" ? t.askStudentTitle : t.askTitle)}</h2>
           {step === "ask" && (
             <div className="gi-fields">
-              <label>Your name<input value={form.name} onChange={set("name")} autoComplete="name" required /></label>
-              <label>Email<input type="email" value={form.email} onChange={set("email")} autoComplete="email" required /></label>
+              <label>{t.nameLabel}<input value={form.name} onChange={set("name")} autoComplete="name" required /></label>
+              <label>{t.emailLabel}<input type="email" value={form.email} onChange={set("email")} autoComplete="email" required /></label>
             </div>
           )}
           <label className="gi-message">
-            {step === "note" ? <>Message <em>optional</em></> : "Message"}
-            <textarea rows={5} maxLength={1400} value={form.note} onChange={set("note")} required={step === "ask"} placeholder={step === "note" ? "Timeline, budget, questions…" : "How can we help?"} />
+            {step === "note" ? <>{t.messageLabel} <em>optional</em></> : t.messageLabel}
+            <textarea rows={5} maxLength={1400} value={form.note} onChange={set("note")} required={step === "ask"} placeholder={step === "note" ? t.notePlaceholder : t.askPlaceholder} />
           </label>
           <div className="gi-send">
             <Turnstile key={attempt} siteKey={turnstileSiteKey} onToken={onToken} onError={setVerificationError} />
@@ -297,9 +298,9 @@ export function GetInvolvedFlow({ applyUrl, season, email, turnstileSiteKey }: P
       body = (
         <>
           <span className="gi-sent-mark"><Check size={26} strokeWidth={2.5} aria-hidden="true" /></span>
-          <h2 tabIndex={-1}>Message sent</h2>
-          <p className="gi-lead">Thanks for writing. A team member will get back to you by email soon.</p>
-          <button type="button" className="gi-quiet" onClick={restart}>Start over</button>
+          <h2 tabIndex={-1}>{plain(t.sentTitle)}</h2>
+          <p className="gi-lead">{t.sentLead}</p>
+          <button type="button" className="gi-quiet" onClick={restart}>{t.startOver}</button>
         </>
       );
       break;

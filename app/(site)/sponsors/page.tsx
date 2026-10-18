@@ -1,27 +1,25 @@
 import { LinkArrow } from "@/components/ui/link-arrow";
-import { pageMetadata, seoPages } from "@/lib/seo";
+import { textMetadata } from "@/lib/seo";
 import type { CSSProperties } from "react";
 import Link from "@/components/ui/intent-link";
 import { ArrowUpRight, Bus, Megaphone, Package, Trophy, Warehouse, Wrench } from "lucide-react";
 import { Navbar } from "@/components/sections/navbar";
 import { Footer } from "@/components/sections/footer";
 import { AnimatedSection } from "@/components/ui/animated-section";
-import { getSiteSettings, getSponsors } from "@/lib/cms";
+import { getPageText, getSiteSettings, getSponsors } from "@/lib/cms";
+import { rich } from "@/components/ui/rich-text";
+import { plain } from "@/lib/page-text";
 import { ThemedImage } from "@/components/ui/themed-image";
 import { ContinueButton } from "@/components/ui/continue-button";
 import { DonateLink } from "@/components/ui/donate-link";
 import "./sponsors.css";
 
-export const metadata = pageMetadata("/sponsors", seoPages["/sponsors"]);
+export async function generateMetadata() {
+  return textMetadata("/sponsors", (await getPageText()).sponsors);
+}
 
-const funds = [
-  { icon: Trophy, title: "Competition fees", copy: "Entry fees for the FIRST Robotics Competition events we attend each season." },
-  { icon: Package, title: "Materials & parts", copy: "Aluminum, motors, electronics, and the spares a robot goes through." },
-  { icon: Wrench, title: "Tools", copy: "The equipment we use to build parts and check that they work." },
-  { icon: Bus, title: "Travel", copy: "Getting the team and the robot to events away from home." },
-  { icon: Megaphone, title: "Outreach", copy: "Robot demos, workshops and camps for kids around Frisco." },
-  { icon: Warehouse, title: "Workspace", copy: "A place where we can design, build, test, and start over when we need to." }
-];
+// One icon per support card; the titles and text come from the CMS (fund1Title, fund1Copy, …).
+const fundIcons = [Trophy, Package, Wrench, Bus, Megaphone, Warehouse];
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -29,8 +27,13 @@ const pad = (n: number) => String(n).padStart(2, "0");
 const WIDE_LOGOS = /lockheed|texas instruments/i;
 
 export default async function SponsorsPage() {
-  const [sponsors, settings] = await Promise.all([getSponsors(), getSiteSettings()]);
+  const [sponsors, settings, { sponsors: t }] = await Promise.all([getSponsors(), getSiteSettings(), getPageText()]);
   const { corporate, individual } = sponsors;
+  const team = { team: settings.teamNumber };
+  const funds = fundIcons.map((icon, index) => {
+    const n = index + 1 as 1 | 2 | 3 | 4 | 5 | 6;
+    return { icon, title: t[`fund${n}Title`], copy: t[`fund${n}Copy`] };
+  });
   // The "your logo here" tile stretches to close out the last row at each breakpoint.
   const fillStyle = { "--fill-4": 4 - (corporate.length % 4), "--fill-2": 2 - (corporate.length % 2) } as CSSProperties;
 
@@ -40,31 +43,29 @@ export default async function SponsorsPage() {
 
       <section className="wrap sp-hero">
         <AnimatedSection className="sp-hero-copy">
-          <p className="eyebrow">FRC Team {settings.teamNumber}</p>
-          <h1>Our sponsors</h1>
-          <p className="section-copy">
-            We run this team ourselves, but we don&apos;t do it alone. The companies, foundations, and families here help pay for the robot, our tools, and the trips that get us to competition.
-          </p>
+          <p className="eyebrow">{plain(t.eyebrow, team)}</p>
+          <h1>{rich(t.title)}</h1>
+          <p className="section-copy">{t.copy}</p>
           <div className="actions">
-            <ContinueButton href="/contact?topic=sponsor">Become a sponsor</ContinueButton>
+            <ContinueButton href="/contact?topic=sponsor">{t.becomeButton}</ContinueButton>
             <DonateLink className="btn btn-light" href={settings.donateUrl} />
           </div>
         </AnimatedSection>
         <AnimatedSection className="sp-stats" delay={0.1}>
           <dl>
-            <div><dt>Corporate partners</dt><dd>{pad(corporate.length)}</dd></div>
-            <div><dt>Individual sponsors</dt><dd>{pad(individual.length)}</dd></div>
-            <div><dt>Nonprofit status</dt><dd className="sp-stat-text">501(c)(3)</dd></div>
+            <div><dt>{t.statCorporate}</dt><dd>{pad(corporate.length)}</dd></div>
+            <div><dt>{t.statIndividual}</dt><dd>{pad(individual.length)}</dd></div>
+            <div><dt>{t.statNonprofit}</dt><dd className="sp-stat-text">{t.statNonprofitValue}</dd></div>
           </dl>
-          <p>Donations are tax-deductible.</p>
+          <p>{t.statNote}</p>
         </AnimatedSection>
       </section>
 
       <section className="section sp-section">
         <div className="wrap">
           <AnimatedSection className="sp-head">
-            <div><p className="eyebrow">Partners</p><h2>Corporate sponsors</h2></div>
-            <p className="section-copy">These organizations help us turn ideas into a working robot.</p>
+            <div><p className="eyebrow">{t.corporateEyebrow}</p><h2>{rich(t.corporateTitle)}</h2></div>
+            <p className="section-copy">{t.corporateCopy}</p>
           </AnimatedSection>
           <ul className="sp-logo-grid">
             {corporate.map((sponsor, index) => (
@@ -84,7 +85,7 @@ export default async function SponsorsPage() {
             ))}
             <li className="sp-logo-open" style={fillStyle}>
               <Link className="sp-logo-tile sp-logo-tile--open" href="/contact?topic=sponsor">
-                <span className="sp-open-copy"><strong>Your logo here</strong><span>Partner with Team {settings.teamNumber} <LinkArrow direction="right" /></span></span>
+                <span className="sp-open-copy"><strong>{t.openTitle}</strong><span>{plain(t.openLink, team)} <LinkArrow direction="right" /></span></span>
               </Link>
             </li>
           </ul>
@@ -94,8 +95,8 @@ export default async function SponsorsPage() {
       <section className="section sp-section">
         <div className="wrap">
           <AnimatedSection className="sp-head">
-            <div><p className="eyebrow">Community</p><h2>Individual sponsors</h2></div>
-            <p className="section-copy">To the families and friends who have pitched in: thank you.</p>
+            <div><p className="eyebrow">{t.individualEyebrow}</p><h2>{rich(t.individualTitle)}</h2></div>
+            <p className="section-copy">{t.individualCopy}</p>
           </AnimatedSection>
           <AnimatedSection>
             <ol className="sp-names">
@@ -110,12 +111,12 @@ export default async function SponsorsPage() {
       <section className="section sp-section">
         <div className="wrap">
           <AnimatedSection className="sp-head">
-            <div><p className="eyebrow">Impact</p><h2>What your support builds</h2></div>
-            <p className="section-copy">Your support goes straight into the work we do all season.</p>
+            <div><p className="eyebrow">{t.fundsEyebrow}</p><h2>{rich(t.fundsTitle)}</h2></div>
+            <p className="section-copy">{t.fundsCopy}</p>
           </AnimatedSection>
           <div className="sp-funds">
             {funds.map(({ icon: Icon, title, copy }, index) => (
-              <AnimatedSection key={title} className="sp-fund" delay={(index % 3) * 0.06}>
+              <AnimatedSection key={index} className="sp-fund" delay={(index % 3) * 0.06}>
                 <div className="sp-fund-top"><span className="sp-index">{pad(index + 1)}</span><Icon size={20} strokeWidth={1.75} aria-hidden="true" /></div>
                 <h3>{title}</h3>
                 <p>{copy}</p>
@@ -129,19 +130,19 @@ export default async function SponsorsPage() {
         <div className="wrap">
           <AnimatedSection className="sp-join">
             <div className="sp-join-intro">
-              <p className="eyebrow">Get involved</p>
-              <h2>Join our sponsors</h2>
-              <p className="section-copy">Want to talk through a sponsorship? Email us at <a className="text-link" href={`mailto:${settings.email}`}>{settings.email}</a>.</p>
+              <p className="eyebrow">{t.joinEyebrow}</p>
+              <h2>{rich(t.joinTitle)}</h2>
+              <p className="section-copy">{rich(t.joinCopy, { email: <a className="text-link" href={`mailto:${settings.email}`}>{settings.email}</a> })}</p>
             </div>
             <div className="sp-join-options">
               <Link className="sp-option" href="/contact?topic=sponsor">
                 <span className="sp-index">01</span>
-                <span className="sp-option-body"><strong>Become a sponsor</strong><span>Companies, families, and individuals are all welcome. We'll recognize your support here.</span></span>
+                <span className="sp-option-body"><strong>{t.option1Title}</strong><span>{t.option1Copy}</span></span>
                 <ArrowUpRight className="sp-option-arrow" size={22} aria-hidden="true" />
               </Link>
               <a className="sp-option" href={settings.donateUrl} target="_blank" rel="noreferrer">
                 <span className="sp-index">02</span>
-                <span className="sp-option-body"><strong>Make a donation</strong><span>Give directly to the team. Tax-deductible.</span></span>
+                <span className="sp-option-body"><strong>{t.option2Title}</strong><span>{t.option2Copy}</span></span>
                 <ArrowUpRight className="sp-option-arrow" size={22} aria-hidden="true" />
               </a>
             </div>

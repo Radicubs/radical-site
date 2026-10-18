@@ -1,14 +1,17 @@
-import { pageMetadata, seoPages } from "@/lib/seo";
+import { textMetadata } from "@/lib/seo";
 import { ArrowUpRight } from "lucide-react";
 import { Navbar } from "@/components/sections/navbar";
 import { Footer } from "@/components/sections/footer";
 import { AnimatedSection } from "@/components/ui/animated-section";
-import { getJourneySeasons } from "@/lib/cms";
+import { getJourneySeasons, getPageText } from "@/lib/cms";
+import { rich } from "@/components/ui/rich-text";
 
-export const metadata = pageMetadata("/journey", seoPages["/journey"]);
+export async function generateMetadata() {
+  return textMetadata("/journey", (await getPageText()).journey);
+}
 
 export default async function JourneyPage() {
-  const journeySeasons = await getJourneySeasons();
+  const [journeySeasons, { journey: t }] = await Promise.all([getJourneySeasons(), getPageText()]);
 
   return (
     <main>
@@ -16,8 +19,8 @@ export default async function JourneyPage() {
       <section className="page-hero">
         <div className="wrap">
           <AnimatedSection>
-            <h1 className="page-title">Our Journey</h1>
-            <p className="section-copy">Every robot has a story. Here's ours, from our first season in 2019 to now.</p>
+            <h1 className="page-title">{rich(t.title)}</h1>
+            <p className="section-copy">{t.copy}</p>
           </AnimatedSection>
 
           <div className="journey-list">
@@ -33,11 +36,11 @@ export default async function JourneyPage() {
                       <h2 className="journey-title">{season.game}</h2>
                       <p className="journey-summary">{season.summary}</p>
                       {season.awards.length > 0 && (
-                        <p className="journey-awards"><strong>Awards:</strong> {season.awards.join(" · ")}</p>
+                        <p className="journey-awards"><strong>{t.awards}</strong> {season.awards.join(" · ")}</p>
                       )}
                       <a className="journey-source" href={season.tbaUrl} target="_blank" rel="noreferrer">
                         <span className="tba-mark" aria-hidden="true" />
-                        View season on The Blue Alliance
+                        {t.tbaLink}
                         <ArrowUpRight size={15} />
                       </a>
                     </div>
@@ -45,7 +48,7 @@ export default async function JourneyPage() {
                       {image ? (
                         <img src={image} srcSet={season.imageSrcSet} sizes="(max-width: 900px) calc(100vw - 64px), 560px" alt={`Radicubs ${season.year} robot`} loading="lazy" />
                       ) : (
-                        <div className="journey-no-media"><div><strong>No robot photo for this season</strong><span>{season.imageNote}</span></div></div>
+                        <div className="journey-no-media"><div><strong>{t.noPhoto}</strong><span>{season.imageNote}</span></div></div>
                       )}
                     </div>
                   </article>

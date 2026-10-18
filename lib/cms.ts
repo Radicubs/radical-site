@@ -10,6 +10,7 @@ import { journeySeasons as fallbackJourney, type JourneySeason } from "@/data/jo
 import { outreachEvents as fallbackOutreachEvents, outreachPartners as fallbackPartners, outreachPrograms as fallbackPrograms, outreachStats as fallbackStats, type OutreachEvent, type OutreachProgram } from "@/data/outreach";
 import { impactStats as fallbackImpact, type ImpactStat } from "@/data/impact";
 import { site } from "@/data/site";
+import { defaultPageText, withDefaults, type PageText } from "@/lib/page-text";
 import { corporateSponsors as fallbackCorporateSponsors, individualSponsors as fallbackIndividualSponsors, type Sponsor } from "@/data/sponsors";
 import { teamMembers as fallbackTeamMembers, type TeamMember } from "@/data/team";
 
@@ -426,6 +427,12 @@ export const getJourneySeasons = cmsRead("journey", async (): Promise<JourneySea
     tbaUrl: season.tbaUrl
   }));
 }, fallbackJourney);
+
+// ---------------------------------------------------------------------------
+// Page text
+
+export const getPageText = cmsRead("page-text", async (): Promise<PageText> =>
+  withDefaults(await (await payloadClient()).findGlobal({ slug: "page-text", depth: 0 })), defaultPageText);
 
 // ---------------------------------------------------------------------------
 // Outreach

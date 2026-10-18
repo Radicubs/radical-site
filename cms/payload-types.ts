@@ -112,11 +112,13 @@ export interface Config {
   globals: {
     'home-page': HomePage;
     'outreach-page': OutreachPage;
+    'page-text': PageText;
     'site-settings': SiteSetting;
   };
   globalsSelect: {
     'home-page': HomePageSelect<false> | HomePageSelect<true>;
     'outreach-page': OutreachPageSelect<false> | OutreachPageSelect<true>;
+    'page-text': PageTextSelect<false> | PageTextSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: null;
@@ -968,6 +970,243 @@ export interface OutreachPage {
   createdAt?: string | null;
 }
 /**
+ * The fixed wording on each page. Wrap words in *asterisks* to make them green in a heading. Keep anything in {curly braces}: the site fills it in, e.g. {season} becomes 2026–2027. Clearing a field puts the original wording back.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "page-text".
+ */
+export interface PageText {
+  id: number;
+  shared?: {
+    navHome?: string | null;
+    navTeam?: string | null;
+    navStudents?: string | null;
+    navStudentsNote?: string | null;
+    navMentors?: string | null;
+    navMentorsNote?: string | null;
+    navAbout?: string | null;
+    navJourney?: string | null;
+    navJourneyNote?: string | null;
+    navOutreach?: string | null;
+    navOutreachNote?: string | null;
+    navGallery?: string | null;
+    navSponsors?: string | null;
+    navBlog?: string | null;
+    navContact?: string | null;
+    navExplore?: string | null;
+    navCta?: string | null;
+    navDonate?: string | null;
+    ctaEyebrow?: string | null;
+    /**
+     * Uses {season}.
+     */
+    ctaCopy?: string | null;
+    ctaApply?: string | null;
+    footerNavigate?: string | null;
+    footerConnect?: string | null;
+    /**
+     * Uses {year}.
+     */
+    footerCopyright?: string | null;
+    footerTagline?: string | null;
+  };
+  home?: {
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+    heroDescription?: string | null;
+    heroJoin?: string | null;
+    heroScroll?: string | null;
+    updatesEyebrow?: string | null;
+    updatesCopy?: string | null;
+    updatesLink?: string | null;
+    impactTitle?: string | null;
+    impactCopy?: string | null;
+    awardsTitle?: string | null;
+    awardsCopy?: string | null;
+    /**
+     * Uses {year}.
+     */
+    awardsTotal?: string | null;
+    awardsTeam?: string | null;
+    sponsorsEyebrow?: string | null;
+    sponsorsCopy?: string | null;
+    sponsorsLink?: string | null;
+    disciplinesTitle?: string | null;
+    disciplinesLink?: string | null;
+  };
+  team?: {
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+    eyebrow?: string | null;
+    title?: string | null;
+    copy?: string | null;
+    mentorsButton?: string | null;
+    /**
+     * Uses {season}.
+     */
+    applyButton?: string | null;
+    seasonLabel?: string | null;
+    empty?: string | null;
+  };
+  mentors?: {
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+    eyebrow?: string | null;
+    title?: string | null;
+    copy?: string | null;
+    back?: string | null;
+  };
+  journey?: {
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+    title?: string | null;
+    copy?: string | null;
+    awards?: string | null;
+    tbaLink?: string | null;
+    noPhoto?: string | null;
+  };
+  outreach?: {
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+    title?: string | null;
+    /**
+     * Type - to hide it.
+     */
+    heroLabel?: string | null;
+    /**
+     * Type - to hide it.
+     */
+    heroNote?: string | null;
+    whyEyebrow?: string | null;
+    whyTitle?: string | null;
+    whyCopy?: string | null;
+    programsTitle?: string | null;
+    programsCopy?: string | null;
+    reelEyebrow?: string | null;
+    reelTitle?: string | null;
+    reelLink?: string | null;
+    partnersEyebrow?: string | null;
+  };
+  gallery?: {
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+    eyebrow?: string | null;
+    title?: string | null;
+    copy?: string | null;
+    empty?: string | null;
+  };
+  sponsors?: {
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+    /**
+     * Uses {team}.
+     */
+    eyebrow?: string | null;
+    title?: string | null;
+    copy?: string | null;
+    becomeButton?: string | null;
+    statCorporate?: string | null;
+    statIndividual?: string | null;
+    statNonprofit?: string | null;
+    statNonprofitValue?: string | null;
+    statNote?: string | null;
+    corporateEyebrow?: string | null;
+    corporateTitle?: string | null;
+    corporateCopy?: string | null;
+    openTitle?: string | null;
+    /**
+     * Uses {team}.
+     */
+    openLink?: string | null;
+    individualEyebrow?: string | null;
+    individualTitle?: string | null;
+    individualCopy?: string | null;
+    fundsEyebrow?: string | null;
+    fundsTitle?: string | null;
+    fundsCopy?: string | null;
+    fund1Title?: string | null;
+    fund1Copy?: string | null;
+    fund2Title?: string | null;
+    fund2Copy?: string | null;
+    fund3Title?: string | null;
+    fund3Copy?: string | null;
+    fund4Title?: string | null;
+    fund4Copy?: string | null;
+    fund5Title?: string | null;
+    fund5Copy?: string | null;
+    fund6Title?: string | null;
+    fund6Copy?: string | null;
+    joinEyebrow?: string | null;
+    joinTitle?: string | null;
+    /**
+     * Uses {email}.
+     */
+    joinCopy?: string | null;
+    option1Title?: string | null;
+    option1Copy?: string | null;
+    option2Title?: string | null;
+    option2Copy?: string | null;
+  };
+  blog?: {
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+    title?: string | null;
+    copy?: string | null;
+    back?: string | null;
+    watchVideo?: string | null;
+  };
+  contact?: {
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+    title?: string | null;
+    /**
+     * Uses {email}.
+     */
+    copy?: string | null;
+    chooseTitle?: string | null;
+    chooseLead?: string | null;
+    studentTitle?: string | null;
+    studentNote?: string | null;
+    sponsorTitle?: string | null;
+    sponsorNote?: string | null;
+    otherLink?: string | null;
+    applyTitle?: string | null;
+    /**
+     * Uses {season}.
+     */
+    applyLead?: string | null;
+    applyNote?: string | null;
+    applyButton?: string | null;
+    applyQuestion?: string | null;
+    interestsTitle?: string | null;
+    interestsLead?: string | null;
+    interestsOptions?: string | null;
+    whoTitle?: string | null;
+    noteTitle?: string | null;
+    notePlaceholder?: string | null;
+    askStudentTitle?: string | null;
+    askTitle?: string | null;
+    askPlaceholder?: string | null;
+    nameLabel?: string | null;
+    emailLabel?: string | null;
+    orgLabel?: string | null;
+    messageLabel?: string | null;
+    sentTitle?: string | null;
+    sentLead?: string | null;
+    startOver?: string | null;
+  };
+  notFound?: {
+    kicker?: string | null;
+    title?: string | null;
+    copy?: string | null;
+    hint?: string | null;
+    homeButton?: string | null;
+    journeyButton?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * Team details, links and supporters used across the whole site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1077,6 +1316,230 @@ export interface OutreachPageSelect<T extends boolean = true> {
     | {
         name?: T;
         id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "page-text_select".
+ */
+export interface PageTextSelect<T extends boolean = true> {
+  shared?:
+    | T
+    | {
+        navHome?: T;
+        navTeam?: T;
+        navStudents?: T;
+        navStudentsNote?: T;
+        navMentors?: T;
+        navMentorsNote?: T;
+        navAbout?: T;
+        navJourney?: T;
+        navJourneyNote?: T;
+        navOutreach?: T;
+        navOutreachNote?: T;
+        navGallery?: T;
+        navSponsors?: T;
+        navBlog?: T;
+        navContact?: T;
+        navExplore?: T;
+        navCta?: T;
+        navDonate?: T;
+        ctaEyebrow?: T;
+        ctaCopy?: T;
+        ctaApply?: T;
+        footerNavigate?: T;
+        footerConnect?: T;
+        footerCopyright?: T;
+        footerTagline?: T;
+      };
+  home?:
+    | T
+    | {
+        seoTitle?: T;
+        seoDescription?: T;
+        heroDescription?: T;
+        heroJoin?: T;
+        heroScroll?: T;
+        updatesEyebrow?: T;
+        updatesCopy?: T;
+        updatesLink?: T;
+        impactTitle?: T;
+        impactCopy?: T;
+        awardsTitle?: T;
+        awardsCopy?: T;
+        awardsTotal?: T;
+        awardsTeam?: T;
+        sponsorsEyebrow?: T;
+        sponsorsCopy?: T;
+        sponsorsLink?: T;
+        disciplinesTitle?: T;
+        disciplinesLink?: T;
+      };
+  team?:
+    | T
+    | {
+        seoTitle?: T;
+        seoDescription?: T;
+        eyebrow?: T;
+        title?: T;
+        copy?: T;
+        mentorsButton?: T;
+        applyButton?: T;
+        seasonLabel?: T;
+        empty?: T;
+      };
+  mentors?:
+    | T
+    | {
+        seoTitle?: T;
+        seoDescription?: T;
+        eyebrow?: T;
+        title?: T;
+        copy?: T;
+        back?: T;
+      };
+  journey?:
+    | T
+    | {
+        seoTitle?: T;
+        seoDescription?: T;
+        title?: T;
+        copy?: T;
+        awards?: T;
+        tbaLink?: T;
+        noPhoto?: T;
+      };
+  outreach?:
+    | T
+    | {
+        seoTitle?: T;
+        seoDescription?: T;
+        title?: T;
+        heroLabel?: T;
+        heroNote?: T;
+        whyEyebrow?: T;
+        whyTitle?: T;
+        whyCopy?: T;
+        programsTitle?: T;
+        programsCopy?: T;
+        reelEyebrow?: T;
+        reelTitle?: T;
+        reelLink?: T;
+        partnersEyebrow?: T;
+      };
+  gallery?:
+    | T
+    | {
+        seoTitle?: T;
+        seoDescription?: T;
+        eyebrow?: T;
+        title?: T;
+        copy?: T;
+        empty?: T;
+      };
+  sponsors?:
+    | T
+    | {
+        seoTitle?: T;
+        seoDescription?: T;
+        eyebrow?: T;
+        title?: T;
+        copy?: T;
+        becomeButton?: T;
+        statCorporate?: T;
+        statIndividual?: T;
+        statNonprofit?: T;
+        statNonprofitValue?: T;
+        statNote?: T;
+        corporateEyebrow?: T;
+        corporateTitle?: T;
+        corporateCopy?: T;
+        openTitle?: T;
+        openLink?: T;
+        individualEyebrow?: T;
+        individualTitle?: T;
+        individualCopy?: T;
+        fundsEyebrow?: T;
+        fundsTitle?: T;
+        fundsCopy?: T;
+        fund1Title?: T;
+        fund1Copy?: T;
+        fund2Title?: T;
+        fund2Copy?: T;
+        fund3Title?: T;
+        fund3Copy?: T;
+        fund4Title?: T;
+        fund4Copy?: T;
+        fund5Title?: T;
+        fund5Copy?: T;
+        fund6Title?: T;
+        fund6Copy?: T;
+        joinEyebrow?: T;
+        joinTitle?: T;
+        joinCopy?: T;
+        option1Title?: T;
+        option1Copy?: T;
+        option2Title?: T;
+        option2Copy?: T;
+      };
+  blog?:
+    | T
+    | {
+        seoTitle?: T;
+        seoDescription?: T;
+        title?: T;
+        copy?: T;
+        back?: T;
+        watchVideo?: T;
+      };
+  contact?:
+    | T
+    | {
+        seoTitle?: T;
+        seoDescription?: T;
+        title?: T;
+        copy?: T;
+        chooseTitle?: T;
+        chooseLead?: T;
+        studentTitle?: T;
+        studentNote?: T;
+        sponsorTitle?: T;
+        sponsorNote?: T;
+        otherLink?: T;
+        applyTitle?: T;
+        applyLead?: T;
+        applyNote?: T;
+        applyButton?: T;
+        applyQuestion?: T;
+        interestsTitle?: T;
+        interestsLead?: T;
+        interestsOptions?: T;
+        whoTitle?: T;
+        noteTitle?: T;
+        notePlaceholder?: T;
+        askStudentTitle?: T;
+        askTitle?: T;
+        askPlaceholder?: T;
+        nameLabel?: T;
+        emailLabel?: T;
+        orgLabel?: T;
+        messageLabel?: T;
+        sentTitle?: T;
+        sentLead?: T;
+        startOver?: T;
+      };
+  notFound?:
+    | T
+    | {
+        kicker?: T;
+        title?: T;
+        copy?: T;
+        hint?: T;
+        homeButton?: T;
+        journeyButton?: T;
       };
   updatedAt?: T;
   createdAt?: T;

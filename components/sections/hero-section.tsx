@@ -6,6 +6,7 @@ import { HeroElectricWordmark } from "@/components/sections/hero-electric-wordma
 import { PixelArrowButton } from "@/components/ui/pixel-arrow-button";
 import { glideTo } from "@/components/ui/glide-to";
 import type { GalleryPhoto, SiteSettings } from "@/lib/cms";
+import type { PageText } from "@/lib/page-text";
 
 // No stand-in photo: while the gallery streams in (or if it's empty) the wall stays blank.
 export function HeroPhotoWall({ photos }: { photos: GalleryPhoto[] }) {
@@ -37,7 +38,7 @@ function scrollToUpdates(event: React.MouseEvent<HTMLAnchorElement>) {
   glideTo(target);
 }
 
-export function HeroSection({ settings, photos = [], wall }: { settings: SiteSettings; photos?: GalleryPhoto[]; wall?: ReactNode }) {
+export function HeroSection({ settings, text: t, photos = [], wall }: { settings: SiteSettings; text: PageText["home"]; photos?: GalleryPhoto[]; wall?: ReactNode }) {
   return (
     <section className="home-hero" aria-labelledby="home-title">
       <div className="home-hero-wall">
@@ -45,10 +46,10 @@ export function HeroSection({ settings, photos = [], wall }: { settings: SiteSet
       </div>
       <div className="home-hero-content">
         <h1 id="home-title"><span className="sr-only">Radicubs — FRC Team 7503 in Frisco, Texas</span><HeroElectricWordmark /></h1>
-        <p className="home-hero-description">We build robots, compete, and figure things out together in Frisco, Texas.</p>
+        <p className="home-hero-description">{t.heroDescription}</p>
         <div className="home-hero-actions">
-          <PixelArrowButton href={settings.applyUrl} external>Join the team</PixelArrowButton>
-          <PixelArrowButton href="#home-updates" variant="secondary" direction="down" onClick={scrollToUpdates}>Scroll to explore</PixelArrowButton>
+          <PixelArrowButton href={settings.applyUrl} external>{t.heroJoin}</PixelArrowButton>
+          <PixelArrowButton href="#home-updates" variant="secondary" direction="down" onClick={scrollToUpdates}>{t.heroScroll}</PixelArrowButton>
         </div>
       </div>
     </section>

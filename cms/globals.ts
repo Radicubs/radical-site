@@ -1,4 +1,5 @@
-import type { Field, GlobalBeforeValidateHook, GlobalConfig } from "payload";
+import type { Field, GlobalAfterReadHook, GlobalBeforeValidateHook, GlobalConfig } from "payload";
+import { fillDefaults, pageTextSchema } from "../lib/page-text";
 import { anyone, refreshGlobal, signedIn } from "./access";
 
 const access = { read: anyone, update: signedIn };
@@ -215,4 +216,32 @@ export const OutreachPage: GlobalConfig = {
       ]
     }
   ]
+};
+
+// Shows the default wording in fields that have never been filled, so editors change the
+// text in place instead of retyping it.
+const fillPageText: GlobalAfterReadHook = ({ doc }) => ({ ...doc, ...fillDefaults(doc) });
+
+export const PageText: GlobalConfig = {
+  slug: "page-text",
+  label: "Page text",
+  admin: {
+    group: "Pages",
+    description: "The fixed wording on each page. Wrap words in *asterisks* to make them green in a heading. Keep anything in {curly braces}: the site fills it in, e.g. {season} becomes 2026–2027. Clearing a field puts the original wording back."
+  },
+  access,
+  hooks: { ...hooks, afterRead: [fillPageText] },
+  fields: [{
+    type: "tabs",
+    tabs: Object.entries(pageTextSchema).map(([page, { label, fields }]) => ({
+      name: page,
+      label,
+      fields: Object.entries(fields).map(([name, entry]): Field => {
+        const names = entry.text.match(/\{\w+\}/g);
+        const notes = [names && `Uses ${names.join(", ")}.`, "optional" in entry && entry.optional && "Type - to hide it."].filter(Boolean);
+        const field = { name, label: entry.label, admin: notes.length ? { description: notes.join(" ") } : undefined };
+        return "long" in entry && entry.long ? { ...field, type: "textarea" } : { ...field, type: "text" };
+      })
+    }))
+  }]
 };

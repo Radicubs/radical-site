@@ -1,4 +1,6 @@
 import type { Award } from "@/data/awards";
+import { rich } from "@/components/ui/rich-text";
+import { plain, type PageText } from "@/lib/page-text";
 import "./awards-ledger.css";
 
 const shortGame = (game: string) => game.replace(/^Destination:\s*/i, "");
@@ -13,21 +15,21 @@ function bySeason(awards: Award[]) {
 }
 
 // Header shows the season's FRC game (the outlined year already shows the year).
-export function HowItWorksSection({ awards, games }: { awards: Award[]; games: Record<number, string> }) {
+export function HowItWorksSection({ awards, games, text: t }: { awards: Award[]; games: Record<number, string>; text: PageText["home"] }) {
   const gameFor = (year: number) => games[year];
   const seasons = bySeason(awards);
   const firstYear = Math.min(...awards.map((award) => award.year));
 
   return <section className="section awards-section"><div className="wrap">
     <div className="section-head-row awards-head">
-      <h2>What we&apos;ve <em>won.</em></h2>
-      <p className="section-copy">Every award we've earned since our rookie year. Select one to see the official result.</p>
+      <h2>{rich(t.awardsTitle)}</h2>
+      <p className="section-copy">{t.awardsCopy}</p>
     </div>
 
     <div className="awards-ledger">
       <div className="awards-cell awards-total">
         <span className="awards-total-number">{awards.length}</span>
-        <span className="awards-total-label">Awards since {firstYear}<br />FRC Team 7503</span>
+        <span className="awards-total-label">{plain(t.awardsTotal, { year: firstYear })}<br />{t.awardsTeam}</span>
       </div>
 
       {seasons.map(([year, list]) => <section className="awards-cell awards-season" key={year} data-year={year} data-count={list.length} aria-label={`${year} season awards`}>

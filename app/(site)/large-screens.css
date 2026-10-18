@@ -413,7 +413,6 @@
   html .outreach-hero-caption { gap: calc(16 * var(--u)); }
   html .outreach-hero .outreach-hero-caption h1 { font-size: calc(169.05 * var(--u)); }
   html .outreach-hero-caption p { font-size: calc(13 * var(--u)); }
-  html .outreach-hero-dot { margin: 0 calc(10 * var(--u)) 1px 0; width: calc(7 * var(--u)); height: calc(7 * var(--u)); }
   html .outreach-hero-sep { margin: 0 calc(6 * var(--u)); }
   html .outreach-hero-mute { padding: calc(6 * var(--u)); margin: 0 calc(-6 * var(--u)) calc(-6 * var(--u)) 0; }
   html .outreach-hero-mute:focus-visible { border-radius: calc(4 * var(--u)); }

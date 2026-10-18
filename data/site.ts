@@ -17,14 +17,3 @@ export const site = {
   wordmarkImage: "/radicubs-wordmark-green.png",
   latestPost: "/blog/week-8-rebuilt-2026"
 } as const;
-
-export const navigation = [
-  { label: "Home", href: "/" },
-  { label: "Team", href: "/team" },
-  { label: "Journey", href: "/journey" },
-  { label: "Outreach", href: "/outreach" },
-  { label: "Gallery", href: "/gallery" },
-  { label: "Sponsors", href: "/sponsors" },
-  { label: "Blog", href: "/blog" },
-  { label: "Contact", href: "/contact" }
-] as const;

@@ -7,7 +7,7 @@ import sharp from "sharp";
 import { Users } from "./cms/collections/Users";
 import { Media } from "./cms/collections/Media";
 import { Albums, BlogPosts, JourneySeasons, Mentors, OutreachEvents, Sponsors, TeamMembers, TeamRoles, TeamSeasons } from "./cms/collections/content";
-import { HomePage, OutreachPage, SiteSettings } from "./cms/globals";
+import { HomePage, OutreachPage, PageText, SiteSettings } from "./cms/globals";
 import { googleSignInEnabled } from "./cms/supabase-auth";
 import { databaseConnectionString } from "./cms/database-connection";
 import { removeUploadLeftovers } from "./cms/media-storage";
@@ -73,7 +73,7 @@ export default buildConfig({
     importMap: { baseDir: root }
   },
   collections: [BlogPosts, Albums, JourneySeasons, OutreachEvents, TeamMembers, TeamRoles, TeamSeasons, Mentors, Sponsors, Media, Users],
-  globals: [HomePage, OutreachPage, SiteSettings],
+  globals: [HomePage, OutreachPage, PageText, SiteSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: { outputFile: path.resolve(root, "cms/payload-types.ts") },

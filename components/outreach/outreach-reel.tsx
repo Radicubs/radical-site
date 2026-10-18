@@ -5,6 +5,8 @@ import Link from "@/components/ui/intent-link";
 import { motion, type MotionValue, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { CmsImage, OutreachReelEvent } from "@/lib/cms";
+import { rich } from "@/components/ui/rich-text";
+import type { PageText } from "@/lib/page-text";
 import "./outreach-reel.css";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -13,7 +15,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
  * "Where we've been": the section pins while vertical scroll pans a strip of event cards sideways.
  * Tagged data-sc-act="pan" so sideways trackpad swipes also drive it (see horizontal-wheel-lock).
  */
-export function OutreachReel({ events }: { events: OutreachReelEvent[] }) {
+export function OutreachReel({ events, text: t }: { events: OutreachReelEvent[]; text: PageText["outreach"] }) {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLOListElement>(null);
   const [travel, setTravel] = useState(0);
@@ -49,8 +51,8 @@ export function OutreachReel({ events }: { events: OutreachReelEvent[] }) {
     <div className="outreach-reel-stage">
       <div className="wrap outreach-reel-head">
         <div>
-          <p className="outreach-eyebrow">On the road</p>
-          <h2 id="outreach-reel-title">Where we&apos;ve <em>been.</em></h2>
+          <p className="outreach-eyebrow">{t.reelEyebrow}</p>
+          <h2 id="outreach-reel-title">{rich(t.reelTitle)}</h2>
         </div>
         <div className="outreach-reel-meter" aria-hidden="true">
           <span className="outreach-reel-count"><strong>{pad(active + 1)}</strong> / {pad(events.length)}</span>
@@ -59,14 +61,14 @@ export function OutreachReel({ events }: { events: OutreachReelEvent[] }) {
       </div>
       <motion.ol ref={trackRef} className="outreach-reel-track" data-pan-track style={pinned ? { x } : undefined}>
         {events.map((event, i) => <li key={`${event.year}-${event.title}`} data-active={i === active || undefined}>
-          <ReelCard event={event} image={event.photo} index={i} imageShift={pinned ? imageShift : undefined} />
+          <ReelCard event={event} image={event.photo} index={i} imageShift={pinned ? imageShift : undefined} readLabel={t.reelLink} />
         </li>)}
       </motion.ol>
     </div>
   </section>;
 }
 
-function ReelCard({ event, image, index, imageShift }: { event: OutreachReelEvent; image?: CmsImage; index: number; imageShift?: MotionValue<string> }) {
+function ReelCard({ event, image, index, imageShift, readLabel }: { event: OutreachReelEvent; image?: CmsImage; index: number; imageShift?: MotionValue<string>; readLabel: string }) {
   const inner = <>
     {image
       ? <span className={`outreach-reel-photo${event.fit === "contain" ? " outreach-reel-photo--contain" : ""}`}>
@@ -77,7 +79,7 @@ function ReelCard({ event, image, index, imageShift }: { event: OutreachReelEven
       <span className="outreach-reel-year">{event.year} <span>· {pad(index + 1)}</span></span>
       <strong>{event.title}</strong>
       <span className="outreach-reel-place">{event.place}</span>
-      {event.source && <span className="outreach-reel-read" aria-hidden="true">Read the post <LinkArrow /></span>}
+      {event.source && <span className="outreach-reel-read" aria-hidden="true">{readLabel} <LinkArrow /></span>}
     </span>
   </>;
 

@@ -1,20 +1,25 @@
-import { pageMetadata, seoPages } from "@/lib/seo";
+import { textMetadata } from "@/lib/seo";
 import { Suspense } from "react";
 import Script from "next/script";
 import { AnimatedSection } from "@/components/ui/animated-section";
 import { Footer } from "@/components/sections/footer";
 import { Navbar } from "@/components/sections/navbar";
-import { getSiteSettings } from "@/lib/cms";
+import { getPageText, getSiteSettings } from "@/lib/cms";
+import { rich } from "@/components/ui/rich-text";
+import { seasonLabel } from "@/lib/page-text";
 import { GetInvolvedFlow } from "@/components/contact/get-involved-flow";
 import "./contact.css";
 
-export const metadata = pageMetadata("/contact", seoPages["/contact"]);
+export async function generateMetadata() {
+  return textMetadata("/contact", (await getPageText()).contact);
+}
 
 export default async function ContactPage() {
-  const settings = await getSiteSettings();
+  const [settings, { contact: t }] = await Promise.all([getSiteSettings(), getPageText()]);
   const flow = {
     applyUrl: settings.applyUrl,
-    season: `${settings.applicationSeason}–${settings.applicationSeason + 1}`,
+    season: seasonLabel(settings.applicationSeason),
+    text: t,
     email: settings.email,
     turnstileSiteKey: process.env.TURNSTILE_SITE_KEY?.trim() || "0x4AAAAAAAS8m1QMSH1rRxYU"
   };
@@ -24,8 +29,8 @@ export default async function ContactPage() {
       <Navbar settings={settings} />
       <section className="wrap ct-hero">
         <AnimatedSection>
-          <h1>Get involved</h1>
-          <p className="section-copy">Thinking about joining us? Want to sponsor a season? We'd love to hear from you. You can also email <a className="text-link" href={`mailto:${settings.email}`}>{settings.email}</a>.</p>
+          <h1>{rich(t.title)}</h1>
+          <p className="section-copy">{rich(t.copy, { email: <a className="text-link" href={`mailto:${settings.email}`}>{settings.email}</a> })}</p>
         </AnimatedSection>
         <AnimatedSection delay={0.08}>
           <Suspense fallback={null}><GetInvolvedFlow {...flow} /></Suspense>

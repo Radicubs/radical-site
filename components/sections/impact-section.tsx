@@ -1,14 +1,16 @@
 import type { ImpactStat } from "@/data/impact";
 import { CountUp } from "@/components/ui/count-up";
+import { rich } from "@/components/ui/rich-text";
+import type { PageText } from "@/lib/page-text";
 import "./awards-ledger.css";
 
 // Shares the awards ledger's heading and corner-marked cells.
-export function ImpactSection({ stats }: { stats: ImpactStat[] }) {
+export function ImpactSection({ stats, text: t }: { stats: ImpactStat[]; text: PageText["home"] }) {
   if (!stats.length) return null;
   return <section className="section awards-section impact-section"><div className="wrap">
     <div className="section-head-row awards-head">
-      <h2>Our <em>impact.</em></h2>
-      <p className="section-copy">What the team adds up to so far.</p>
+      <h2>{rich(t.impactTitle)}</h2>
+      <p className="section-copy">{t.impactCopy}</p>
     </div>
 
     <dl className="awards-ledger impact-grid">

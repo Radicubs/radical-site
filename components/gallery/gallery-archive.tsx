@@ -167,7 +167,7 @@ function TetrisGrid({ albums, onOpen }: { albums: GalleryAlbum[]; onOpen: (photo
   );
 }
 
-export function GalleryArchive({ albums: unsorted }: { albums: GalleryAlbum[] }) {
+export function GalleryArchive({ albums: unsorted, emptyText }: { albums: GalleryAlbum[]; emptyText: string }) {
   // Newest year first; the grid and the lightbox arrows share this order.
   const albums = useMemo(() => [...unsorted].sort((a, b) => (b.year ?? -1) - (a.year ?? -1)), [unsorted]);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -261,7 +261,7 @@ export function GalleryArchive({ albums: unsorted }: { albums: GalleryAlbum[] })
     </div>
     <div className={playing ? "gallery-archive gallery-archive--stowed" : "gallery-archive"} aria-hidden={playing || undefined}>
       <TetrisGrid albums={albums} onOpen={open} />
-      {albums.length === 0 && <p className="gallery-empty">More team photos are coming soon.</p>}
+      {albums.length === 0 && <p className="gallery-empty">{emptyText}</p>}
     </div>
     <AnimatePresence>
       {active && <motion.div

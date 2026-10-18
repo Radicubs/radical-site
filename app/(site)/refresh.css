@@ -62,9 +62,6 @@ html, body, * { scrollbar-width: none !important; }
   .awards-section h2 { font-size: 38px; }
 
 }
-/* DriftWall freezes its animation loop for reduced motion while retaining
-   the positioning transforms that keep every photo column filled. */
-
 /* Blog index: the hero already spaces the title; cards follow closely. */
 .blog-index{padding-top:0}
 .blog-index .blog-grid{margin-top:28px}
