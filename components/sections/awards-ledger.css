@@ -181,6 +181,10 @@ html[data-theme="light"] .awards-section {
 }
 .awards-season a:is(:hover, :focus-visible) .awards-event { color: var(--aw-accent); }
 
+/* refresh.css stacks the heading over the copy below 800px; keep both on the left. */
+@media (max-width: 800px) {
+  .awards-section .awards-head { align-items: flex-start; }
+}
 @media (max-width: 1100px) {
   .awards-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -192,4 +196,52 @@ html[data-theme="light"] .awards-section {
 }
 @media (prefers-reduced-motion: reduce) {
   .awards-season a, .awards-marker, .awards-leader, .awards-event { transition: none; }
+}
+
+/* ---- Impact numbers: the same cells, one figure each ---- */
+.impact-grid { grid-auto-rows: auto; margin-bottom: 0; }
+.impact-cell {
+  justify-content: space-between;
+  gap: 28px;
+  min-height: clamp(170px, 14vw, 220px);
+  margin: 0;
+  padding: 18px 20px 16px;
+}
+.impact-number {
+  order: -1;
+  margin: 0;
+  color: var(--aw-accent);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: clamp(56px, 5.6vw, 96px);
+  font-weight: 600;
+  line-height: .85;
+  letter-spacing: -.06em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.impact-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--aw-ink);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+.impact-label span {
+  color: var(--aw-muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .04em;
+  text-transform: none;
+}
+@media (max-width: 600px) {
+  .impact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .impact-cell { min-height: 140px; gap: 20px; padding: 14px 14px 12px; }
+  .impact-number { font-size: clamp(40px, 12vw, 56px); }
+  .impact-label { font-size: 10px; }
 }

@@ -9,6 +9,6 @@ export function TitleRowLabel() {
 }
 
 export function LabelRowLabel() {
-  const { data, rowNumber } = useRowLabel<{ label?: string; value?: number; suffix?: string }>();
-  return <span>{data?.label ? `${data.value ?? ""}${data.suffix ?? ""} ${data.label}` : `Item ${String((rowNumber ?? 0) + 1).padStart(2, "0")}`}</span>;
+  const { data, rowNumber } = useRowLabel<{ label?: string; prefix?: string; value?: number; suffix?: string }>();
+  return <span>{data?.label ? `${data.prefix ?? ""}${data.value ?? ""}${data.suffix ?? ""} ${data.label}` : `Item ${String((rowNumber ?? 0) + 1).padStart(2, "0")}`}</span>;
 }

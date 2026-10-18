@@ -141,7 +141,6 @@
   html .sponsor-panel { padding: calc(44 * var(--u)) 0; }
   html .sponsor-loop { margin-top: calc(44 * var(--u)); height: calc(220 * var(--u)); }
   html .sponsor-loop:before, html .sponsor-loop:after { width: calc(120 * var(--u)); }
-  html .sponsor-loop .sponsor-loop-logo-haas { width: calc(290 * var(--u)); }
   html .telemetry { padding-top: calc(24 * var(--u)); }
   html .telemetry-compact { padding: calc(62 * var(--u)) 0 calc(12 * var(--u)); }
   html .telemetry-source { font-size: calc(9 * var(--u)); }
@@ -452,6 +451,10 @@
   html .awards-season a { gap: calc(9 * var(--u)); margin: 0 calc(-8 * var(--u)); padding: calc(7 * var(--u)) calc(8 * var(--u)); border-radius: calc(3 * var(--u)); }
   html .awards-marker { width: calc(6 * var(--u)); height: calc(6 * var(--u)); }
   html .awards-name { font-size: calc(14 * var(--u)); }
+  html .impact-cell { gap: calc(28 * var(--u)); min-height: calc(220 * var(--u)); padding: calc(18 * var(--u)) calc(20 * var(--u)) calc(16 * var(--u)); }
+  html .impact-number { font-size: calc(96 * var(--u)); }
+  html .impact-label { gap: calc(6 * var(--u)); font-size: calc(12 * var(--u)); }
+  html .impact-label span { font-size: calc(11 * var(--u)); }
   html .awards-leader { flex: 1 1 calc(12 * var(--u)); min-width: calc(12 * var(--u)); }
   html .awards-event { font-size: calc(10 * var(--u)); }
   /* components/sections/discipline-cards.css */

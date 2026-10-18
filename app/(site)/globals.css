@@ -265,9 +265,11 @@ h3,.journey-title,.post-title,.team-name,.mentor-name,.award-name{font-family:"I
 .sponsor-loop .logoloop__item{display:flex;align-items:center}
 .sponsor-loop .logoloop__link{display:flex;align-items:center}
 .sponsor-loop .logoloop__item img{--sponsor-logo-scale:1.32;opacity:1;object-fit:contain;scale:var(--sponsor-logo-scale);transition:scale .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1)}
-.sponsor-loop .sponsor-loop-logo-haas{--sponsor-logo-scale:1;width:290px;height:auto}
-.sponsor-loop .logoloop__item img.sponsor-loop-logo-workforce{--sponsor-logo-scale:1.18}
-.sponsor-loop .logoloop.logoloop--scale-hover .logoloop__item:hover img{transform:scale(1.08)}
+.sponsor-loop .logoloop.logoloop--scale-hover .logoloop__item:hover img{transform:none}
+.sponsor-loop .logoloop.logoloop--scale-hover .logoloop__item:hover .logoloop__node{transform:scale(1.08)}
+/* components/ui/sponsor-mark.tsx crops each logo to its artwork and sets its size. */
+.sponsor-mark{position:relative;display:block;overflow:hidden;width:calc(var(--logoloop-logoHeight) * var(--mark-w,1.1));height:calc(var(--logoloop-logoHeight) * var(--mark-h,.37))}
+.sponsor-loop .logoloop__item .sponsor-mark img{position:absolute;left:var(--img-x,0);top:var(--img-y,0);width:var(--img-w,100%);max-width:none;height:var(--img-h,100%);scale:1}
 
 /* Bklit competition telemetry. */
 .telemetry{position:relative;padding-top:24px}

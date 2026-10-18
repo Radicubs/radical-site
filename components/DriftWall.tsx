@@ -350,7 +350,9 @@ const DriftWall = ({
           srcSet={item.srcSet ?? (item.previewImage ? `${item.previewImage} 245w, ${item.image} 750w` : undefined)}
           sizes={`${Math.ceil(fittedTileWidth * scale)}px`}
           alt={item.title ?? ''}
-          loading={decorative ? "eager" : "lazy"}
+          // Lazy even when decorative: only tiles near the screen download, and long walls
+          // fill in as their columns drift into view.
+          loading="lazy"
           decoding="async"
           draggable={false}
         />

@@ -8,6 +8,7 @@ import { blogPosts as fallbackBlogPosts, type BlogPost } from "@/data/blog";
 import { disciplines as fallbackDisciplines } from "@/data/disciplines";
 import { journeySeasons as fallbackJourney, type JourneySeason } from "@/data/journey";
 import { outreachEvents as fallbackOutreachEvents, outreachPartners as fallbackPartners, outreachPrograms as fallbackPrograms, outreachStats as fallbackStats, type OutreachEvent, type OutreachProgram } from "@/data/outreach";
+import { impactStats as fallbackImpact, type ImpactStat } from "@/data/impact";
 import { site } from "@/data/site";
 import { corporateSponsors as fallbackCorporateSponsors, individualSponsors as fallbackIndividualSponsors, type Sponsor } from "@/data/sponsors";
 import { teamMembers as fallbackTeamMembers, type TeamMember } from "@/data/team";
@@ -330,7 +331,9 @@ export async function getPhotoAlbum(): Promise<GalleryPhoto[]> {
 }
 
 // The homepage wall alternates the chosen wall photos with a spread of photos
-// from albums marked "Include on the homepage".
+// from albums marked "Include on the homepage". Tiles load as they drift into view,
+// so a long wall doesn't cost a first visit much more than a short one.
+const HOME_WALL_LIMIT = 96;
 export const getHomeWallPhotos = cmsRead("home-wall", async (): Promise<GalleryPhoto[]> => {
   const [home, albums] = await Promise.all([loadHome(), loadAlbums(true)]);
   const wall = (home.wallPhotos ?? []).flatMap((value, index) => {
@@ -339,13 +342,11 @@ export const getHomeWallPhotos = cmsRead("home-wall", async (): Promise<GalleryP
     return photo ? [photo] : [];
   });
 
-  const sampledAlbums = albums.filter((album) => album.showOnHomepage !== false).map(albumPhotos).filter((photos) => photos.length).map((photos) => {
-    const count = Math.min(12, photos.length);
-    return Array.from({ length: count }, (_, index) => photos[Math.floor(((index + 0.5) * photos.length) / count)]);
-  });
+  // Take turns between albums so one big album doesn't fill a stretch of the wall.
+  const homeAlbums = albums.filter((album) => album.showOnHomepage !== false).map(albumPhotos).filter((photos) => photos.length);
   const eventPhotos: GalleryPhoto[] = [];
-  for (let index = 0; index < 12; index++) {
-    for (const album of sampledAlbums) if (album[index]) eventPhotos.push(album[index]);
+  for (let index = 0; index < Math.max(0, ...homeAlbums.map((photos) => photos.length)); index++) {
+    for (const album of homeAlbums) if (album[index]) eventPhotos.push(album[index]);
   }
 
   const result: GalleryPhoto[] = [];
@@ -358,11 +359,11 @@ export const getHomeWallPhotos = cmsRead("home-wall", async (): Promise<GalleryP
         result.push(heroPhoto);
         seen.add(key);
       }
-      if (result.length === 20) return result;
+      if (result.length === HOME_WALL_LIMIT) return result;
     }
   }
   return result;
-}, [{ id: "fallback", src: site.robotImage, fullSrc: site.robotImage, thumbSrc: site.robotImage, alt: "Radicubs robot from the 2026 season", width: 1600, height: 1200 }]);
+}, []);
 
 // ---------------------------------------------------------------------------
 // Homepage sections
@@ -387,6 +388,13 @@ export const getDisciplines = cmsRead("disciplines", async (): Promise<Disciplin
   });
   return cards;
 }, fallbackDisciplineCards);
+
+export const getImpactStats = cmsRead("impact", async (): Promise<ImpactStat[]> => {
+  const home = await loadHome();
+  return (home.impact ?? []).map(({ prefix, value, suffix, label, detail }) => ({
+    value, label, prefix: prefix || undefined, suffix: suffix || undefined, detail: detail || undefined
+  }));
+}, fallbackImpact);
 
 export const getHomeVideos = cmsRead("home-videos", async (): Promise<HomeVideos> => {
   const home = await loadHome();

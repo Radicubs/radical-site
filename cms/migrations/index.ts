@@ -3,6 +3,7 @@ import * as migration_20260929_034108_remove_robot_assets from './20260929_03410
 import * as migration_20261008_014722_team_season_assignments from './20261008_014722_team_season_assignments';
 import * as migration_20261008_033527_recurring_team_profiles from './20261008_033527_recurring_team_profiles';
 import * as migration_20261017_213824_team_member_glow_icon from './20261017_213824_team_member_glow_icon';
+import * as migration_20261018_054800_impact_numbers from './20261018_054800_impact_numbers';
 
 export const migrations = [
   {
@@ -28,6 +29,11 @@ export const migrations = [
   {
     up: migration_20261017_213824_team_member_glow_icon.up,
     down: migration_20261017_213824_team_member_glow_icon.down,
-    name: '20261017_213824_team_member_glow_icon'
+    name: '20261017_213824_team_member_glow_icon',
+  },
+  {
+    up: migration_20261018_054800_impact_numbers.up,
+    down: migration_20261018_054800_impact_numbers.down,
+    name: '20261018_054800_impact_numbers'
   },
 ];

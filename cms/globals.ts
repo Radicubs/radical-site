@@ -1,8 +1,25 @@
-import type { Field, GlobalConfig } from "payload";
+import type { Field, GlobalBeforeValidateHook, GlobalConfig } from "payload";
 import { anyone, refreshGlobal, signedIn } from "./access";
 
 const access = { read: anyone, update: signedIn };
 const hooks = { afterChange: [refreshGlobal] };
+
+// Names pasted into "Add several at once" join the supporter list, skipping any already
+// on it, and the box clears on save.
+const addPastedSupporters: GlobalBeforeValidateHook = ({ data }) => {
+  const pasted = typeof data?.pastedSupporters === "string" ? data.pastedSupporters : "";
+  if (!data || !pasted.trim()) return data;
+  const rows: { name?: string }[] = Array.isArray(data.individualSponsors) ? data.individualSponsors : [];
+  const known = new Set(rows.map((row) => row.name?.trim().toLowerCase()));
+  for (const line of pasted.split(/\r?\n/)) {
+    const name = line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").trim().replace(/\s+/g, " ");
+    if (name && !known.has(name.toLowerCase())) {
+      rows.push({ name });
+      known.add(name.toLowerCase());
+    }
+  }
+  return { ...data, individualSponsors: rows, pastedSupporters: "" };
+};
 
 const upload = (name: string, label: string, description?: string): Field => ({
   name,
@@ -17,7 +34,7 @@ export const SiteSettings: GlobalConfig = {
   label: "Site settings",
   admin: { group: "Settings", description: "Team details, links and supporters used across the whole site." },
   access,
-  hooks,
+  hooks: { ...hooks, beforeValidate: [addPastedSupporters] },
   fields: [
     {
       type: "tabs",
@@ -54,6 +71,13 @@ export const SiteSettings: GlobalConfig = {
               type: "array",
               admin: { description: "Names listed on the Sponsors page. Company sponsors are under People → Sponsors." },
               fields: [{ name: "name", type: "text", required: true }]
+            },
+            {
+              name: "pastedSupporters",
+              label: "Add several at once",
+              type: "textarea",
+              virtual: true,
+              admin: { rows: 8, description: "Paste names, one per line, then save. They're added to the end of the list above; names already on it are skipped." }
             }
           ]
         }
@@ -81,6 +105,29 @@ export const HomePage: GlobalConfig = {
             relationTo: "media",
             hasMany: true,
             admin: { description: "The photos in the hero wall, in order. Photos from albums marked \"Include on the homepage\" are mixed in between." }
+          }]
+        },
+        {
+          label: "Impact numbers",
+          fields: [{
+            name: "impact",
+            label: "Impact numbers",
+            type: "array",
+            labels: { singular: "Number", plural: "Numbers" },
+            maxRows: 8,
+            admin: { description: "The numbers under \"Our impact\" on the homepage. Drag to reorder.", components: { RowLabel: "/cms/row-label#LabelRowLabel" } },
+            fields: [
+              {
+                type: "row",
+                fields: [
+                  { name: "prefix", type: "text", admin: { width: "15%", description: "e.g. $" } },
+                  { name: "value", type: "number", required: true, admin: { width: "25%" } },
+                  { name: "suffix", type: "text", admin: { width: "15%", description: "e.g. + or M+" } },
+                  { name: "label", type: "text", required: true, admin: { width: "45%", description: "e.g. Unique members" } }
+                ]
+              },
+              { name: "detail", type: "text", admin: { description: "Optional short line under the label." } }
+            ]
           }]
         },
         {

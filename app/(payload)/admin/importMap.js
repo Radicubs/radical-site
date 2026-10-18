@@ -26,8 +26,8 @@ import { BlockquoteFeatureClient as BlockquoteFeatureClient_e70f5e05f09f93e00b99
 import { UploadFeatureClient as UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { InlineToolbarFeatureClient as InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
-import { TitleRowLabel as TitleRowLabel_12885fa8e1560742d90878698b0c6d23 } from '../../../cms/row-label'
 import { LabelRowLabel as LabelRowLabel_12885fa8e1560742d90878698b0c6d23 } from '../../../cms/row-label'
+import { TitleRowLabel as TitleRowLabel_12885fa8e1560742d90878698b0c6d23 } from '../../../cms/row-label'
 import { LogoutButton as LogoutButton_f14a38ee439ae327c4cac6cda7d740c5 } from '../../../cms/google-login'
 import { Icon as Icon_f293b56943f4bd94c96f2751f62ed213 } from '../../../cms/admin-components'
 import { Logo as Logo_f293b56943f4bd94c96f2751f62ed213 } from '../../../cms/admin-components'
@@ -65,8 +65,8 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UploadFeatureClient": UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#InlineToolbarFeatureClient": InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
-  "/cms/row-label#TitleRowLabel": TitleRowLabel_12885fa8e1560742d90878698b0c6d23,
   "/cms/row-label#LabelRowLabel": LabelRowLabel_12885fa8e1560742d90878698b0c6d23,
+  "/cms/row-label#TitleRowLabel": TitleRowLabel_12885fa8e1560742d90878698b0c6d23,
   "/cms/google-login#LogoutButton": LogoutButton_f14a38ee439ae327c4cac6cda7d740c5,
   "/cms/admin-components#Icon": Icon_f293b56943f4bd94c96f2751f62ed213,
   "/cms/admin-components#Logo": Logo_f293b56943f4bd94c96f2751f62ed213,

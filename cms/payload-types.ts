@@ -862,6 +862,31 @@ export interface HomePage {
    */
   wallPhotos?: (number | Media)[] | null;
   /**
+   * The numbers under "Our impact" on the homepage. Drag to reorder.
+   */
+  impact?:
+    | {
+        /**
+         * e.g. $
+         */
+        prefix?: string | null;
+        value: number;
+        /**
+         * e.g. + or M+
+         */
+        suffix?: string | null;
+        /**
+         * e.g. Unique members
+         */
+        label: string;
+        /**
+         * Optional short line under the label.
+         */
+        detail?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * The flip cards under "Find where you fit in". Drag to reorder.
    */
   disciplines?:
@@ -978,6 +1003,10 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Paste names, one per line, then save. They're added to the end of the list above; names already on it are skipped.
+   */
+  pastedSupporters?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -987,6 +1016,16 @@ export interface SiteSetting {
  */
 export interface HomePageSelect<T extends boolean = true> {
   wallPhotos?: T;
+  impact?:
+    | T
+    | {
+        prefix?: T;
+        value?: T;
+        suffix?: T;
+        label?: T;
+        detail?: T;
+        id?: T;
+      };
   disciplines?:
     | T
     | {
@@ -1067,6 +1106,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         name?: T;
         id?: T;
       };
+  pastedSupporters?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
