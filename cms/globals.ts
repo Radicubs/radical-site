@@ -78,7 +78,8 @@ export const SiteSettings: GlobalConfig = {
               label: "Add several at once",
               type: "textarea",
               virtual: true,
-              admin: { rows: 8, description: "Paste names, one per line, then save. They're added to the end of the list above; names already on it are skipped." }
+              // Payload defaults virtual fields to read-only unless explicitly overridden.
+              admin: { readOnly: false, rows: 8, description: "Paste names, one per line, then save. They're added to the end of the list above; names already on it are skipped." }
             }
           ]
         }
